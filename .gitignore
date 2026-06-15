@@ -1,0 +1,8 @@
+﻿# Office temporary lock files
+~$*.docx
+~$*.pptx
+~$*.xlsx
+
+# OS/editor noise
+.DS_Store
+Thumbs.db

@@ -1,0 +1,164 @@
+// Credit Card MVP - Prisma Schema
+// Version: 2026-06-08 / v2
+// Product Spec: credit-card-mvp-spec-v11-2026-06-08
+// Schema Spec: prisma-schema-spec-v2-2026-06-08.md
+// Target: personal developer MVP, low-cost setup
+// Database: SQLite for local MVP development
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Site-wide settings used by the frontend and admin defaults.
+model SiteSetting {
+  id                    Int      @id @default(autoincrement())
+  siteName              String   @default("信用卡優惠查詢")
+  defaultSeoTitle       String?
+  defaultSeoDescription String?
+  homepageFeaturedCount Int      @default(6)
+  categoryPageSize      Int      @default(12)
+  showExpiredOffers     Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+/// Admin account for the MVP back office.
+model AdminUser {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  displayName  String?
+  isActive     Boolean  @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+/// Bank issuer data used for filtering, card ownership, and bank pages.
+model Bank {
+  id             Int      @id @default(autoincrement())
+  name           String
+  slug           String   @unique
+  logoUrl        String?
+  logoAlt        String?
+  websiteUrl     String?
+  description    String?
+  seoTitle       String?
+  seoDescription String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  cards Card[]
+
+  @@index([isActive])
+}
+
+/// Credit card data. Offers are attached through OfferCard.
+model Card {
+  id             Int      @id @default(autoincrement())
+  bankId         Int
+  name           String
+  slug           String   @unique
+  imageUrl       String?
+  imageAlt       String?
+  summary        String?
+  description    String?
+  targetAudience String?
+  seoTitle       String?
+  seoDescription String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  bank   Bank        @relation(fields: [bankId], references: [id], onDelete: Restrict)
+  offers OfferCard[]
+
+  @@index([bankId])
+  @@index([isActive])
+}
+
+/// Frontend offer category, including SEO and FAQ metadata.
+model Category {
+  id             Int      @id @default(autoincrement())
+  name           String
+  slug           String   @unique
+  iconName       String?
+  description    String?
+  seoTitle       String?
+  seoDescription String?
+  faqJson        String?
+  isActive       Boolean  @default(true)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  offers Offer[]
+
+  @@index([isActive, sortOrder])
+}
+
+/// Main credit-card offer content shown on listing and detail pages.
+model Offer {
+  id             Int     @id @default(autoincrement())
+  categoryId     Int
+  title          String
+  slug           String  @unique
+  summary        String?
+  summaryMode    String  @default("system")
+  targetAudience String?
+  highlight1     String?
+  highlight2     String?
+  manualSummary  String?
+  summaryPreview String?
+  description    String?
+
+  startDate      DateTime?
+  endDate        DateTime?
+  rewardType     String?
+  rewardValue    String?
+  rewardCap      String?
+  minSpend       String?
+  conditions     String?
+  sourceUrl      String?
+  lastVerifiedAt DateTime?
+  tags           String?
+
+  seoTitle       String?
+  seoDescription String?
+  faqJson        String?
+
+  isFeatured     Boolean @default(false)
+  recommendScore Int     @default(0)
+  sortOrder      Int     @default(0)
+  isPublished    Boolean @default(false)
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  category Category    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  cards    OfferCard[]
+
+  @@index([categoryId])
+  @@index([isPublished, isFeatured, recommendScore, sortOrder, updatedAt])
+  @@index([endDate])
+}
+
+/// Join table for the many-to-many relation between offers and cards.
+model OfferCard {
+  offerId Int
+  cardId  Int
+
+  offer Offer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  card  Card  @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@id([offerId, cardId])
+  @@index([cardId])
+}
