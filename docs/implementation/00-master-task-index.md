@@ -78,22 +78,24 @@ Tasks not listed as project-level gates still require a task-level manual test s
 
 ## Task Overview
 
+Note: Historical summaries for T01-T07, T09-T11, and T13 were consolidated into `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md` after the summary cleanup on 2026-06-21. T08, T12, and T14 remain as standalone summaries.
+
 | Task | Name | Depends On | Status | Summary File |
 |---|---|---|---|---|
-| T01 | Project Bootstrap | None | Not started | `docs/implementation/summaries/T01-summary.md` |
-| T02 | Prisma Database | T01 | Not started | `docs/implementation/summaries/T02-summary.md` |
-| T03 | Seed Data | T02 | Not started | `docs/implementation/summaries/T03-summary.md` |
-| T04 | Domain Rules And Validation | T02, T03 | Not started | `docs/implementation/summaries/T04-summary.md` |
-| T05 | Public Frontend Foundation | T03, T04 | Not started | `docs/implementation/summaries/T05-summary.md` |
-| T06 | Public Detail Pages | T05 | Not started | `docs/implementation/summaries/T06-summary.md` |
-| T07 | Search Listing Sorting | T05, T06 | Not started | `docs/implementation/summaries/T07-summary.md` |
-| T08 | SEO Sitemap JSON-LD | T05, T06, T07 | Not started | `docs/implementation/summaries/T08-summary.md` |
-| T09 | Admin Auth | T02, T03 | Not started | `docs/implementation/summaries/T09-summary.md` |
-| T10 | Admin Layout Dashboard | T09 | Not started | `docs/implementation/summaries/T10-summary.md` |
-| T11 | Admin Basic CRUD | T09, T10, T04 | Not started | `docs/implementation/summaries/T11-summary.md` |
-| T12 | Admin Offer Editor | T11, T04 | Not started | `docs/implementation/summaries/T12-summary.md` |
-| T13 | RWD Polish | T05, T06, T10, T11, T12 | Not started | `docs/implementation/summaries/T13-summary.md` |
-| T14 | MVP Acceptance Pass | T01-T13 | Not started | `docs/implementation/summaries/T14-summary.md` |
+| T01 | Project Bootstrap | None | Done | `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md` |
+| T02 | Prisma Database | T01 | Done | `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md` |
+| T03 | Seed Data | T02 | Done | `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md` |
+| T04 | Domain Rules And Validation | T02, T03 | Done | `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md` |
+| T05 | Public Frontend Foundation | T03, T04 | Done | `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md` |
+| T06 | Public Detail Pages | T05 | Done | `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md` |
+| T07 | Search Listing Sorting | T05, T06 | Done | `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md` |
+| T08 | SEO Sitemap JSON-LD | T05, T06, T07 | Done | `docs/implementation/summaries/T08-summary.md` |
+| T09 | Admin Auth | T02, T03 | Done | `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md` |
+| T10 | Admin Layout Dashboard | T09 | Done | `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md` |
+| T11 | Admin Basic CRUD | T09, T10, T04 | Done | `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md` |
+| T12 | Admin Offer Editor | T11, T04 | Done | `docs/implementation/summaries/T12-summary.md` |
+| T13 | RWD Polish | T05, T06, T10, T11, T12 | Done | `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md` |
+| T14 | MVP Acceptance Pass | T01-T13 | Done | `docs/implementation/summaries/T14-summary.md` |
 
 ---
 
@@ -127,7 +129,7 @@ Create the runnable application foundation for the MVP.
 
 ### Completion Summary Required
 
-Write `docs/implementation/summaries/T01-summary.md`.
+Original summary consolidated into `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md`.
 
 ---
 
@@ -162,7 +164,7 @@ Connect Prisma schema v2 to the app and create the local SQLite database foundat
 
 ### Completion Summary Required
 
-Write `docs/implementation/summaries/T02-summary.md`.
+Original summary consolidated into `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md`.
 
 ---
 
@@ -197,7 +199,7 @@ Create realistic MVP seed data so frontend and admin features can be verified wi
 
 ### Completion Summary Required
 
-Write `docs/implementation/summaries/T03-summary.md`.
+Original summary consolidated into `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md`.
 
 ---
 
@@ -231,7 +233,7 @@ Centralize MVP business rules so frontend, admin, seed, and future APIs use cons
 
 ### Completion Summary Required
 
-Write `docs/implementation/summaries/T04-summary.md`.
+Original summary consolidated into `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md`.
 
 ---
 
@@ -267,7 +269,7 @@ Build the main public browsing experience and reusable public UI patterns.
 
 ### Completion Summary Required
 
-Write `docs/implementation/summaries/T05-summary.md`.
+Original summary consolidated into `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md`.
 
 ---
 
@@ -302,7 +304,7 @@ Build the public detail pages that expose bank, card, and offer relationships.
 
 ### Completion Summary Required
 
-Write `docs/implementation/summaries/T06-summary.md`.
+Original summary consolidated into `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md`.
 
 ---
 
@@ -334,7 +336,7 @@ Implement search and list behavior using the same card and sorting rules as cate
 
 ### Completion Summary Required
 
-Write `docs/implementation/summaries/T07-summary.md`.
+Original summary consolidated into `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md`.
 
 ---
 
@@ -404,7 +406,7 @@ Protect the admin area with a single-admin MVP login flow.
 
 ### Completion Summary Required
 
-Write `docs/implementation/summaries/T09-summary.md`.
+Original summary consolidated into `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md`.
 
 ---
 
@@ -437,7 +439,7 @@ Create the admin work surface before individual CRUD modules are added.
 
 ### Completion Summary Required
 
-Write `docs/implementation/summaries/T10-summary.md`.
+Original summary consolidated into `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md`.
 
 ---
 
@@ -474,7 +476,7 @@ Build admin CRUD for the lower-risk models before the complex offer editor.
 
 ### Completion Summary Required
 
-Write `docs/implementation/summaries/T11-summary.md`.
+Original summary consolidated into `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md`.
 
 ---
 
@@ -546,7 +548,7 @@ Make public and admin screens usable across mobile, tablet, and desktop.
 
 ### Completion Summary Required
 
-Write `docs/implementation/summaries/T13-summary.md`.
+Original summary consolidated into `docs/implementation/summaries/2026-06-15至2026-06-21-信用卡MVP實作長期記憶總結-v1-2026-06-21.md`.
 
 ---
 
@@ -632,5 +634,3 @@ A task is not considered done until:
 ## Recommended Next Step
 
 Start with T01. Do not implement T02 until T01 is runnable and summarized.
-
-

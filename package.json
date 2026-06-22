@@ -1,0 +1,50 @@
+{
+  "name": "credit-card-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prisma:format": "prisma format",
+    "prisma:validate": "prisma validate",
+    "prisma:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "node prisma/seed.mjs",
+    "smoke:t01": "node scripts/verify-t01-routes.mjs",
+    "smoke:t02": "node scripts/verify-t02-prisma.mjs",
+    "smoke:t03": "node scripts/verify-t03-seed.mjs",
+    "smoke:t04": "node scripts/verify-t04-domain.mjs",
+    "smoke:t08": "node scripts/verify-t08-seo.mjs",
+    "smoke:t09": "node scripts/verify-t09-auth.mjs",
+    "smoke:t10": "node scripts/verify-t10-dashboard.mjs",
+    "smoke:t11": "node scripts/verify-t11-admin-crud.mjs",
+    "smoke:t12": "node scripts/verify-t12-offer-editor.mjs",
+    "smoke:t13": "node scripts/verify-t13-rwd-polish.mjs",
+    "smoke:ux-followup": "node scripts/verify-ux-followup.mjs",
+    "smoke:real-data": "node scripts/verify-real-card-data.mjs",
+    "smoke:admin-ux-v2": "node scripts/verify-admin-ux-fixes-v2.mjs",
+    "smoke:admin-ux-v3": "node scripts/verify-admin-ux-fixes-v3.mjs"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "bcryptjs": "^3.0.3",
+    "next": "^14.2.0",
+    "next-auth": "^4.24.11",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "autoprefixer": "^10.4.19",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.0",
+    "postcss": "^8.4.38",
+    "prisma": "^5.22.0",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.4.5"
+  }
+}

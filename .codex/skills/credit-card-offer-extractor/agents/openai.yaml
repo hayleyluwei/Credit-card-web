@@ -1,0 +1,7 @@
+interface:
+  display_name: "信用卡優惠擷取"
+  short_description: "把官方信用卡優惠頁轉成可操作的前後台內容。"
+  default_prompt: "Use $credit-card-offer-extractor to turn an official credit card offer page into clear frontend and admin content."
+
+policy:
+  allow_implicit_invocation: true
