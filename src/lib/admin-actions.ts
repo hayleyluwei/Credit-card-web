@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { generateSlug } from "@/lib/domain-parsing";
+import { generateSlug, linesToJsonArray } from "@/lib/domain-parsing";
 import { resolveSummaryPreview } from "@/lib/domain-parsing";
 import { validateFaqJson, validateOfferPublish } from "@/lib/domain-validation";
 
@@ -186,6 +186,12 @@ function cardData(formData: FormData, slug: string) {
     summary: nullableText(formData, "summary"),
     description: nullableText(formData, "description"),
     targetAudience: nullableText(formData, "targetAudience"),
+    annualFee: nullableText(formData, "annualFee"),
+    annualFeeWaiver: nullableText(formData, "annualFeeWaiver"),
+    cardLevel: nullableText(formData, "cardLevel"),
+    cardNetwork: nullableText(formData, "cardNetwork"),
+    prosJson: linesToJsonArray(String(formData.get("prosLines") ?? "")),
+    consJson: linesToJsonArray(String(formData.get("consLines") ?? "")),
     seoTitle: nullableText(formData, "seoTitle"),
     seoDescription: nullableText(formData, "seoDescription"),
     isActive: booleanValue(formData, "isActive")

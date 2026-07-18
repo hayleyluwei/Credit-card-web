@@ -44,6 +44,12 @@ export default async function AdminCardsPage({ searchParams }: { searchParams?: 
           </AdminField>
           <AdminField label="圖片 Alt"><input className={adminInputClass} name="imageAlt" placeholder="例：CUBE 卡卡面圖片" /></AdminField>
           <AdminField label="目標客群"><input className={adminInputClass} name="targetAudience" placeholder="例：常用餐飲、網購與旅遊權益的使用者" /></AdminField>
+          <AdminField label="年費"><input className={adminInputClass} name="annualFee" placeholder="例：NT$36,000／終身免年費" /></AdminField>
+          <AdminField label="免年費條件"><input className={adminInputClass} name="annualFeeWaiver" placeholder="例：首年免年費，次年起年刷 36 萬免年費" /></AdminField>
+          <AdminField label="卡片等級"><input className={adminInputClass} name="cardLevel" placeholder="例：無限卡" /></AdminField>
+          <AdminField label="發卡組織"><input className={adminInputClass} name="cardNetwork" placeholder="例：Visa" /></AdminField>
+          <AdminField label="優點" help="一行一項，前台會以條列顯示。"><textarea className={adminInputClass} name="prosLines" rows={3} placeholder={"例：\n國內 18 元/哩無上限\n送 8 次貴賓室"} /></AdminField>
+          <AdminField label="注意事項" help="一行一項，前台會以條列顯示。"><textarea className={adminInputClass} name="consLines" rows={3} placeholder={"例：\n需事先登錄\n排除公共事業費"} /></AdminField>
           <AdminField label="摘要"><textarea className={adminInputClass} name="summary" rows={2} placeholder="例：可切換權益方案，指定消費享小樹點回饋。" /></AdminField>
           <AdminField label="說明"><textarea className={adminInputClass} name="description" rows={2} placeholder="例：卡片定位、主要權益與適合使用情境。" /></AdminField>
           <AdminField label="SEO 標題" help="SEO 欄位不會因優惠更新自動覆蓋。"><input className={adminInputClass} name="seoTitle" /></AdminField>

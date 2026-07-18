@@ -6,6 +6,7 @@ import { useFormState, useFormStatus } from "react-dom";
 import { AdminField, adminInputClass } from "@/components/AdminField";
 import { StableSlugInput } from "@/components/StableSlugInput";
 import type { AdminActionState } from "@/lib/admin-actions";
+import { jsonArrayToLines } from "@/lib/domain-parsing";
 
 type AdminCardFormProps = {
   action: (state: AdminActionState, formData: FormData) => Promise<AdminActionState>;
@@ -98,6 +99,24 @@ export function AdminCardForm({ action, banks, card }: AdminCardFormProps) {
       </AdminField>
       <AdminField label="目標客群">
         <input className={adminInputClass} name="targetAudience" defaultValue={card.targetAudience ?? ""} />
+      </AdminField>
+      <AdminField label="年費" help="寫給人看的短句，例：NT$36,000／終身免年費。">
+        <input className={adminInputClass} name="annualFee" defaultValue={card.annualFee ?? ""} />
+      </AdminField>
+      <AdminField label="免年費條件" help="例：首年免年費，次年起年刷 36 萬免年費。">
+        <input className={adminInputClass} name="annualFeeWaiver" defaultValue={card.annualFeeWaiver ?? ""} />
+      </AdminField>
+      <AdminField label="卡片等級" help="例：無限卡、御璽卡、鈦金卡。">
+        <input className={adminInputClass} name="cardLevel" defaultValue={card.cardLevel ?? ""} />
+      </AdminField>
+      <AdminField label="發卡組織" help="例：Visa、Mastercard、JCB。">
+        <input className={adminInputClass} name="cardNetwork" defaultValue={card.cardNetwork ?? ""} />
+      </AdminField>
+      <AdminField label="優點" help="一行一項，前台會以條列顯示。">
+        <textarea className={adminInputClass} name="prosLines" rows={4} defaultValue={jsonArrayToLines(card.prosJson)} />
+      </AdminField>
+      <AdminField label="注意事項" help="一行一項，前台會以條列顯示。">
+        <textarea className={adminInputClass} name="consLines" rows={4} defaultValue={jsonArrayToLines(card.consJson)} />
       </AdminField>
       <AdminField label="SEO 標題" help="SEO 欄位不會因優惠更新自動覆蓋。">
         <input className={adminInputClass} name="seoTitle" defaultValue={card.seoTitle ?? ""} />

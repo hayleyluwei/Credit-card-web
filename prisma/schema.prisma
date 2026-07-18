@@ -72,6 +72,12 @@ model Card {
   summary        String?
   description    String?
   targetAudience String?
+  annualFee       String?
+  annualFeeWaiver String?
+  cardLevel       String?
+  cardNetwork     String?
+  prosJson        String?
+  consJson        String?
   seoTitle       String?
   seoDescription String?
   isActive       Boolean  @default(true)

@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { getPublicOffers, sortOffers } from "@/lib/domain-offers";
+import { parseJsonStringArray } from "@/lib/domain-parsing";
 import { OfferCard } from "@/components/OfferCard";
 import { generateWebPageJsonLd, getCanonicalUrl } from "@/lib/domain-seo";
 
@@ -58,6 +59,8 @@ export default async function CardDetailPage({ params }: CardPageProps) {
 
   const publicOffers = getPublicOffers(offers, siteSetting?.showExpiredOffers ?? false);
   const sortedOffers = sortOffers(publicOffers);
+  const pros = parseJsonStringArray(card.prosJson);
+  const cons = parseJsonStringArray(card.consJson);
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-5 py-8 sm:px-8 lg:px-10">
@@ -109,12 +112,64 @@ export default async function CardDetailPage({ params }: CardPageProps) {
                 <p className="text-sm font-semibold text-slate-900">目標客群</p>
                 <p className="mt-2 text-sm text-slate-600">{card.targetAudience ?? "不限客群"}</p>
               </div>
+              {card.cardLevel ? (
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">卡片等級</p>
+                  <p className="mt-2 text-sm text-slate-600">{card.cardLevel}</p>
+                </div>
+              ) : null}
+              {card.cardNetwork ? (
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">發卡組織</p>
+                  <p className="mt-2 text-sm text-slate-600">{card.cardNetwork}</p>
+                </div>
+              ) : null}
+              {card.annualFee ? (
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">年費</p>
+                  <p className="mt-2 text-sm text-slate-600">{card.annualFee}</p>
+                </div>
+              ) : null}
+              {card.annualFeeWaiver ? (
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">免年費條件</p>
+                  <p className="mt-2 text-sm text-slate-600">{card.annualFeeWaiver}</p>
+                </div>
+              ) : null}
               <div className="sm:col-span-2">
                 <p className="text-sm font-semibold text-slate-900">卡片說明</p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">{card.description ?? "尚未提供更多說明。"}</p>
               </div>
             </div>
           </div>
+
+          {pros.length > 0 || cons.length > 0 ? (
+            <div className="rounded-3xl border border-line bg-white p-6 shadow-soft">
+              <h2 className="text-2xl font-bold text-ink">優點與注意事項</h2>
+              <div className="mt-4 grid gap-6 sm:grid-cols-2">
+                {pros.length > 0 ? (
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">優點</p>
+                    <ul className="mt-2 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-600">
+                      {pros.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {cons.length > 0 ? (
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">注意事項</p>
+                    <ul className="mt-2 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-600">
+                      {cons.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
 
           <div className="rounded-3xl border border-line bg-white p-6 shadow-soft">
             <div className="mb-6 flex items-center justify-between">

@@ -46,6 +46,55 @@ export function tagsToString(tags: string[]): string {
 }
 
 /**
+ * Parses a JSON string-array field (e.g. Card.prosJson / Card.consJson)
+ * Invalid JSON or non-array values return an empty array
+ * @param jsonString - JSON string or null
+ * @returns array of non-empty strings
+ */
+export function parseJsonStringArray(jsonString: string | null | undefined): string[] {
+  if (!jsonString) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(jsonString);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed.filter((item): item is string => typeof item === "string" && item.trim().length > 0).map((item) => item.trim());
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Converts multiline textarea input (one item per line) to a JSON string array
+ * @param linesText - Raw textarea value
+ * @returns JSON string of the array, or null when no non-empty lines
+ */
+export function linesToJsonArray(linesText: string | null | undefined): string | null {
+  if (!linesText) {
+    return null;
+  }
+
+  const items = linesText
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  return items.length > 0 ? JSON.stringify(items) : null;
+}
+
+/**
+ * Converts a JSON string-array field back to multiline text for textarea editing
+ * @param jsonString - JSON string or null
+ * @returns newline-joined string
+ */
+export function jsonArrayToLines(jsonString: string | null | undefined): string {
+  return parseJsonStringArray(jsonString).join("\n");
+}
+
+/**
  * Resolves the summary preview for an offer
  * Priority: manualSummary > (highlight1 + highlight2) > summaryPreview > title
  * @param offer - Offer object with summary fields
