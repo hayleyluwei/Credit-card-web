@@ -16,7 +16,7 @@
 |---|---|---|---|---|---|---|---|
 | T15 | AI 開發治理導入 | v1 已核准 | 完成 | 不適用 | 治理設計 v2 | `tasks/T15-AI_DEVELOPMENT_GOVERNANCE_AI開發治理導入.md` | `summaries/T15-AI_DEVELOPMENT_GOVERNANCE_SUMMARY_AI開發治理導入摘要-v1-2026-07-04.md` |
 | T16 | 第一版正式資料匯入 | v1 已核准 | 完成 | 不適用 | 資料試算表交付（已完成兩輪） | `tasks/T16-FIRST_RELEASE_DATA_IMPORT_第一版正式資料匯入.md` | `summaries/T16-FIRST_RELEASE_DATA_IMPORT_SUMMARY-v1-2026-07-26.md` |
-| T17 | 上線前完整測試 | v1 待核准 | 未開始 | 不適用 | T16（已完成） | `tasks/T17-PRE_LAUNCH_TESTING_上線前完整測試.md` | 無 |
+| T17 | 上線前完整測試 | v1 已核准 | 待人工驗收（自動驗證與AI示範測試已通過，待使用者最終覆核） | 不適用 | T16（已完成） | `tasks/T17-PRE_LAUNCH_TESTING_上線前完整測試.md` | `summaries/T17-PRE_LAUNCH_TESTING_SUMMARY-v1-2026-07-27.md` |
 | T18 | 第一版部署上線 | v1 待核准 | 未開始 | 未部署 | T17、T21、部署平台核准 | `tasks/T18-FIRST_RELEASE_DEPLOYMENT_第一版部署上線.md` | 無 |
 | T19 | 卡片結構化欄位與蒐集規格擴充 | v1 已核准 | 完成 | 不適用 | 排 T16 前（2026-07-18 拍板，已完成） | `tasks/T19-CARD_STRUCTURED_FIELDS_卡片結構化欄位與蒐集規格擴充.md` | `summaries/T19-CARD_STRUCTURED_FIELDS_SUMMARY_卡片結構化欄位與蒐集規格擴充摘要-v1-2026-07-18.md` |
 | T20 | 攻略文章功能（AI 可引用性） | v1 待核准 | 未開始 | 未部署 | T18、套件選型核准 | `tasks/T20-GUIDE_ARTICLES_攻略文章功能.md` | 無 |

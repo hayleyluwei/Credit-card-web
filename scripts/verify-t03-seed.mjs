@@ -1,3 +1,7 @@
+// [T17 停用，2026-07-27] 本腳本斷言的是舊 seed 測試資料的固定範圍（3-5家銀行、8-12張卡、
+// 至少一筆草稿/停用/過期優惠、admin@example.com）。T16 匯入真實資料後（6家銀行/10張卡/16筆
+// 優惠，全數已發布且啟用）不再符合這些斷言，執行必定失敗。保留本檔供歷史回溯，不刪除；
+// 正式資料時期的對應檢查由 scripts/verify-release-data.mjs 取代。詳見 T17 Summary。
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();

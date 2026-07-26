@@ -1,3 +1,6 @@
+// [T17 停用，2026-07-27] 本腳本斷言引用舊 seed slug（cube-cashback-3、dawho-high-cashback-2026）
+// 與已不存在的「FlyGo 卡」。T16 真實資料匯入後這些內容已不存在，執行必定失敗。保留本檔供
+// 歷史回溯，不刪除；正式資料時期的對應檢查由 scripts/verify-release-data.mjs 取代。詳見 T17 Summary。
 const baseUrl = process.env.SMOKE_BASE_URL ?? "http://127.0.0.1:3000";
 const adminEmail = process.env.ADMIN_EMAIL ?? "admin@example.com";
 const adminPassword = process.env.ADMIN_PASSWORD ?? "replace-with-a-local-admin-password";

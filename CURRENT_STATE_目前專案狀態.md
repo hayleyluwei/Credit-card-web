@@ -28,6 +28,18 @@
 - **手動內容修正（只存在資料庫，不在 xlsx 原始檔）**：`hsbc-travelone-signature-first-spend-2026q3` 與 `hsbc-travelone-infinite-first-spend-2026q3` 的 `description`／`conditions` 欄位補上了年費金額（NT$2,500／NT$8,000），因為原始文字只寫「正卡全額年費」沒帶數字。**這個修正不在 xlsx 裡，若之後重新執行 `npm run data:import`（資料庫會被清空重建），這兩處會被還原成沒有金額，需要重新補（做法見本次對話紀錄，或直接找對應 offer 的 description/conditions 欄位，把「繳付正卡全額年費、」取代為「繳付正卡全額年費（金額）、」）。**
 - **收尾已完成**：Summary 已建立（`docs/implementation/summaries/T16-FIRST_RELEASE_DATA_IMPORT_SUMMARY-v1-2026-07-26.md`）、`01-ACTIVE_TASK_INDEX_目前任務索引.md` 的 T16 狀態列已改為「完成」、本文件同步更新。人工抽點（首頁／分類頁／優惠詳情頁確認無測試資料殘留）已在先前對話中完成，本次僅補齊「正式標記完成」的文件流程。
 
+### T17 上線前完整測試 — 已核准 v1（2026-07-27），自動驗證與 AI 示範人工測試已完成，**待使用者最終覆核**
+
+- 任務卡：`docs/implementation/tasks/T17-PRE_LAUNCH_TESTING_上線前完整測試.md`
+- 核准拍板：抽查比例＝全部16筆；人工測試執行方式＝AI先示範跑一輪、使用者最後覆核；Git 授權＝git add + local commit。
+- 建立 `scripts/verify-release-data.mjs`（唯讀），執行通過、0 錯誤：6 家銀行／10 張卡／16 筆優惠（皆已發布）／20 筆優惠卡片對應，無舊測試資料殘留。2 個非阻擋警告：2 筆優惠已過期但 isPublished 仍為 true（設計如此，前台已確認正確隱藏）；目前 0 筆優惠為精選（isFeatured=true），首頁「本期精選」區塊目前為空。
+- 盤點既有 17 支 smoke 腳本，逐一決定處置（詳見 T17 Summary）：`verify-t03-seed.mjs`、`verify-real-card-data.mjs`、`verify-ux-followup.mjs` 三支因斷言舊 seed／舊一輪真實資料的專屬內容已標記**停用**（加註頭部說明，未刪除）；其餘沿用不變，但多數仍為 `unclassified`（需即時 dev server 與正式管理員密碼，寫入共用資料庫），本次未執行。
+- 建立人工測試腳本 `docs/implementation/manual-test-scripts/T17-上線前測試腳本-v1-2026-07-08.md` 與資料抽查清單（全部16筆）`docs/implementation/manual-test-scripts/T17-資料抽查清單-v1-2026-07-27.md`，AI 已用瀏覽器與 WebFetch 示範跑過一輪。
+- **重要發現，待使用者裁定**：`sinopac-designated-tax-installment-2026h1`、`sinopac-tuition-payment-rebate-2026h1` 兩筆優惠的官方來源頁目前顯示活動期間為「2026/7/1–12/31」（下半年），但資料庫記錄為已過期的上半年期間（至2026-06-30）。回饋內容本身與官網相符，僅期間可能未同步，可能導致實際仍有效的優惠被前台誤判過期而隱藏。是否回到 T16 資料流程更新期間，待使用者決定；本任務 Non-scope 不允許 AI 直接修改資料。
+- **AI 無法示範的項目**：後台登入與編輯流程（AI 無管理員登入憑證）、5 個未逐頁示範的分類頁、分頁功能（目前資料量未觸發）。
+- Summary：`docs/implementation/summaries/T17-PRE_LAUNCH_TESTING_SUMMARY-v1-2026-07-27.md`
+- **流程備註**：本次 T17 寫入作業因銜接前一輪 T16/T19 收尾直接進行，未在動筆前重新建立 `.ai-worktree-lock.json`（屬流程疏漏）；當下並無其他 session 持有鎖或有重疊寫入跡象，風險判斷為低，但提醒下次寫入前仍應依 `AI_WORKFLOW_AI協作流程.md` 第7節建立鎖。
+
 ### T19 卡片結構化欄位與蒐集規格擴充 — 已核准 v1，**已於 2026-07-26 正式標記完成**
 
 - 已 commit：`d6abc55 feat(T19): add card structured fields`
@@ -120,17 +132,16 @@
 - **僅剩待決問題 (d)**：T21 排在 T18（部署上線）之前還是之後執行，尚未拍板。決定後 T21 才能整體核准 Scope 進入實作階段。
 - 與 T16–T18 上線主線的關係：T21 目前完全不影響 T16–T18，兩者互不阻塞（T21 Non-scope 明確排除修改 schema／程式碼／既有規格書）。
 
-## 下一步（2026-07-26 更新，取代同日稍早版本）
+## 下一步（2026-07-27 更新，取代同日稍早版本）
 
-**T16／T19 收尾已完成**：T16 Summary 已建立、`01-ACTIVE_TASK_INDEX_目前任務索引.md` 的 T16／T19 狀態列已改為「完成」、本文件已同步更新。以下依優先順序：
+**T16／T19 收尾已完成，T17 已核准並完成自動驗證＋AI示範人工測試，待使用者最終覆核**。以下依優先順序：
 
-1. **T21 待使用者正式核准 Scope v1**——六個分岔路都已拍板（見上方 T21 段落），只差一個明確的「核准」動作，之後才能開始寫 schema。核准時機依已拍板的排序是 T17 之後、T18 之前，目前 T17 尚未核准，尚未到核准 T21 的時機點。
-2. 接續 T17（上線前完整測試，任務卡已存在但待核准）——需要使用者核准 Scope 才能開始。
+1. **使用者覆核 T17 產出**：`docs/implementation/manual-test-scripts/T17-上線前測試腳本-v1-2026-07-08.md`、`T17-資料抽查清單-v1-2026-07-27.md` 中標示「待使用者覆核」的項目，尤其是兩筆永豐優惠（指定稅款分期、繳學費回饋）可能需要更新活動期間一事。覆核通過後 T17 才能正式標記「完成」。
+2. **T21 待使用者正式核准 Scope v1**——六個分岔路都已拍板（見上方 T21 段落），依已拍板排序應在 T17 之後、T18 之前核准；T17 已核准並接近完成，可視進度考慮核准 T21。
 3. Codex 那邊如果還有後續資料蒐集批次，記得先確認 `.ai-worktree-lock.json` 狀態再接手匯入，且每次重新執行 `npm run data:import` 前要記得：HSBC 兩筆優惠的年費文字修正只在資料庫裡，會被清空重建覆蓋，需要重新補（見上方 T16 段落）。
-4. `esun-unicard-wallet-new-card-2026q3` 的「最低消費」欄位內容疑似有誤，待人工核對修正（回饋給 Codex 或直接改資料庫皆可）。
+4. `esun-unicard-wallet-new-card-2026q3` 的「最低消費」欄位：T17 資料抽查已核對為欄位歸類問題（內容應屬申辦期限敘述，非事實錯誤），待資料整理或 T21 欄位重構時一併調整。
 5. T20（攻略文章功能，AI 可引用性）已起草待核准，仍建議排 T18 上線後；FAQ／比較表格缺口已透過 AI 引用性檢視確認存在。
 6. 長期未提交變更（T15 治理文件批次、首頁舊工作、T16 前置 seed.mjs 改寫、多張待核准任務卡草稿）**仍原封不動放著**，需要使用者另外決定要不要一次處理，不屬於任何一條任務線的自然下一步，不要在沒有明確指示時主動去動它們。
-7. 本次 T16／T19 收尾新增的 Summary 檔與索引／CURRENT_STATE 修改目前皆為未提交變更（未 git add／commit），是否 commit 需使用者另行授權。
 
 使用者已於 2026-07-08 拍板：清除 seed 測試資料（已完成，真實資料已上）、首頁未提交變更採 commit（**仍未執行**）、部署平台 Vercel Hobby + Neon Free、後台帳號由使用者本人持有。
 
