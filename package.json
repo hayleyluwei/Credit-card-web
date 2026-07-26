@@ -12,6 +12,8 @@
     "prisma:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.mjs",
+    "data:import:dry": "node scripts/import-offer-data.mjs --dry-run",
+    "data:import": "node scripts/import-offer-data.mjs",
     "smoke:t01": "node scripts/verify-t01-routes.mjs",
     "smoke:t02": "node scripts/verify-t02-prisma.mjs",
     "smoke:t03": "node scripts/verify-t03-seed.mjs",
@@ -25,7 +27,8 @@
     "smoke:ux-followup": "node scripts/verify-ux-followup.mjs",
     "smoke:real-data": "node scripts/verify-real-card-data.mjs",
     "smoke:admin-ux-v2": "node scripts/verify-admin-ux-fixes-v2.mjs",
-    "smoke:admin-ux-v3": "node scripts/verify-admin-ux-fixes-v3.mjs"
+    "smoke:admin-ux-v3": "node scripts/verify-admin-ux-fixes-v3.mjs",
+    "smoke:homepage-card-entry": "node scripts/verify-homepage-card-entry.mjs"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
