@@ -9,8 +9,8 @@
 - 工作區 alias：`C:/Users/user/Documents/信用卡查詢網站`
 - alias 類型：Windows junction，兩個路徑指向同一份檔案
 - branch：`main`
-- HEAD：`5bcec14`
-- 遠端關係：`main...origin/main [ahead 7]`，尚未 push
+- HEAD：`0429178`（2026-07-26 對話核對時的實際 HEAD；本次 T16/T19 收尾的檔案修改尚未 commit）
+- 遠端關係：`main...origin/main [ahead 8]`，尚未 push
 
 新 session 必須以 `git rev-parse --show-toplevel`、`git status` 及 `git rev-parse --short HEAD` 重新核對，不得只相信本文件。
 
@@ -18,21 +18,21 @@
 
 本專案目前由使用者＋Claude Code＋Codex 三方協作，Codex 負責資料整理人員角色（透過 `.ai-worktree-lock.json` 協調寫入時機），Claude Code 負責工程實作。**新 session 開始時務必先讀 `.ai-worktree-lock.json` 是否存在，若存在且是 Codex 持有，唯讀分析不受影響，但寫入前要跟使用者確認鎖是否仍有效**（不可自行覆蓋或刪除）。
 
-### T16 第一版正式資料匯入 — 已核准 v1，資料已匯入，待人工最終驗收與收尾文件
+### T16 第一版正式資料匯入 — 已核准 v1，資料已匯入，**已於 2026-07-26 正式標記完成**
 
 - 任務卡：`docs/implementation/tasks/T16-FIRST_RELEASE_DATA_IMPORT_第一版正式資料匯入.md`
 - 匯入腳本已建立並 commit：`scripts/import-offer-data.mjs`（用 Python openpyxl 讀 xlsx，不新增 npm 相依）；`package.json` 新增 `data:import`／`data:import:dry`。
 - 已完成兩輪真實資料匯入：第一輪 5 家銀行／8 張卡／10 筆優惠；Codex 第二輪（CORE-SCENARIOS-DATA-COLLECTION-BATCH-2，補繳稅／學費／水電瓦斯情境）後累計 **6 家銀行／10 張卡／16 筆優惠／20 筆優惠卡片對應**。每次匯入前都會備份 `prisma/dev.db`（見 `prisma/backups/`），只清除 Bank/Card/Offer/OfferCard，保留 Category/SiteSetting/AdminUser。
 - 來源試算表：`docs/data-collection/信用卡優惠資料整理模板-v2-2026-07-18.xlsx`，目前版本已由使用者／Codex commit（`5bcec14 docs(data): 核實繳稅學費與代扣優惠`）。
-- **已知資料狀況**：16 筆優惠中有 2 筆（永豐指定稅款分期、永豐學費回饋，皆為 2026 上半年活動）以系統目前日期（2026-07-26）來看已過期，前台正確隱藏，不是 bug；等下一輪報稅季可能需要新資料。另有 1 筆（`esun-unicard-wallet-new-card-2026q3`）的「最低消費」欄位疑似填錯內容，dry-run 有警告但不阻擋匯入，尚未人工核對修正。
+- **已知資料狀況（尚未解決，非本次收尾範圍）**：16 筆優惠中有 2 筆（永豐指定稅款分期、永豐學費回饋，皆為 2026 上半年活動）以系統目前日期（2026-07-26）來看已過期，前台正確隱藏，不是 bug；等下一輪報稅季可能需要新資料。另有 1 筆（`esun-unicard-wallet-new-card-2026q3`）的「最低消費」欄位疑似填錯內容，dry-run 有警告但不阻擋匯入，尚未人工核對修正。
 - **手動內容修正（只存在資料庫，不在 xlsx 原始檔）**：`hsbc-travelone-signature-first-spend-2026q3` 與 `hsbc-travelone-infinite-first-spend-2026q3` 的 `description`／`conditions` 欄位補上了年費金額（NT$2,500／NT$8,000），因為原始文字只寫「正卡全額年費」沒帶數字。**這個修正不在 xlsx 裡，若之後重新執行 `npm run data:import`（資料庫會被清空重建），這兩處會被還原成沒有金額，需要重新補（做法見本次對話紀錄，或直接找對應 offer 的 description/conditions 欄位，把「繳付正卡全額年費、」取代為「繳付正卡全額年費（金額）、」）。**
-- **未完成**：尚未寫 T16 Summary、尚未更新 `01-ACTIVE_TASK_INDEX_目前任務索引.md` 的 T16 狀態列、尚未做 T16 定義的正式人工驗收（抽點首頁／分類頁／優惠詳情頁確認無測試資料殘留——這件事其實已經在對話中做過，只是沒有走「正式標記完成」的文件流程）。
+- **收尾已完成**：Summary 已建立（`docs/implementation/summaries/T16-FIRST_RELEASE_DATA_IMPORT_SUMMARY-v1-2026-07-26.md`）、`01-ACTIVE_TASK_INDEX_目前任務索引.md` 的 T16 狀態列已改為「完成」、本文件同步更新。人工抽點（首頁／分類頁／優惠詳情頁確認無測試資料殘留）已在先前對話中完成，本次僅補齊「正式標記完成」的文件流程。
 
-### T19 卡片結構化欄位與蒐集規格擴充 — 已核准 v1，功能已驗證，任務卡狀態仍是「待驗收」
+### T19 卡片結構化欄位與蒐集規格擴充 — 已核准 v1，**已於 2026-07-26 正式標記完成**
 
 - 已 commit：`d6abc55 feat(T19): add card structured fields`
-- 功能已用真實資料驗證過（T16 匯入的卡片都正確顯示年費／等級／發卡組織／優缺點），但 `01-ACTIVE_TASK_INDEX` 與任務卡本身的「任務狀態」欄位還沒有正式改成「完成」——嚴格說仍是「待驗收」。
-- Summary：`docs/implementation/summaries/T19-CARD_STRUCTURED_FIELDS_SUMMARY_卡片結構化欄位與蒐集規格擴充摘要-v1-2026-07-18.md`
+- 功能已用真實資料驗證過（T16 匯入的卡片都正確顯示年費／等級／發卡組織／優缺點），且規格書 v2 與模板 v2 已實際交付整理人員並完成兩輪真實資料匯入，滿足任務卡定義的兩項人工驗收條件。`01-ACTIVE_TASK_INDEX` 與任務卡 Summary 的任務狀態欄位已正式改為「完成」。
+- Summary：`docs/implementation/summaries/T19-CARD_STRUCTURED_FIELDS_SUMMARY_卡片結構化欄位與蒐集規格擴充摘要-v1-2026-07-18.md`（2026-07-26 補記驗收結果）
 
 ### T21 優惠條件結構化規劃（Promotion／RewardTier／Channel）— 草案，六個分岔路全部拍板，僅剩正式核准 Scope
 
@@ -90,7 +90,7 @@
 ## Worktree 寫入鎖
 
 - lock：`.ai-worktree-lock.json`
-- 截至本文件更新時，鎖由 **Codex** 持有（`sessionId: codex-core-scenarios-data-collection-2026-07-26`，`status: ready_for_handoff`），代表 Codex 上一批資料蒐集已完成交接，但鎖檔本身還沒被清除。
+- 2026-07-26 對話中，使用者已明確確認 Codex 上一把鎖（`sessionId: codex-core-scenarios-data-collection-2026-07-26`，`status: ready_for_handoff`）可視為交接完成；Claude Code 已接手，目前鎖為 `sessionId: claude-t16-t19-closeout-2026-07-26`，涵蓋範圍僅限 T16 收尾文件與 T19 狀態欄位標記，本輪工作完成後將釋放。
 - 新 session 必須以 lock 檔實際是否存在為準，不可只依本段文字；若要自己寫入，先確認這把鎖是否還有效（例如問使用者），不可自行刪除或接管。
 
 ## 最近相關文件
@@ -120,18 +120,17 @@
 - **僅剩待決問題 (d)**：T21 排在 T18（部署上線）之前還是之後執行，尚未拍板。決定後 T21 才能整體核准 Scope 進入實作階段。
 - 與 T16–T18 上線主線的關係：T21 目前完全不影響 T16–T18，兩者互不阻塞（T21 Non-scope 明確排除修改 schema／程式碼／既有規格書）。
 
-## 下一步（2026-07-26 更新，取代 2026-07-18 版本）
+## 下一步（2026-07-26 更新，取代同日稍早版本）
 
-**最優先單一行動**：T16 收尾——寫 T16 Summary、更新 `01-ACTIVE_TASK_INDEX_目前任務索引.md` 的 T16／T19 狀態列、把 T19 任務狀態正式改為「完成」。這是唯一卡在「功能都做完了但文件沒收尾」狀態的項目。
+**T16／T19 收尾已完成**：T16 Summary 已建立、`01-ACTIVE_TASK_INDEX_目前任務索引.md` 的 T16／T19 狀態列已改為「完成」、本文件已同步更新。以下依優先順序：
 
-其餘依優先順序：
-
-1. T16 Summary 完成後，接續 T17（上線前完整測試，任務卡已存在但待核准）。
-2. **T21 待使用者正式核准 Scope v1**——六個分岔路都已拍板（見上方 T21 段落），只差一個明確的「核准」動作，之後才能開始寫 schema。核准時機依已拍板的排序是 T17 之後、T18 之前。
+1. **T21 待使用者正式核准 Scope v1**——六個分岔路都已拍板（見上方 T21 段落），只差一個明確的「核准」動作，之後才能開始寫 schema。核准時機依已拍板的排序是 T17 之後、T18 之前，目前 T17 尚未核准，尚未到核准 T21 的時機點。
+2. 接續 T17（上線前完整測試，任務卡已存在但待核准）——需要使用者核准 Scope 才能開始。
 3. Codex 那邊如果還有後續資料蒐集批次，記得先確認 `.ai-worktree-lock.json` 狀態再接手匯入，且每次重新執行 `npm run data:import` 前要記得：HSBC 兩筆優惠的年費文字修正只在資料庫裡，會被清空重建覆蓋，需要重新補（見上方 T16 段落）。
 4. `esun-unicard-wallet-new-card-2026q3` 的「最低消費」欄位內容疑似有誤，待人工核對修正（回饋給 Codex 或直接改資料庫皆可）。
 5. T20（攻略文章功能，AI 可引用性）已起草待核准，仍建議排 T18 上線後；FAQ／比較表格缺口已透過 AI 引用性檢視確認存在。
 6. 長期未提交變更（T15 治理文件批次、首頁舊工作、T16 前置 seed.mjs 改寫、多張待核准任務卡草稿）**仍原封不動放著**，需要使用者另外決定要不要一次處理，不屬於任何一條任務線的自然下一步，不要在沒有明確指示時主動去動它們。
+7. 本次 T16／T19 收尾新增的 Summary 檔與索引／CURRENT_STATE 修改目前皆為未提交變更（未 git add／commit），是否 commit 需使用者另行授權。
 
 使用者已於 2026-07-08 拍板：清除 seed 測試資料（已完成，真實資料已上）、首頁未提交變更採 commit（**仍未執行**）、部署平台 Vercel Hobby + Neon Free、後台帳號由使用者本人持有。
 
