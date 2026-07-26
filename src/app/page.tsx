@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { getFeaturedOffers, getLatestOffers } from "@/lib/domain-offers";
+import { getFeaturedOffers, getLatestOffers, getPublicOffers } from "@/lib/domain-offers";
+import { CardImage } from "@/components/CardImage";
 import { CategoryCard } from "@/components/CategoryCard";
 import { OfferCard } from "@/components/OfferCard";
 import { generateOrganizationJsonLd, getCanonicalUrl } from "@/lib/domain-seo";
@@ -30,8 +31,46 @@ export default async function HomePage() {
     }
   });
 
+  const cards = await prisma.card.findMany({
+    where: {
+      isActive: true,
+      bank: {
+        isActive: true
+      }
+    },
+    include: {
+      bank: true,
+      offers: {
+        include: {
+          offer: true
+        }
+      }
+    },
+    orderBy: [{ bank: { name: "asc" } }, { name: "asc" }]
+  });
+
   const featuredOffers = getFeaturedOffers(offers, siteSetting?.homepageFeaturedCount ?? 6, siteSetting?.showExpiredOffers ?? false);
   const latestOffers = getLatestOffers(offers, 6, siteSetting?.showExpiredOffers ?? false);
+  const cardEntries = cards
+    .map((card) => {
+      const publicOfferCount = getPublicOffers(
+        card.offers.map((item) => item.offer),
+        siteSetting?.showExpiredOffers ?? false
+      ).length;
+
+      return {
+        card,
+        publicOfferCount
+      };
+    })
+    .sort((a, b) => {
+      if (a.publicOfferCount !== b.publicOfferCount) {
+        return b.publicOfferCount - a.publicOfferCount;
+      }
+
+      return a.card.name.localeCompare(b.card.name, "zh-Hant");
+    })
+    .slice(0, 6);
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-5 py-8 sm:px-8 lg:px-10">
@@ -55,6 +94,50 @@ export default async function HomePage() {
           </nav>
         </div>
       </header>
+
+      <section className="mb-10">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-brand-700">依信用卡查優惠</p>
+            <h2 className="mt-2 text-2xl font-bold text-ink">選你手上的信用卡</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+              不確定要看哪個分類時，先從手上的卡開始。點進信用卡頁，就能看到這張卡目前整理到的公開優惠。
+            </p>
+          </div>
+          <Link href="/search" className="text-sm font-semibold text-brand-700">
+            用關鍵字搜尋優惠 →
+          </Link>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {cardEntries.length > 0 ? (
+            cardEntries.map(({ card, publicOfferCount }) => (
+              <Link
+                key={card.id}
+                href={`/cards/${card.slug}`}
+                className="group grid gap-4 rounded-3xl border border-line bg-white p-5 shadow-soft transition duration-200 hover:-translate-y-1 hover:border-brand-300"
+              >
+                <CardImage imageUrl={card.imageUrl} alt={card.imageAlt} name={card.name} />
+                <div>
+                  <p className="text-sm font-semibold text-brand-700">{card.bank.name}</p>
+                  <h3 className="mt-2 text-xl font-bold text-ink">{card.name}</h3>
+                  <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">
+                    {card.summary ?? card.targetAudience ?? "查看這張信用卡目前整理到的優惠。"}
+                  </p>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="rounded-full bg-brand-50 px-3 py-1 font-semibold text-brand-700">{publicOfferCount} 筆優惠</span>
+                  <span className="font-semibold text-brand-700 transition group-hover:translate-x-1">查看這張卡 →</span>
+                </div>
+              </Link>
+            ))
+          ) : (
+            <div className="rounded-3xl border border-line bg-white p-8 text-center text-slate-600 shadow-soft md:col-span-2 xl:col-span-3">
+              目前尚無可顯示的信用卡。
+            </div>
+          )}
+        </div>
+      </section>
 
       <section className="mb-10">
         <div className="mb-6 flex items-center justify-between">
