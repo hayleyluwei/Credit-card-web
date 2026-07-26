@@ -1,0 +1,14 @@
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3105
+  - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 1278ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1489ms (545 modules)
+ GET / 200 in 1639ms
+ ✓ Compiled /cards/[slug] in 115ms (552 modules)
+ GET /cards/dawho-cashback-card 200 in 413ms
+ GET /cards/dawho-cashback-card 200 in 94ms
+ GET /cards/dawho-cashback-card 200 in 57ms
+[?25h

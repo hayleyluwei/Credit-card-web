@@ -1,165 +1,87 @@
-﻿# Codex Project Instructions
+# 信用卡網站 AI 專案入口
 
-## Project Context
+最後更新：2026-07-04（Asia/Taipei）
 
-This project is the Credit Card MVP website.
+## 專案身分
 
-Primary project folder:
+本專案是信用卡優惠查詢網站。開始工作前必須執行 `git rev-parse --show-toplevel`，確認目前目錄指向本專案；目前正式 Git root 為 `C:/Users/user/Documents/Credit card web project`，`C:/Users/user/Documents/信用卡查詢網站` 是同一目錄的 junction alias。
 
-`C:\Users\user\Documents\Credit card web project`
+若目錄不是同一個 Git 專案，停止所有寫入並回報。
 
-The project contains product specs, schema specs, acceptance rules, and implementation task planning documents. Keep work scoped to this project unless the user explicitly says otherwise.
+## 規則優先順序
 
-## Rule Scope And Precedence
+規則衝突時依序採用：
 
-This project has separate rules for product-spec editing, schema editing, and code implementation.
+1. 平台、系統、工具及沙箱安全規則。
+2. 使用者最新明確指令。
+3. 產品規格或 schema 專門修改流程。
+4. 已核准任務卡的明確 Scope 與操作授權。
+5. `AI_WORKFLOW_AI協作流程.md` 的預設規則。
+6. 未核准任務草稿。
+7. 一般專案慣例。
 
-Use this priority when rules overlap:
+已核准任務卡不得跳過更高層安全規則或專門流程的必要檢查。
 
-1. User's latest explicit instruction
-2. Product-spec or schema modification flow, if the task edits those files
-3. Implementation task continuity rule, for normal coding work
-4. General coding conventions
+## 新對話必讀順序
 
-## Implementation Task Continuity Rule
+1. `AGENTS.md`
+2. `AI_WORKFLOW_AI協作流程.md`
+3. `CURRENT_STATE_目前專案狀態.md`
+4. `CURRENT_STATE` 指向的目前任務卡
+5. 最近一份相關 Summary
+6. 只有任務需要時才讀產品規格、schema、驗收規則或 SOP
 
-For normal code implementation tasks, do not reread the full product spec, schema spec, acceptance rules, or all task files by default.
+讀完後先回報目前 branch、HEAD、工作區變更、任務狀態、部署狀態、Scope 版本、Non-scope 與待決問題。
 
-At the start of each implementation session, read only:
+## 核心協作邊界
 
-1. `docs/implementation/00-master-task-index.md`
-2. The current task file or current task section
-3. The previous one or two relevant summary files from `docs/implementation/summaries/`
-4. Source specs only when the current task explicitly requires deeper detail
+- Scope 尚未核准：只能做唯讀檢查、Discovery、分析、規劃，以及更新治理草稿或可驗證的狀態事實。
+- Scope 已核准：可在核准範圍內連續修改一般程式碼、文件與測試，完成驗證後一次回報。
+- 第一次寫入前必須依 `AI_WORKFLOW_AI協作流程.md` 取得 `.ai-worktree-lock.json`。
+- 未列入核准驗證白名單的測試一律視為 `unclassified`，不得由 AI 自我認證為安全。
+- 修改 schema、migration、共用資料、權限、正式環境、push、部署、破壞性 Git 操作及核心治理規則，必須先確認。
+- `git add`、local commit、建立或切換 branch，只有任務卡明確授權時才可執行。
+- 不覆蓋來源不明的未提交變更，不使用 reset 或 checkout 丟棄使用者工作。
 
-Each completed task must create or update its own summary file under:
+完整規則以 `AI_WORKFLOW_AI協作流程.md` 為準。
 
-`docs/implementation/summaries/`
+## 專門流程入口
 
-A task is not done until its summary includes:
+### 產品規格、Word、PDF 或產品示意圖
 
-- completed work
-- main files changed
-- route / API / model changes
-- verification result
-- what the next task needs to know
-- open questions
-
-## Product Spec Editing Rule
-
-If the task modifies the product spec, Word files, PDFs, product-spec images, or related spec documents, follow these files first:
+先讀：
 
 - `規格書文件修正原則.md`
 - `規格書修改流程.md`
 
-When following the product spec flow:
+先列修改清單並取得確認，只修改清單內容，不覆蓋既有正式版本，Word 與 PDF 必須同版。
 
-- read the required rule files first
-- list the planned changes before editing
-- wait for user confirmation before changing spec files
-- only modify confirmed items
-- do not overwrite already exported Word versions
-- keep Word and PDF content versions aligned when both are produced
-- ensure Traditional Chinese text renders correctly and contains no mojibake, `??`, or replacement characters
+### Prisma schema 與資料模型
 
-## Schema Editing Rule
-
-If the task modifies `schema.prisma`, schema backup files, schema checklists, or schema spec documents, follow these files first:
+先讀：
 
 - `engineering-data-model-spec/schema修正原則.md`
 - `engineering-data-model-spec/schema修改流程.md`
 
-When following the schema flow:
+schema、規格說明及版本備份必須同步；未確認不得修改或建立 migration。
 
-- read the required rule files first
-- read the current formal schema file
-- read the latest schema spec and checklist files
-- list the planned changes before editing
-- wait for user confirmation before changing schema files
-- keep `schema.prisma`, the same-version schema spec, and the same-version schema backup aligned
-- do not add models, fields, indexes, or relations outside MVP scope unless the user explicitly confirms
-- run Prisma format or validate only if the project already has the needed environment; do not install packages without asking first
+### 一般實作與驗收
 
+正式依據：
 
-## Verification Gates And Manual Test Scripts
+- 歷史 MVP 任務：`docs/implementation/00-master-task-index.md`
+- 目前任務：`docs/implementation/01-ACTIVE_TASK_INDEX_目前任務索引.md`
+- 驗收規則：`docs/acceptance/credit-card-mvp-development-acceptance-rules-v1-2026-06-15.md`
+- 任務摘要：`docs/implementation/summaries/`
+- SOP：`docs/sop/README_SOP索引.md`
 
-Implementation work must include both automated verification and user-runnable manual verification.
+使用者可見、後台可見、資料流程或權限變更需要人工測試腳本；純治理或純文件任務使用文件審閱清單。
 
-For every implementation task:
+## 語言、機密與完成標準
 
-1. Codex must run the relevant automated checks before claiming the task is done.
-2. Codex must create or update a manual test script before asking the user to test.
-3. The manual test script must be written so the user can follow it step by step without rereading specs.
-4. The task summary must include both automated verification results and the manual test script path, including the script version and date.
-
-Manual test scripts live under:
-
-`docs/implementation/manual-test-scripts/`
-
-Use this naming pattern:
-
-`Txx-測試腳本-v版本號-YYYY-MM-DD.md`
-
-Example:
-
-`T01-測試腳本-v1-2026-06-15.md`
-
-The filename must use Traditional Chinese `測試腳本`, include a version number, and include the date the script was created or updated.
-
-Each manual test script must include:
-
-- prerequisite setup
-- local URL to open
-- test account or seed data needed, if applicable
-- step-by-step actions
-- expected result for each step
-- what to screenshot or report if the result is wrong
-- pass/fail checklist
-- script version and date
-
-Do not ask the user to manually test a task until the manual test script exists.
-
-### Required Verification Gates
-
-Use these project-level gates during implementation:
-
-| Gate | Timing | Codex Verification | User Manual Testing |
-|---|---|---|---|
-| Gate 1 | After T01 | App starts, routes render, lint/build baseline checked when available | Open public/admin shell pages |
-| Gate 2 | After T03 | Prisma database and seed script verified | Inspect seeded public data if UI exists, otherwise confirm seed command output |
-| Gate 3 | After T04 | Domain validation tests or scripted checks pass | Review validation examples and expected errors |
-| Gate 4 | After T08 | Public pages, search, SEO, sitemap, robots, JSON-LD checked | Browse public flows and SEO outputs using a script |
-| Gate 5 | After T12 | Admin auth and CRUD workflows checked | Run admin login, CRUD, offer publish/unpublish script |
-| Gate 6 | After T14 | Full MVP acceptance pass completed | Run final acceptance script before considering MVP complete |
-
-If a task is partially complete or blocked, still write a summary and include which verification steps were not run and why.
-## Implementation Source Documents
-
-Use these as authoritative references when a task explicitly needs deeper detail:
-
-| Type | Path | Purpose |
-|---|---|---|
-| Product spec | `outputs/product-spec/credit-card-mvp-spec-v11-2026-06-08.docx` | Product scope, frontend/admin pages, RWD, SEO, field usability |
-| Product spec inspection | `outputs/product-spec/credit-card-mvp-spec-v11-2026-06-08-inspection.txt` | Faster text reference for the v11 product spec |
-| Prisma schema | `engineering-data-model-spec/schema.prisma` | Actual MVP data model to implement |
-| Schema spec | `engineering-data-model-spec/prisma-schema-spec-v2-2026-06-08.md` | Explanation of schema decisions and non-goals |
-| Acceptance rules | `docs/acceptance/credit-card-mvp-development-acceptance-rules-v1-2026-06-15.md` | Development acceptance criteria |
-| Task index | `docs/implementation/00-master-task-index.md` | Implementation task order and handoff rules |
-
-## MVP Boundaries
-
-For MVP implementation:
-
-- Use Next.js, TypeScript, Tailwind CSS, Prisma, and SQLite unless the user changes the decision.
-- Use Prisma schema v2 as the data model source of truth.
-- Use camelCase field names in implementation, matching Prisma.
-- Treat product-spec snake_case names as conceptual equivalents only.
-- Do not add MVP-excluded models unless explicitly approved: `AuditLog`, `FaqItem`, `Tag`, `OfferTag`, `Redirect`, `CrawlSource`, `ImportJob`.
-- Do not add `canonicalUrl` fields in MVP. Canonical URLs are generated from site base URL and slug.
-- Do not add `SiteSetting.homepageFaqJson` in MVP. Homepage FAQ remains static frontend content for now.
-- Store image URLs or paths only. Do not store image binary data in the database.
-- Frontend public pages must show only `isPublished = true` offers by default.
-- Expired offer visibility follows `SiteSetting.showExpiredOffers`.
-
-
-
+- 預設使用繁體中文與台灣用語。
+- 不在對話、文件、Summary 或 log 顯示 `.env` 的密碼、Token、金鑰或完整連線字串。
+- 優先讀 `.env.example`；只有任務必要時才讀 `.env`，且不得輸出值。
+- 必須區分未執行、失敗、通過與無法確認；未驗證不得宣稱完成。
+- 任務狀態與部署狀態分開；「完成」不等於「已部署」。
+- 每個完成或阻塞任務都要有 Summary，並讓 `CURRENT_STATE_目前專案狀態.md` 指向最新可接續狀態。

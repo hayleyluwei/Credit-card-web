@@ -1,0 +1,68 @@
+
+> credit-card-mvp@0.1.0 dev
+> next dev -p 3001
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3001
+  - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 1273ms
+ ○ Compiling /offers/[slug] ...
+ ✓ Compiled /offers/[slug] in 2s (713 modules)
+ GET / 200 in 2492ms
+ GET /categories/cashback 200 in 2587ms
+ GET /categories/transport 200 in 2273ms
+ GET /offers/dawho-general-cashback-2026h2 200 in 2208ms
+ GET /categories/transport 200 in 299ms
+ GET /categories/cashback 200 in 304ms
+ GET / 200 in 374ms
+ GET /offers/dawho-general-cashback-2026h2 200 in 285ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1250ms (644 modules)
+ GET /uploads/cards/giving-card.png 404 in 1237ms
+ GET /uploads/cards/cube-card.png 404 in 1247ms
+ GET /uploads/cards/sport-card.png 404 in 370ms
+ GET /uploads/cards/dawho-cashback-card.png 404 in 605ms
+ GET /uploads/cards/flygo-card.png 404 in 83ms
+ GET /uploads/cards/hsbc-travellers-infinite-card.png 404 in 83ms
+ GET /admin/login?callbackUrl=%2Fadmin 200 in 1580ms
+ GET /uploads/cards/dawho-cashback-card.png 404 in 67ms
+ ✓ Compiled /search in 212ms (647 modules)
+ ✓ Compiled /_not-found in 135ms (650 modules)
+ GET /uploads/cards/cube-card.png 404 in 206ms
+ GET /uploads/cards/flygo-card.png 404 in 206ms
+ GET /uploads/cards/sport-card.png 404 in 206ms
+ GET /uploads/cards/dawho-cashback-card.png 404 in 207ms
+ GET /uploads/cards/giving-card.png 404 in 208ms
+ GET /uploads/cards/hsbc-travellers-infinite-card.png 404 in 207ms
+ ✓ Compiled /categories in 134ms (652 modules)
+ GET /uploads/cards/cube-card.png 404 in 66ms
+ GET /uploads/cards/hsbc-travellers-infinite-card.png 404 in 65ms
+ GET /uploads/cards/flygo-card.png 404 in 65ms
+ GET /uploads/cards/sport-card.png 404 in 66ms
+ GET /uploads/cards/dawho-cashback-card.png 404 in 67ms
+ GET /uploads/cards/giving-card.png 404 in 68ms
+ GET /uploads/cards/cube-card.png 404 in 67ms
+ GET /uploads/cards/flygo-card.png 404 in 66ms
+ GET /uploads/cards/sport-card.png 404 in 68ms
+ GET /uploads/cards/dawho-cashback-card.png 404 in 68ms
+ GET /uploads/cards/giving-card.png 404 in 69ms
+ GET /uploads/cards/hsbc-travellers-infinite-card.png 404 in 68ms
+ GET /uploads/cards/giving-card.png 404 in 59ms
+ GET /uploads/cards/cube-card.png 404 in 62ms
+ GET /uploads/cards/hsbc-travellers-infinite-card.png 404 in 60ms
+ GET /uploads/cards/dawho-cashback-card.png 404 in 61ms
+ GET /uploads/cards/flygo-card.png 404 in 60ms
+ GET /uploads/cards/sport-card.png 404 in 61ms
+ GET /uploads/cards/dawho-cashback-card.png 404 in 47ms
+ GET /uploads/cards/dawho-cashback-card.png 404 in 27ms
+ GET /uploads/cards/giving-card.png 404 in 28ms
+ GET /uploads/cards/cube-card.png 404 in 30ms
+ GET /uploads/cards/hsbc-travellers-infinite-card.png 404 in 28ms
+ GET /uploads/cards/flygo-card.png 404 in 28ms
+ GET /uploads/cards/sport-card.png 404 in 29ms
+ GET /uploads/cards/cube-card.png 404 in 88ms
+ GET /uploads/cards/dawho-cashback-card.png 404 in 41ms
+ GET /offers/dawho-general-cashback-2026h2 200 in 86ms
+ GET /offers/dawho-easycard-autoload-cashback-2026h2 200 in 49ms

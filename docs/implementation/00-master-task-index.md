@@ -5,6 +5,8 @@ Project: 信用卡優惠查詢網站 MVP
 Task size: 14 medium tasks  
 Purpose: Provide an execution-oriented task map so each future coding session can continue from a small set of files instead of rereading the full product spec, schema, and acceptance rules.
 
+> **Historical index:** This file is frozen as the T01-T14 MVP implementation history. Do not append T15 or later tasks here. Current work lives in `01-ACTIVE_TASK_INDEX_目前任務索引.md`.
+
 ## Source Documents
 
 Use these as the authoritative references when a task needs deeper detail:
@@ -20,7 +22,14 @@ Use these as the authoritative references when a task needs deeper detail:
 
 ## How To Resume Work
 
-When starting a future task, read only:
+When starting any new session, first read:
+
+1. `AGENTS.md`
+2. `AI_WORKFLOW_AI協作流程.md`
+3. `CURRENT_STATE_目前專案狀態.md`
+4. `docs/implementation/01-ACTIVE_TASK_INDEX_目前任務索引.md`
+
+When reviewing or maintaining the historical T01-T14 MVP work, then read only:
 
 1. This file: `docs/implementation/00-master-task-index.md`
 2. The current task section below

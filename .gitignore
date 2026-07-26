@@ -7,6 +7,9 @@
 .DS_Store
 Thumbs.db
 
+# AI worktree write coordination
+.ai-worktree-lock.json
+
 # Node / Next.js
 node_modules/
 .next/

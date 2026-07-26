@@ -1,0 +1,121 @@
+# T20 攻略文章功能（情境式內容與 AI 可引用性）
+
+建立日期：2026-07-17（Asia/Taipei）
+任務卡版本：v1
+核准狀態：待核准
+問題類型：功能／產品
+
+## 背景
+
+使用者的核心目標：當有人問 AI「繳稅／學費／水電費刷哪張信用卡有優惠」時，本網站的內容能被 AI 搜尋引用。2026-07-17 評估結論：
+
+1. 網站技術基礎已及格（SSR、robots 全開放、sitemap、JSON-LD、來源網址＋查證日期欄位），真正缺口是**沒有直接回答情境式問題的頁面**。
+2. 現有內容類型只有分類／銀行／卡片／優惠四種，「16 張 Visa 無限卡怎麼選」「2026 繳稅信用卡總整理」這類跨卡片比較與策略內容無處承載，而這正是 AI 最常引用的內容形態。
+3. AI 引用偏好：結論先行、比較表格、FAQ 區塊、明示更新／查證日期、可查證的官方來源。
+
+本功能依賴第一版上線（T18）完成後才有意義：AI 只能引用已被抓取、建立索引的網站。
+
+相關文件：
+
+- 上層計畫：`docs/superpowers/plans/2026-07-08-FIRST_RELEASE_第一版上線實作計畫.md`
+- SEO 模組：`src/lib/domain-seo.ts`
+- 相關任務：T19（卡片結構化欄位與情境標籤，為本功能的資料基礎）
+
+## 已確認決策
+
+- 使用者 2026-07-17 確認：網站內容要能被 AI 引用，並指示起草本任務卡。
+- 著作權原則：KOL 文章只參考資訊架構與選題，數字與條件一律回官方來源查證後改寫，不得抄錄原文。
+- 第一版上線（T16–T18）優先於本任務。
+
+## 目標
+
+網站能發布並管理情境式攻略文章（例：「2026 繳稅信用卡回饋總整理」），文章頁具備結論先行結構、比較表、FAQ、可見的更新與查證日期，並輸出完整結構化資料，成為 AI 與搜尋引擎可引用的頁面。
+
+## Scope v1
+
+- `prisma/schema.prisma` 新增 `Article` 模型：`title`、`slug`（唯一）、`summary`、`contentMd`（Markdown 內文）、`seoTitle`、`seoDescription`、`faqJson`、`lastVerifiedAt`、`isPublished`、`publishedAt`、`createdAt`、`updatedAt`；建立 migration（本機環境，正式環境依部署流程另行處理）。
+- 前台頁面：
+  - `/guides`：文章列表頁（僅顯示已發布）。
+  - `/guides/[slug]`：文章詳情頁，需求：
+    - Markdown 渲染，支援表格與站內連結；不允許 raw HTML（防 XSS）。
+    - 頁面明顯處顯示「最後更新日期」與「最後查證日期」。
+    - 文末 FAQ 區塊（讀 `faqJson`）。
+    - JSON-LD：Article（含 `datePublished`／`dateModified`）＋ FAQPage ＋ BreadcrumbList。
+- 後台文章管理：列表、新增、編輯、發布／下架開關（沿用既有 admin 版型與權限）。
+- `src/app/sitemap.ts` 加入已發布文章條目；首頁加入攻略區入口（最小幅度）。
+- 新增 `llms.txt`（站點說明與主要內容路徑，供 AI 爬蟲參考）。
+- 建立「攻略文章撰寫準則」文件（`docs/data-collection/` 或 `docs/sop/`）：結論先行、每個數字附官方來源與查證日期、術語白話、比較表格式、FAQ 寫法。
+- 建立 T20 Summary，更新任務索引與 `CURRENT_STATE_目前專案狀態.md`。
+
+## Non-scope
+
+- 不撰寫正式攻略文章內容：內容產製與查證另案處理（可作為 T21 內容任務），本任務只交付功能與撰寫準則。
+- 不建立文章與卡片／優惠的關聯資料表；第一版以 Markdown 站內連結表達關聯。
+- 不做留言、作者系統、多管理者權限、瀏覽統計。
+- 不做情境聚合自動頁（由標籤自動生成的 landing page），先以人工撰寫的攻略文承載情境查詢。
+- 不做自動化 AI 內容生成或爬蟲。
+- 不修改既有 Offer／Card／Bank／Category 模型。
+- 不執行 push；正式環境部署授權於核准時另行確認。
+
+## 安全限制
+
+- 寫入前依 `AI_WORKFLOW_AI協作流程.md` 取得 `.ai-worktree-lock.json`。
+- migration 前備份本機 `prisma/dev.db`。
+- Markdown 渲染禁用 raw HTML，輸出需經沙盒化處理，防止儲存型 XSS。
+- 不讀取或輸出 `.env` 秘密值。
+- 新增 npm 相依套件（Markdown 渲染器）需先經使用者核准，見待決問題。
+
+## 影響範圍
+
+- 頁面與 route：新增 `/guides`、`/guides/[slug]`、後台 `/admin/articles` 系列頁；首頁小幅調整。
+- API：不涉及獨立 API；後台以 server actions 處理。
+- 資料模型與資料流：新增 `Article` 模型＋migration；既有模型不變。
+- 共用元件：新增文章卡片／Markdown 渲染元件；`domain-seo.ts` 沿用並補 `dateModified`。
+- 文件與測試：撰寫準則文件、`llms.txt`、人工測試腳本、T20 Summary、索引與 CURRENT_STATE 更新。
+- 外部服務：不涉及（不新增外部 API）。
+
+## 驗證方式與完成定義
+
+- 自動驗證：
+  - lint 與 build 通過（指令分類依驗證政策，未核准前由使用者執行或逐次同意）。
+  - migration 在備份後執行成功。
+- 人工驗收（新版測試腳本）：
+  - 後台建立測試文章（含表格、FAQ、站內連結）→ 前台正確渲染，未發布文章前台看不到。
+  - 文章頁原始碼含 Article＋FAQPage JSON-LD，`dateModified` 正確；以 schema.org validator 或 Google Rich Results Test 驗證通過。
+  - 頁面可見更新／查證日期；`/guides` 出現在 sitemap；`llms.txt` 可存取。
+  - Markdown 中嵌入 `<script>` 等 raw HTML 不會被執行。
+- 完成定義：自動驗證通過、人工測試腳本全過、撰寫準則文件經使用者審閱、Summary 完成。
+- 部署驗證：功能上線至正式環境時，於正式網址重跑人工驗收關鍵項（文章頁、JSON-LD、llms.txt）；部署授權另行取得。
+
+## 資料保護與回復方式
+
+- 接觸本機開發資料庫（新增資料表）。
+- migration 前建立帶日期戳備份於 `prisma/backups/`；失敗或不接受時以備份還原。
+- 測試文章資料可隨時刪除，不影響既有資料。
+
+## Git 授權
+
+- 允許：status、diff、log 唯讀操作。
+- 不允許（核准時可另行授權）：建立或切換 branch、`git add`、local commit。
+- 不允許：push、破壞性或重寫歷史操作。
+
+## 風險與待決問題
+
+- **依賴 T18**：本任務建議於第一版上線後執行；若提前實作，功能會累積在未部署分支，增加上線範圍與測試面。
+- **待使用者核准：Markdown 渲染套件選型**（建議 `react-markdown` ＋ `remark-gfm`，皆為廣泛使用的開源套件；新增相依需經使用者同意）。
+- **AI 引用成效不可保證**：新網域被 AI 檢索與引用需要數週至數月累積，本任務交付「可被引用的頁面形態」，不承諾引用結果；成效觀察方式（如定期以 AI 搜尋自測）列入上線後 Roadmap。
+- 文章內容品質決定成敗：功能完成後若無持續產出與查證的內容，頁面不會被引用；內容產製需另立任務與節奏。
+- `faqJson` 手寫 JSON 易錯，後台需提供格式驗證與錯誤提示。
+
+## 核准證據
+
+- 核准者：（待核准）
+- 核准日期與時區：（待核准）
+- 核准 Scope 版本：（待核准）
+- 核准原文或可追溯摘要：（待核准）
+- Git 特別授權：（待核准）
+- 高風險操作特別授權：（待核准；本任務需要「本機 SQLite schema migration＋備份」與「新增 npm 相依套件」授權）
+
+## Scope 變更紀錄
+
+- v1／2026-07-17：建立草稿，待核准。
