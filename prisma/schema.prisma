@@ -1,9 +1,13 @@
 // Credit Card MVP - Prisma Schema
-// Version: 2026-06-08 / v2
+// Version: 2026-07-27 / v3
 // Product Spec: credit-card-mvp-spec-v11-2026-06-08
-// Schema Spec: prisma-schema-spec-v2-2026-06-08.md
+// Schema Spec: prisma-schema-spec-v3-2026-07-27.md
 // Target: personal developer MVP, low-cost setup
 // Database: SQLite for local MVP development
+// v3 (T21): add RewardTier / Channel / RewardTierChannel; Offer gains tiers
+//   relation + headlineRate/headlineSummary. Flat reward fields kept as a
+//   transitional migration bridge (removed in T21 Phase 5). Also reconciles
+//   the v2 spec-dir copy that had drifted (missing T19 Card fields).
 
 generator client {
   provider = "prisma-client-js"
@@ -128,14 +132,22 @@ model Offer {
 
   startDate      DateTime?
   endDate        DateTime?
+
+  // [T21 過渡相容欄位] 舊的扁平回饋欄位。資料遷移期間保留為搬運橋樑；
+  // 待前台/後台/驗證/匯入全部改讀 RewardTier 後，於 T21 Phase 5 移除。
   rewardType     String?
   rewardValue    String?
   rewardCap      String?
   minSpend       String?
   conditions     String?
+
   sourceUrl      String?
   lastVerifiedAt DateTime?
   tags           String?
+
+  // [T21] 非正規化摘要欄位，供列表頁快速顯示，不必展開全部 tier。
+  headlineRate    String?
+  headlineSummary String?
 
   seoTitle       String?
   seoDescription String?
@@ -149,8 +161,9 @@ model Offer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  category Category    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  category Category     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   cards    OfferCard[]
+  tiers    RewardTier[]
 
   @@index([categoryId])
   @@index([isPublished, isFeatured, recommendScore, sortOrder, updatedAt])
@@ -167,4 +180,54 @@ model OfferCard {
 
   @@id([offerId, cardId])
   @@index([cardId])
+}
+
+/// [T21] One reward layer within an offer. An offer has one or more tiers,
+/// each with its own rate, cap, cap period, channels, and conditions.
+model RewardTier {
+  id             Int     @id @default(autoincrement())
+  offerId        Int
+  label          String?
+  rewardType     String?
+  rate           String?
+  cap            String?
+  capPeriod      String?
+  minSpend       String?
+  conditionsText String?
+  /// JSON string (TierConditions). Populated but not consumed in early phase.
+  conditions     String?
+  sortOrder      Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  offer    Offer               @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  channels RewardTierChannel[]
+
+  @@index([offerId])
+}
+
+/// [T21] Spending channel (e.g. a merchant category or platform) that a
+/// reward tier applies to. Independent table, many-to-many with RewardTier.
+model Channel {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  slug String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tiers RewardTierChannel[]
+}
+
+/// [T21] Join table for the many-to-many relation between reward tiers and channels.
+model RewardTierChannel {
+  rewardTierId Int
+  channelId    Int
+
+  rewardTier RewardTier @relation(fields: [rewardTierId], references: [id], onDelete: Cascade)
+  channel    Channel    @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@id([rewardTierId, channelId])
+  @@index([channelId])
 }

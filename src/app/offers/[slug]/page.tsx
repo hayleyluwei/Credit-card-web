@@ -50,6 +50,14 @@ export default async function OfferDetailPage({ params }: OfferPageProps) {
     where: { slug: params.slug },
     include: {
       category: true,
+      tiers: {
+        orderBy: { sortOrder: "asc" },
+        include: {
+          channels: {
+            include: { channel: true }
+          }
+        }
+      },
       cards: {
         include: {
           card: {
@@ -84,6 +92,8 @@ export default async function OfferDetailPage({ params }: OfferPageProps) {
   const periodStart = formatDate(resolvedOffer.startDate);
   const periodEnd = formatDate(resolvedOffer.endDate);
   const highlights = [resolvedOffer.highlight1, resolvedOffer.highlight2].filter((item): item is string => Boolean(item?.trim()));
+  // [T21] 優先使用結構化 RewardTier；若某筆優惠尚無 tier（過渡期防護），回退到舊扁平欄位。
+  const tiers = resolvedOffer.tiers ?? [];
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-5 py-8 sm:px-8 lg:px-10">
@@ -132,34 +142,90 @@ export default async function OfferDetailPage({ params }: OfferPageProps) {
               ) : (
                 <p>請依適用信用卡、消費門檻、活動期間與官方條件完成消費。</p>
               )}
-              {resolvedOffer.minSpend ? (
-                <div>
-                  <p className="font-semibold text-slate-900">使用門檻</p>
-                  <p>{resolvedOffer.minSpend}</p>
-                </div>
-              ) : null}
             </div>
           </div>
 
           <div className="rounded-3xl border border-line bg-white p-6 shadow-soft">
             <h2 className="text-2xl font-bold text-ink">回饋與限制</h2>
-            <div className="mt-6 grid gap-5 text-sm leading-7 text-slate-700 sm:grid-cols-2">
-              <div>
-                <p className="font-semibold text-slate-900">回饋方式</p>
-                <p>{formatRewardType(resolvedOffer.rewardType)}</p>
+
+            {tiers.length > 0 ? (
+              <div className="mt-6 space-y-6">
+                {tiers.map((tier, index) => {
+                  const channelNames = tier.channels.map((link) => link.channel.name).filter(Boolean);
+                  const tierLabel = tier.label?.trim() || (tiers.length > 1 ? `回饋層 ${index + 1}` : null);
+                  return (
+                    <div
+                      key={tier.id}
+                      className={tiers.length > 1 ? "rounded-2xl border border-line p-5" : ""}
+                    >
+                      {tierLabel ? <p className="mb-4 text-base font-bold text-brand-800">{tierLabel}</p> : null}
+                      <div className="grid gap-5 text-sm leading-7 text-slate-700 sm:grid-cols-2">
+                        <div>
+                          <p className="font-semibold text-slate-900">回饋方式</p>
+                          <p>{formatRewardType(tier.rewardType)}</p>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-900">回饋內容</p>
+                          <p>{tier.rate ?? "請依官方公告為準"}</p>
+                        </div>
+                        <div className="sm:col-span-2">
+                          <p className="font-semibold text-slate-900">回饋上限</p>
+                          <p>
+                            {tier.cap ?? "請依官方公告為準"}
+                            {tier.capPeriod ? `（${tier.capPeriod}）` : ""}
+                          </p>
+                        </div>
+                        {tier.minSpend ? (
+                          <div className="sm:col-span-2">
+                            <p className="font-semibold text-slate-900">使用門檻</p>
+                            <p>{tier.minSpend}</p>
+                          </div>
+                        ) : null}
+                        {channelNames.length > 0 ? (
+                          <div className="sm:col-span-2">
+                            <p className="font-semibold text-slate-900">適用通路</p>
+                            <p>{channelNames.join("、")}</p>
+                          </div>
+                        ) : null}
+                        {tier.conditionsText ? (
+                          <div className="sm:col-span-2">
+                            <p className="font-semibold text-slate-900">注意事項</p>
+                            <p className="whitespace-pre-line">{tier.conditionsText}</p>
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <div>
-                <p className="font-semibold text-slate-900">回饋內容</p>
-                <p>{resolvedOffer.rewardValue ?? "請依官方公告為準"}</p>
+            ) : (
+              <div className="mt-6 grid gap-5 text-sm leading-7 text-slate-700 sm:grid-cols-2">
+                <div>
+                  <p className="font-semibold text-slate-900">回饋方式</p>
+                  <p>{formatRewardType(resolvedOffer.rewardType)}</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900">回饋內容</p>
+                  <p>{resolvedOffer.rewardValue ?? "請依官方公告為準"}</p>
+                </div>
+                <div className="sm:col-span-2">
+                  <p className="font-semibold text-slate-900">回饋上限</p>
+                  <p>{resolvedOffer.rewardCap ?? "請依官方公告為準"}</p>
+                </div>
+                {resolvedOffer.minSpend ? (
+                  <div className="sm:col-span-2">
+                    <p className="font-semibold text-slate-900">使用門檻</p>
+                    <p>{resolvedOffer.minSpend}</p>
+                  </div>
+                ) : null}
+                <div className="sm:col-span-2">
+                  <p className="font-semibold text-slate-900">注意事項</p>
+                  <p className="whitespace-pre-line">{resolvedOffer.conditions ?? "請依官方公告與銀行活動頁為準。"}</p>
+                </div>
               </div>
-              <div className="sm:col-span-2">
-                <p className="font-semibold text-slate-900">回饋上限</p>
-                <p>{resolvedOffer.rewardCap ?? "請依官方公告為準"}</p>
-              </div>
-              <div className="sm:col-span-2">
-                <p className="font-semibold text-slate-900">注意事項</p>
-                <p className="whitespace-pre-line">{resolvedOffer.conditions ?? "請依官方公告與銀行活動頁為準。"}</p>
-              </div>
+            )}
+
+            <div className="mt-6 grid gap-5 border-t border-line pt-6 text-sm leading-7 text-slate-700 sm:grid-cols-2">
               <div>
                 <p className="font-semibold text-slate-900">優惠期間</p>
                 <p>
