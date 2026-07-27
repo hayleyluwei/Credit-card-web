@@ -35,7 +35,7 @@
   - 上述程式與規格異動**尚未 commit**，仍在工作區，commit 前待使用者確認。
 - **收尾已完成**：Summary 已建立（`docs/implementation/summaries/T16-FIRST_RELEASE_DATA_IMPORT_SUMMARY-v1-2026-07-26.md`）、`01-ACTIVE_TASK_INDEX_目前任務索引.md` 的 T16 狀態列已改為「完成」、本文件同步更新。人工抽點（首頁／分類頁／優惠詳情頁確認無測試資料殘留）已在先前對話中完成，本次僅補齊「正式標記完成」的文件流程。
 
-### T17 上線前完整測試 — 已核准 v1（2026-07-27），自動驗證與 AI 示範人工測試已完成，**待使用者最終覆核**
+### T17 上線前完整測試 — 已核准 v1（2026-07-27），**已於 2026-07-27 標記完成**（使用者拍板接受自動驗證＋AI 示範測試＋16 筆抽查；後台登入編輯項由使用者自行補跑）
 
 - 任務卡：`docs/implementation/tasks/T17-PRE_LAUNCH_TESTING_上線前完整測試.md`
 - 核准拍板：抽查比例＝全部16筆；人工測試執行方式＝AI先示範跑一輪、使用者最後覆核；Git 授權＝git add + local commit。
@@ -53,18 +53,18 @@
 - 功能已用真實資料驗證過（T16 匯入的卡片都正確顯示年費／等級／發卡組織／優缺點），且規格書 v2 與模板 v2 已實際交付整理人員並完成兩輪真實資料匯入，滿足任務卡定義的兩項人工驗收條件。`01-ACTIVE_TASK_INDEX` 與任務卡 Summary 的任務狀態欄位已正式改為「完成」。
 - Summary：`docs/implementation/summaries/T19-CARD_STRUCTURED_FIELDS_SUMMARY_卡片結構化欄位與蒐集規格擴充摘要-v1-2026-07-18.md`（2026-07-26 補記驗收結果）
 
-### T21 優惠條件結構化規劃（Promotion／RewardTier／Channel）— 草案，六個分岔路全部拍板，僅剩正式核准 Scope
+### T21 優惠條件結構化（重構 Offer＋RewardTier／Channel）— 已核准 v1（2026-07-27），**實作中，Phases 1-3 完成**
 
-- 任務卡：`docs/implementation/tasks/T21-CONDITION_SCHEMA_優惠條件結構化規劃.md`
-- 核准狀態：**仍是待核准**——這張卡目前只是規劃文件，不構成任何實作授權，不得修改 Prisma schema、不建立 migration、不修改任何程式碼。
-- 已拍板決策（commit `64f7efa`、`4746c10`）：
-  - (a) 採方案 B，重構現有 `Offer` model，不新增獨立 `Promotion` model。
-  - (b) `capPeriod`／`PaymentMethod` 永遠用 String，不做 Prisma enum。
-  - (c) 巢狀邏輯暫不定案，維持限一層，訂觀察門檻（累積 3 張卡以上需要兩層以上巢狀才重新評估）。
-  - 規格書 v3（多層回饋寫法慣例）：現在不改，維持 v2。
-  - (d) 排在 T18 之前執行。
-  - 排序子問題：具體順序是 **T16 → T17 → T21 → T18**（不是排在 T16 之前），因為使用者要先看過真實資料匯入後的狀況再決定結構設計；代價是 T21 的資料遷移腳本屆時要處理 T16 匯入的全部真實資料，範圍比原估的 20+ 筆測試資料大。
-- **下一步只剩**：使用者正式核准 T21 整體 Scope v1，才能開始實作。
+- 任務卡：`docs/implementation/tasks/T21-CONDITION_SCHEMA_優惠條件結構化規劃.md`（核准證據已填）
+- 核准狀態：**已核准**（使用者 2026-07-27 回覆「進入 T21」並選「直接動 schema」）。依 schema 專門流程進行，高風險步驟執行前先確認清單。
+- 已拍板決策（不變）：(a) 方案 B 重構 Offer；(b) capPeriod／PaymentMethod 用 String；(c) 巢狀限一層＋觀察門檻；規格書維持 v2（資料蒐集規格另已升 v3，指增量匯入/半年更新規則，與此不同）；(d) 排序 T16→T17→T21→T18；扁平欄位最終**移除**（使用者 2026-07-27 拍板）。
+- **實作進度（分階段，扁平欄位採「先擴張、遷移、再收縮」避免資料遺失）**：
+  - Phase 1 ✅ schema 加 `RewardTier`／`Channel`／`RewardTierChannel`＋Offer 加 `tiers`／`headlineRate`／`headlineSummary`（RewardTier 另含 `minSpend`）；扁平欄位暫留當橋樑；`prisma validate` 通過。對齊了漂移的 `engineering-data-model-spec/schema.prisma`（補回 T19 少的 6 個 Card 欄位）。產出 `schema-v3-2026-07-27.prisma`、`prisma-schema-spec-v3-2026-07-27.md`、`schema-checklist-2026-07-27.md`。
+  - Phase 2 ✅ 備份 dev.db → `prisma db push`（純新增）→ `scripts/migrate-offers-to-tiers.mjs` 把 16 筆 offer 各遷出 1 筆 tier（16/16，內容抽查一致）。
+  - Phase 3 ✅ 前台詳情頁與 `OfferCard` 改讀 tiers（保留扁平 fallback）；tsc 乾淨、瀏覽器實測正確。
+  - Phase 4 ⏳ 後台 `AdminOfferForm` tier 動態表單＋`admin-actions` 寫 tiers＋`domain-validation` 改用 tiers（**後台 UI 需使用者登入測試**）。
+  - Phase 5 ⏳ `import-offer-data.mjs`／`seed.mjs` 改寫 tiers；幣倍卡做為第一筆多層結構化案例；**從 schema 移除扁平欄位＝高風險，執行前再確認**；寫 T21 Summary。
+- 目前資料庫「新舊並存」：資料已在 RewardTier、前台讀新的，扁平欄位仍在、後台仍寫舊的，網站正常。
 
 ## AI 引用性（AI search）現況評估（2026-07-26 新增）
 
@@ -141,16 +141,16 @@
 
 ## 下一步（2026-07-27 更新，取代同日稍早版本）
 
-**T16／T19 收尾已完成，T17 已核准並完成自動驗證＋AI示範人工測試，待使用者最終覆核**。以下依優先順序：
+**T16／T17／T19 皆已完成；T21 已核准並實作中（Phases 1-3 完成）；長期未提交變更已全部 commit＋push。** 以下依優先順序：
 
-1. **使用者覆核 T17 產出**：`docs/implementation/manual-test-scripts/T17-上線前測試腳本-v1-2026-07-08.md`、`T17-資料抽查清單-v1-2026-07-27.md` 中標示「待使用者覆核」的項目，尤其是兩筆永豐優惠（指定稅款分期、繳學費回饋）可能需要更新活動期間一事。覆核通過後 T17 才能正式標記「完成」。
-2. **T21 待使用者正式核准 Scope v1**——六個分岔路都已拍板（見上方 T21 段落），依已拍板排序應在 T17 之後、T18 之前核准；T17 已核准並接近完成，可視進度考慮核准 T21。
-3. Codex 那邊如果還有後續資料蒐集批次，記得先確認 `.ai-worktree-lock.json` 狀態再接手匯入，且每次重新執行 `npm run data:import` 前要記得：HSBC 兩筆優惠的年費文字修正只在資料庫裡，會被清空重建覆蓋，需要重新補（見上方 T16 段落）。
-4. `esun-unicard-wallet-new-card-2026q3` 的「最低消費」欄位：T17 資料抽查已核對為欄位歸類問題（內容應屬申辦期限敘述，非事實錯誤），待資料整理或 T21 欄位重構時一併調整。
-5. T20（攻略文章功能，AI 可引用性）已起草待核准，仍建議排 T18 上線後；FAQ／比較表格缺口已透過 AI 引用性檢視確認存在。
-6. 長期未提交變更（T15 治理文件批次、首頁舊工作、T16 前置 seed.mjs 改寫、多張待核准任務卡草稿）**仍原封不動放著**，需要使用者另外決定要不要一次處理，不屬於任何一條任務線的自然下一步，不要在沒有明確指示時主動去動它們。
+1. **T21 續作 Phase 4-5**（實作中，見下方 T21 段落）：Phase 1-3（schema／資料遷移／前台改讀 tiers）已完成並驗證，網站「新舊並存」正常運作。剩 Phase 4（後台 tier 動態表單＋admin-actions＋驗證，**後台 UI 需使用者登入測試**）與 Phase 5（匯入/seed 改寫、**移除扁平欄位**＝高風險，執行前會再確認、寫 Summary）。
+2. T21 完成後接 T18（部署上線，Vercel Hobby + Neon Free）；schema 已是 v3，PostgreSQL 遷移屆時一併處理。
+3. T22（排程輔助資料更新）已起草待核准，依賴 T18／T21，見任務卡。
+4. Codex 若有後續資料蒐集批次，先確認 `.ai-worktree-lock.json` 再接手；重跑 `npm run data:import`（增量模式）不會清空既有資料。HSBC 兩筆年費文字修正已寫入 xlsx（`0a7e597`），不再有被覆蓋風險。
+5. `esun-unicard-wallet-new-card-2026q3` 的「最低消費」欄位為欄位歸類問題（非事實錯誤），已隨 T21 遷移進 RewardTier.minSpend，待資料整理時再校正語意。
+6. T20（攻略文章功能）已起草待核准，仍建議排 T18 上線後。
 
-使用者已於 2026-07-08 拍板：清除 seed 測試資料（已完成，真實資料已上）、首頁未提交變更採 commit（**仍未執行**）、部署平台 Vercel Hobby + Neon Free、後台帳號由使用者本人持有。
+使用者已於 2026-07-08 拍板：清除 seed 測試資料（已完成）、部署平台 Vercel Hobby + Neon Free、後台帳號由使用者本人持有。首頁未提交變更與 T15 治理文件批次已於 2026-07-27 全部 commit 並 push（不再是待處理項）。
 
 ## 最新資料整理進度（2026-07-08 更新）
 
