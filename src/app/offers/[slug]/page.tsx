@@ -257,8 +257,7 @@ export default async function OfferDetailPage({ params }: OfferPageProps) {
             <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
               <div>分類：{resolvedOffer.category.name}</div>
               <div>標籤：{resolvedOffer.tags ?? "尚未設定"}</div>
-              <div>推薦分數：{resolvedOffer.recommendScore}</div>
-              <div>精選：{resolvedOffer.isFeatured ? "是" : "否"}</div>
+              {resolvedOffer.isFeatured ? <div>精選優惠</div> : null}
             </div>
           </div>
         </aside>
