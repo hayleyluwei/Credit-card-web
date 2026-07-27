@@ -1,14 +1,54 @@
 "use client";
 
-import type { Bank, Card, Category, Offer, OfferCard } from "@prisma/client";
+import type { Bank, Card, Category, Offer, OfferCard, RewardTier } from "@prisma/client";
 import Link from "next/link";
+import { useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { AdminField, adminInputClass } from "@/components/AdminField";
 import { StableSlugInput } from "@/components/StableSlugInput";
 import type { AdminActionState } from "@/lib/admin-actions";
 
 type CardWithBank = Card & { bank: Bank };
-type OfferWithCards = Offer & { cards: OfferCard[] };
+type OfferWithCards = Offer & { cards: OfferCard[]; tiers: RewardTier[] };
+
+type TierDraft = {
+  key: string;
+  label: string;
+  rewardType: string;
+  rate: string;
+  cap: string;
+  capPeriod: string;
+  minSpend: string;
+  conditionsText: string;
+};
+
+let tierKeySeq = 0;
+function nextTierKey() {
+  tierKeySeq += 1;
+  return `tier-${tierKeySeq}`;
+}
+
+function emptyTier(): TierDraft {
+  return { key: nextTierKey(), label: "", rewardType: "", rate: "", cap: "", capPeriod: "", minSpend: "", conditionsText: "" };
+}
+
+function tiersFromOffer(offer?: OfferWithCards | null): TierDraft[] {
+  const rows = offer?.tiers ?? [];
+  if (rows.length === 0) return [emptyTier()];
+  return rows
+    .slice()
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map((tier) => ({
+      key: nextTierKey(),
+      label: tier.label ?? "",
+      rewardType: tier.rewardType ?? "",
+      rate: tier.rate ?? "",
+      cap: tier.cap ?? "",
+      capPeriod: tier.capPeriod ?? "",
+      minSpend: tier.minSpend ?? "",
+      conditionsText: tier.conditionsText ?? ""
+    }));
+}
 
 type AdminOfferFormProps = {
   action: (state: AdminActionState, formData: FormData) => Promise<AdminActionState>;
@@ -46,6 +86,17 @@ export function AdminOfferForm({ action, cards, categories, offer }: AdminOfferF
   const selectedCards = new Set(offer?.cards.map((item) => item.cardId) ?? []);
   const isEdit = Boolean(offer);
   const [state, formAction] = useFormState(action, initialOfferActionState);
+  const [tiers, setTiers] = useState<TierDraft[]>(() => tiersFromOffer(offer));
+
+  function updateTier(key: string, field: keyof Omit<TierDraft, "key">, value: string) {
+    setTiers((prev) => prev.map((tier) => (tier.key === key ? { ...tier, [field]: value } : tier)));
+  }
+  function addTier() {
+    setTiers((prev) => [...prev, emptyTier()]);
+  }
+  function removeTier(key: string) {
+    setTiers((prev) => (prev.length <= 1 ? prev : prev.filter((tier) => tier.key !== key)));
+  }
 
   return (
     <form action={formAction} className="grid gap-6 rounded-md border border-line bg-white p-6 shadow-soft">
@@ -176,24 +227,113 @@ export function AdminOfferForm({ action, cards, categories, offer }: AdminOfferF
         <AdminField label="詳細說明" help="顯示在優惠詳情頁「怎麼拿到優惠」，請使用消費者看得懂的步驟，不要只寫內部備註。">
           <textarea className={adminInputClass} name="description" placeholder="例：活動期間至指定餐廳消費，結帳時出示指定信用卡並符合單筆門檻即可享優惠。" rows={4} defaultValue={offer?.description ?? ""} />
         </AdminField>
-        <AdminField label="回饋方式" help="顯示在詳情頁「回饋與限制」。例：cashback、points、discount、installment、miles、travel-benefit。">
-          <input className={adminInputClass} name="rewardType" placeholder="例：points" defaultValue={offer?.rewardType ?? ""} />
-        </AdminField>
-        <AdminField label="回饋內容" help="顯示在詳情頁「回饋與限制」。">
-          <input className={adminInputClass} name="rewardValue" placeholder="例：加碼 5% 優惠券" defaultValue={offer?.rewardValue ?? ""} />
-        </AdminField>
-        <AdminField label="回饋上限" help="顯示在詳情頁「回饋與限制」。">
-          <input className={adminInputClass} name="rewardCap" placeholder="例：每張優惠券回饋上限 100 點小樹點" defaultValue={offer?.rewardCap ?? ""} />
-        </AdminField>
-        <AdminField label="使用門檻" help="顯示在詳情頁「怎麼拿到優惠」與「回饋與限制」。">
-          <input className={adminInputClass} name="minSpend" placeholder="例：單筆國內餐廳消費滿 NT$2,000" defaultValue={offer?.minSpend ?? ""} />
-        </AdminField>
-        <AdminField label="優惠條件" help="顯示在詳情頁「回饋與限制」或注意事項。">
-          <textarea className={adminInputClass} name="conditions" placeholder="例：需符合指定活動、消費門檻、優惠券領取與官方公告限制。" rows={3} defaultValue={offer?.conditions ?? ""} />
-        </AdminField>
         <AdminField label="來源連結" help="發布前必填；請填官方活動或銀行頁面。">
           <input className={adminInputClass} name="sourceUrl" placeholder="例：https://www.example.com/official-offer" type="url" defaultValue={offer?.sourceUrl ?? ""} />
         </AdminField>
+      </section>
+
+      <section className="grid gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-bold text-ink">回饋層（Reward Tier）</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              一檔優惠可有多層回饋（例：基本回饋、精選通路加碼、新卡友加碼），每層各自填回饋方式、內容、上限、門檻與條件。單層優惠填一層即可。發布前至少要有一層填了回饋方式或回饋內容。
+            </p>
+          </div>
+          <button type="button" onClick={addTier} className="rounded-md border border-brand-300 px-3 py-2 text-sm font-semibold text-brand-700">
+            ＋ 新增回饋層
+          </button>
+        </div>
+
+        {/* [T21] 動態回饋層；admin-actions 依 tierCount 與 tier-<i>-<field> 讀取。 */}
+        <input type="hidden" name="tierCount" value={tiers.length} />
+
+        <div className="grid gap-5">
+          {tiers.map((tier, index) => (
+            <div key={tier.key} className="rounded-md border border-line bg-slate-50 p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-sm font-bold text-ink">回饋層 {index + 1}</p>
+                {tiers.length > 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => removeTier(tier.key)}
+                    className="rounded-md border border-red-200 px-2 py-1 text-xs font-semibold text-red-700"
+                  >
+                    刪除這層
+                  </button>
+                ) : null}
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <AdminField label="這層名稱（選填）" help="多層時建議填，例：精選通路加碼、新卡友加碼。單層可留空。">
+                  <input
+                    className={adminInputClass}
+                    name={`tier-${index}-label`}
+                    placeholder="例：精選通路加碼"
+                    value={tier.label}
+                    onChange={(event) => updateTier(tier.key, "label", event.target.value)}
+                  />
+                </AdminField>
+                <AdminField label="回饋方式" help="例：cashback、points、discount、installment、miles、travel-benefit。">
+                  <input
+                    className={adminInputClass}
+                    name={`tier-${index}-rewardType`}
+                    placeholder="例：cashback"
+                    value={tier.rewardType}
+                    onChange={(event) => updateTier(tier.key, "rewardType", event.target.value)}
+                  />
+                </AdminField>
+                <AdminField label="回饋內容" help="回饋率或算式，例：4%、每滿 NT$50,000 回饋 NT$50。">
+                  <input
+                    className={adminInputClass}
+                    name={`tier-${index}-rate`}
+                    placeholder="例：加碼 4%"
+                    value={tier.rate}
+                    onChange={(event) => updateTier(tier.key, "rate", event.target.value)}
+                  />
+                </AdminField>
+                <AdminField label="回饋上限" help="這層的回饋金額上限文字。">
+                  <input
+                    className={adminInputClass}
+                    name={`tier-${index}-cap`}
+                    placeholder="例：每帳單週期上限 NT$800"
+                    value={tier.cap}
+                    onChange={(event) => updateTier(tier.key, "cap", event.target.value)}
+                  />
+                </AdminField>
+                <AdminField label="上限週期（選填）" help="例：月帳單週期、日曆月、一次性。">
+                  <input
+                    className={adminInputClass}
+                    name={`tier-${index}-capPeriod`}
+                    placeholder="例：月帳單週期"
+                    value={tier.capPeriod}
+                    onChange={(event) => updateTier(tier.key, "capPeriod", event.target.value)}
+                  />
+                </AdminField>
+                <AdminField label="使用門檻（選填）" help="這層的最低消費／門檻文字。">
+                  <input
+                    className={adminInputClass}
+                    name={`tier-${index}-minSpend`}
+                    placeholder="例：單筆滿 NT$3,000"
+                    value={tier.minSpend}
+                    onChange={(event) => updateTier(tier.key, "minSpend", event.target.value)}
+                  />
+                </AdminField>
+                <div className="md:col-span-2">
+                  <AdminField label="注意事項 / 條件（選填）" help="這層的條件與限制，顯示於詳情頁「回饋與限制」。">
+                    <textarea
+                      className={adminInputClass}
+                      name={`tier-${index}-conditionsText`}
+                      rows={3}
+                      placeholder="例：需完成指定任務、限一般消費、排除項目依官方公告。"
+                      value={tier.conditionsText}
+                      onChange={(event) => updateTier(tier.key, "conditionsText", event.target.value)}
+                    />
+                  </AdminField>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">

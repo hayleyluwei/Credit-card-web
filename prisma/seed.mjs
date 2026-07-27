@@ -758,6 +758,33 @@ async function main() {
     const category = categoryBySlug.get(seed.categorySlug);
     if (!category) throw new Error(`Missing category for offer: ${seed.title}`);
 
+    // [T21] 回饋改由 RewardTier 承載。多層優惠可在 seed 提供 seed.tiers 陣列；
+    // 未提供時，用既有扁平欄位組出單一層 tier。
+    const tiers = (
+      seed.tiers ?? [
+        {
+          label: null,
+          rewardType: seed.rewardType,
+          rate: seed.rewardValue,
+          cap: seed.rewardCap,
+          capPeriod: null,
+          minSpend: seed.minSpend,
+          conditionsText: seed.conditions,
+          conditions: null
+        }
+      ]
+    ).map((tier, tierIndex) => ({
+      label: tier.label ?? null,
+      rewardType: tier.rewardType ?? null,
+      rate: tier.rate ?? null,
+      cap: tier.cap ?? null,
+      capPeriod: tier.capPeriod ?? null,
+      minSpend: tier.minSpend ?? null,
+      conditionsText: tier.conditionsText ?? null,
+      conditions: tier.conditions ?? null,
+      sortOrder: tierIndex
+    }));
+
     const offer = await prisma.offer.create({
       data: {
         categoryId: category.id,
@@ -773,11 +800,7 @@ async function main() {
         description: seed.description,
         startDate: seed.startDate,
         endDate: seed.endDate,
-        rewardType: seed.rewardType,
-        rewardValue: seed.rewardValue,
-        rewardCap: seed.rewardCap,
-        minSpend: seed.minSpend,
-        conditions: seed.conditions,
+        headlineRate: tiers.find((tier) => tier.rate)?.rate ?? seed.rewardValue ?? null,
         sourceUrl: seed.sourceUrl,
         lastVerifiedAt: seed.lastVerifiedAt ?? fixedDate("2026-06-16"),
         tags: seed.tags,
@@ -792,7 +815,8 @@ async function main() {
         isFeatured: seed.isFeatured,
         recommendScore: seed.recommendScore,
         sortOrder: seed.sortOrder,
-        isPublished: seed.isPublished ?? true
+        isPublished: seed.isPublished ?? true,
+        tiers: { create: tiers }
       }
     });
 

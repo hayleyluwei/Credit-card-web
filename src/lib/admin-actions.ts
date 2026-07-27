@@ -268,6 +268,50 @@ function selectedCardIds(formData: FormData): number[] {
     .filter((value) => Number.isFinite(value));
 }
 
+export type ParsedTier = {
+  label: string | null;
+  rewardType: string | null;
+  rate: string | null;
+  cap: string | null;
+  capPeriod: string | null;
+  minSpend: string | null;
+  conditionsText: string | null;
+  sortOrder: number;
+};
+
+// [T21] Parse the dynamic reward-tier rows submitted by AdminOfferForm.
+// The form posts a `tierCount` and indexed fields `tier-<i>-<field>`.
+// Fully-empty rows are skipped so an accidental blank tier is ignored.
+function parseTiers(formData: FormData): ParsedTier[] {
+  const count = intValue(formData, "tierCount", 0);
+  const tiers: ParsedTier[] = [];
+  for (let i = 0; i < count; i += 1) {
+    const label = nullableText(formData, `tier-${i}-label`);
+    const rewardType = nullableText(formData, `tier-${i}-rewardType`);
+    const rate = nullableText(formData, `tier-${i}-rate`);
+    const cap = nullableText(formData, `tier-${i}-cap`);
+    const capPeriod = nullableText(formData, `tier-${i}-capPeriod`);
+    const minSpend = nullableText(formData, `tier-${i}-minSpend`);
+    const conditionsText = nullableText(formData, `tier-${i}-conditionsText`);
+
+    if (!label && !rewardType && !rate && !cap && !capPeriod && !minSpend && !conditionsText) {
+      continue; // skip empty row
+    }
+
+    tiers.push({
+      label,
+      rewardType,
+      rate,
+      cap,
+      capPeriod,
+      minSpend,
+      conditionsText,
+      sortOrder: tiers.length
+    });
+  }
+  return tiers;
+}
+
 function offerData(formData: FormData, slug: string) {
   const draft = {
     categoryId: intValue(formData, "categoryId"),
@@ -283,11 +327,6 @@ function offerData(formData: FormData, slug: string) {
     description: nullableText(formData, "description"),
     startDate: dateValue(formData, "startDate"),
     endDate: dateValue(formData, "endDate"),
-    rewardType: nullableText(formData, "rewardType"),
-    rewardValue: nullableText(formData, "rewardValue"),
-    rewardCap: nullableText(formData, "rewardCap"),
-    minSpend: nullableText(formData, "minSpend"),
-    conditions: nullableText(formData, "conditions"),
     sourceUrl: nullableText(formData, "sourceUrl"),
     lastVerifiedAt: dateValue(formData, "lastVerifiedAt"),
     tags: nullableText(formData, "tags"),
@@ -313,7 +352,7 @@ function offerData(formData: FormData, slug: string) {
   };
 }
 
-function offerSaveErrors(data: ReturnType<typeof offerData>, cardIds: number[], publish: boolean) {
+function offerSaveErrors(data: ReturnType<typeof offerData>, tiers: ParsedTier[], cardIds: number[], publish: boolean) {
   const errors: string[] = [];
   const faqResult = validateFaqJson(data.faqJson);
   if (!faqResult.valid) {
@@ -328,8 +367,7 @@ function offerSaveErrors(data: ReturnType<typeof offerData>, cardIds: number[], 
     categoryId: data.categoryId,
     summaryPreview: data.summaryPreview,
     sourceUrl: data.sourceUrl,
-    rewardType: data.rewardType,
-    rewardValue: data.rewardValue,
+    tiers,
     cards: cardIds.map((id) => ({ id }))
   });
 
@@ -337,8 +375,8 @@ function offerSaveErrors(data: ReturnType<typeof offerData>, cardIds: number[], 
     for (const error of result.errors) {
       if (error === "sourceUrl is required for published offers") {
         errors.push("發布前請填寫官方來源連結");
-      } else if (error === "either rewardType or rewardValue is required for published offers") {
-        errors.push("發布前請填寫回饋方式或回饋內容");
+      } else if (error === "at least one reward tier with a reward type or rate is required for published offers") {
+        errors.push("發布前請至少填寫一層回饋（回饋方式或回饋內容）");
       } else if (error === "at least one card must be linked for published offers") {
         errors.push("發布前請至少勾選一張適用信用卡");
       } else {
@@ -350,12 +388,18 @@ function offerSaveErrors(data: ReturnType<typeof offerData>, cardIds: number[], 
   return errors;
 }
 
+// [T21] The non-normalized headline shown on listing cards: use the first tier's rate.
+function headlineRateFromTiers(tiers: ParsedTier[]): string | null {
+  return tiers.find((tier) => tier.rate && tier.rate.trim())?.rate ?? null;
+}
+
 export async function createOffer(_prevState: AdminActionState, formData: FormData): Promise<AdminActionState> {
   const title = text(formData, "title");
   const slug = text(formData, "slug") || generateSlug(title);
   const publish = text(formData, "intent") === "publish";
   const cardIds = selectedCardIds(formData);
   const data = offerData(formData, slug);
+  const tiers = parseTiers(formData);
   try {
     await ensureUniqueSlug("offer", slug);
   } catch (error) {
@@ -364,7 +408,7 @@ export async function createOffer(_prevState: AdminActionState, formData: FormDa
       ok: false
     };
   }
-  const errors = offerSaveErrors(data, cardIds, publish);
+  const errors = offerSaveErrors(data, tiers, cardIds, publish);
   if (errors.length > 0) {
     return { errors, ok: false };
   }
@@ -372,9 +416,13 @@ export async function createOffer(_prevState: AdminActionState, formData: FormDa
   const offer = await prisma.offer.create({
     data: {
       ...data,
+      headlineRate: headlineRateFromTiers(tiers),
       isPublished: publish,
       cards: {
         create: cardIds.map((cardId) => ({ cardId }))
+      },
+      tiers: {
+        create: tiers.map(({ sortOrder, ...tier }) => ({ ...tier, sortOrder }))
       }
     }
   });
@@ -394,6 +442,7 @@ export async function updateOffer(_prevState: AdminActionState, formData: FormDa
   const unpublish = intent === "unpublish";
   const cardIds = selectedCardIds(formData);
   const data = offerData(formData, slug);
+  const tiers = parseTiers(formData);
   try {
     await ensureUniqueSlug("offer", slug, id);
   } catch (error) {
@@ -402,7 +451,7 @@ export async function updateOffer(_prevState: AdminActionState, formData: FormDa
       ok: false
     };
   }
-  const errors = offerSaveErrors(data, cardIds, publish);
+  const errors = offerSaveErrors(data, tiers, cardIds, publish);
   if (errors.length > 0) {
     return { errors, ok: false };
   }
@@ -411,10 +460,15 @@ export async function updateOffer(_prevState: AdminActionState, formData: FormDa
     where: { id },
     data: {
       ...data,
+      headlineRate: headlineRateFromTiers(tiers),
       isPublished: unpublish ? false : publish ? true : undefined,
       cards: {
         deleteMany: {},
         create: cardIds.map((cardId) => ({ cardId }))
+      },
+      tiers: {
+        deleteMany: {},
+        create: tiers.map(({ sortOrder, ...tier }) => ({ ...tier, sortOrder }))
       }
     }
   });

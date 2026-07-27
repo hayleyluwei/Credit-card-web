@@ -264,16 +264,29 @@ function offerData(o, categoryId) {
     description: o["詳細說明＊"] || null,
     startDate: o["開始日期"] ? new Date(`${o["開始日期"]}T00:00:00+08:00`) : null,
     endDate: o["結束日期"] ? new Date(`${o["結束日期"]}T00:00:00+08:00`) : null,
-    rewardType: REWARD_TYPE_MAP[o["回饋類型＊"]],
-    rewardValue: o["回饋數值＊"] || null,
-    rewardCap: o["回饋上限"] || null,
-    minSpend: o["最低消費"] || null,
-    conditions: o["條件與限制＊"] || null,
+    // [T21] 非正規化摘要欄位；扁平回饋欄位已移至 RewardTier（見 tierDataFromRow）。
+    headlineRate: o["回饋數值＊"] || null,
     sourceUrl: o["來源網址＊"] || null,
     lastVerifiedAt: new Date(`${o["查證日期＊"]}T00:00:00+08:00`),
     tags: o["標籤"] || null,
     seoTitle: `${o["優惠標題＊"]}｜信用卡優惠`,
     seoDescription: o["一句話摘要＊"] || null
+  };
+}
+
+// [T21] 試算表 offers 工作表目前仍是扁平（一檔一組回饋），因此每筆優惠對應建立一層 RewardTier。
+// 多層結構化優惠（如幣倍卡）目前透過後台 tier 表單或 seed 手動建立；試算表多層寫法待規格 v3+ 再議。
+function tierDataFromRow(o) {
+  return {
+    label: null,
+    rewardType: REWARD_TYPE_MAP[o["回饋類型＊"]] || null,
+    rate: o["回饋數值＊"] || null,
+    cap: o["回饋上限"] || null,
+    capPeriod: null,
+    minSpend: o["最低消費"] || null,
+    conditionsText: o["條件與限制＊"] || null,
+    conditions: null,
+    sortOrder: 0
   };
 }
 
@@ -341,12 +354,13 @@ async function runReset(prisma, { banks, cards, offers, offerCards }) {
         isFeatured: false,
         recommendScore: 50,
         sortOrder: 0,
-        isPublished: true
+        isPublished: true,
+        tiers: { create: [tierDataFromRow(o)] }
       }
     });
     offerIdBySlug[o["優惠代號＊"]] = created.id;
   }
-  console.log(`已寫入 ${offers.length} 筆優惠`);
+  console.log(`已寫入 ${offers.length} 筆優惠（各含 1 層 RewardTier）`);
 
   for (const oc of offerCards) {
     await prisma.offerCard.create({
@@ -465,10 +479,13 @@ async function runUpsert(prisma, { banks, cards, offers, offerCards }) {
       update: data
     });
     offerIdBySlug[slug] = result.id;
+    // [T21] 重建這筆優惠的 RewardTier（試算表為扁平，對應一層）。先清後建以免重複。
+    await prisma.rewardTier.deleteMany({ where: { offerId: result.id } });
+    await prisma.rewardTier.create({ data: { ...tierDataFromRow(o), offerId: result.id } });
     if (existing) offerUpdated += 1;
     else offerCreated += 1;
   }
-  console.log(`優惠：新增 ${offerCreated}／更新 ${offerUpdated}（未列在本次表格的既有優惠不受影響）`);
+  console.log(`優惠：新增 ${offerCreated}／更新 ${offerUpdated}（各重建 1 層 RewardTier；未列在本次表格的既有優惠不受影響）`);
 
   const touchedOfferSlugs = [...new Set(offers.map((o) => o["優惠代號＊"]))];
   for (const slug of touchedOfferSlugs) {

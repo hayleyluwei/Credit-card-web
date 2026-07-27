@@ -57,8 +57,7 @@ export function validateOfferPublish(offer: {
   categoryId?: number | null;
   summaryPreview?: string | null;
   sourceUrl?: string | null;
-  rewardType?: string | null;
-  rewardValue?: string | null;
+  tiers?: { rewardType?: string | null; rate?: string | null }[] | null;
   cards?: { id: number }[] | null;
 }): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
@@ -83,8 +82,12 @@ export function validateOfferPublish(offer: {
     errors.push("sourceUrl is required for published offers");
   }
 
-  if ((!offer.rewardType || !offer.rewardType.trim()) && (!offer.rewardValue || !offer.rewardValue.trim())) {
-    errors.push("either rewardType or rewardValue is required for published offers");
+  // [T21] Require at least one reward tier that carries a reward type or a rate.
+  const hasUsableTier = (offer.tiers ?? []).some(
+    (tier) => (tier.rewardType && tier.rewardType.trim()) || (tier.rate && tier.rate.trim())
+  );
+  if (!hasUsableTier) {
+    errors.push("at least one reward tier with a reward type or rate is required for published offers");
   }
 
   // Check for at least one card (OfferCard relation)

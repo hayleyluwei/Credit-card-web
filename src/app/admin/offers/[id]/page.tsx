@@ -8,7 +8,7 @@ export default async function AdminOfferEditPage({ params }: { params: { id: str
   const [offer, categories, cards] = await Promise.all([
     prisma.offer.findUnique({
       where: { id },
-      include: { cards: true }
+      include: { cards: true, tiers: { orderBy: { sortOrder: "asc" } } }
     }),
     prisma.category.findMany({ orderBy: [{ sortOrder: "asc" }, { name: "asc" }] }),
     prisma.card.findMany({
