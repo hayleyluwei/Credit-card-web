@@ -99,8 +99,7 @@ export default async function CardDetailPage({ params }: CardPageProps) {
         </div>
       </header>
 
-      <section className="grid gap-8 lg:grid-cols-[1.3fr_0.9fr]">
-        <div className="space-y-8">
+      <section className="space-y-8">
           <div className="rounded-3xl border border-line bg-white p-6 shadow-soft">
             <h2 className="text-2xl font-bold text-ink">卡片資訊</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -189,18 +188,6 @@ export default async function CardDetailPage({ params }: CardPageProps) {
               )}
             </div>
           </div>
-        </div>
-
-        <aside className="space-y-6">
-          <div className="rounded-3xl border border-line bg-white p-6 shadow-soft">
-            <h2 className="text-xl font-bold text-ink">卡片資訊</h2>
-            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-              <div>卡片名稱：{card.name}</div>
-              <div>是否啟用：{card.isActive ? "啟用" : "停用"}</div>
-              <div>SEO 標題：{card.seoTitle ?? "尚未設定"}</div>
-            </div>
-          </div>
-        </aside>
       </section>
 
       <script
