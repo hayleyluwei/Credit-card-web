@@ -1,3 +1,7 @@
+// [歷史腳本／已失效，2026-07-27] T21 Phase 5b 已從 Offer 移除扁平回饋欄位
+// （rewardType/rewardValue/rewardCap/minSpend/conditions），本腳本讀取的來源欄位不再存在，
+// 執行只會建立空的 tier。保留檔案作為 Phase 2 遷移的歷史紀錄，請勿再執行。
+//
 // T21 Phase 2 資料遷移：把每筆 Offer 的扁平回饋欄位轉成 1 筆 RewardTier。
 // 唯讀讀取扁平欄位 → 建立對應 RewardTier；不刪除、不修改 Offer 既有欄位。
 // 具冪等性：同一 offer 已存在 tier 時跳過（可重複執行不重複建立）。

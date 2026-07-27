@@ -52,7 +52,7 @@ export function OfferCard({ offer }: OfferCardProps) {
 
       <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-slate-500">
         <span>{offer.cards.length} 張適用卡片</span>
-        {offer.headlineRate ?? offer.rewardValue ? <span>回饋：{offer.headlineRate ?? offer.rewardValue}</span> : null}
+        {offer.headlineRate ? <span>回饋：{offer.headlineRate}</span> : null}
         {offer.endDate ? <span>截至 {new Date(offer.endDate).toLocaleDateString("zh-TW")}</span> : null}
       </div>
 

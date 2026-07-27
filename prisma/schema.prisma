@@ -1,13 +1,15 @@
 // Credit Card MVP - Prisma Schema
-// Version: 2026-07-27 / v3
+// Version: 2026-07-27 / v4
 // Product Spec: credit-card-mvp-spec-v11-2026-06-08
-// Schema Spec: prisma-schema-spec-v3-2026-07-27.md
+// Schema Spec: prisma-schema-spec-v4-2026-07-27.md
 // Target: personal developer MVP, low-cost setup
 // Database: SQLite for local MVP development
 // v3 (T21): add RewardTier / Channel / RewardTierChannel; Offer gains tiers
-//   relation + headlineRate/headlineSummary. Flat reward fields kept as a
-//   transitional migration bridge (removed in T21 Phase 5). Also reconciles
-//   the v2 spec-dir copy that had drifted (missing T19 Card fields).
+//   relation + headlineRate/headlineSummary. Reconciled the drifted v2
+//   spec-dir copy (missing T19 Card fields).
+// v4 (T21 Phase 5b): remove the transitional flat reward columns from Offer
+//   (rewardType/rewardValue/rewardCap/minSpend/conditions) now that all data,
+//   frontend, admin, and import paths use RewardTier.
 
 generator client {
   provider = "prisma-client-js"
@@ -133,14 +135,7 @@ model Offer {
   startDate      DateTime?
   endDate        DateTime?
 
-  // [T21 過渡相容欄位] 舊的扁平回饋欄位。資料遷移期間保留為搬運橋樑；
-  // 待前台/後台/驗證/匯入全部改讀 RewardTier 後，於 T21 Phase 5 移除。
-  rewardType     String?
-  rewardValue    String?
-  rewardCap      String?
-  minSpend       String?
-  conditions     String?
-
+  // [T21 Phase 5b] 舊的扁平回饋欄位已移除，回饋一律由 RewardTier 承載。
   sourceUrl      String?
   lastVerifiedAt DateTime?
   tags           String?

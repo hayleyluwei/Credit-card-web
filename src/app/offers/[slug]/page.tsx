@@ -199,30 +199,7 @@ export default async function OfferDetailPage({ params }: OfferPageProps) {
                 })}
               </div>
             ) : (
-              <div className="mt-6 grid gap-5 text-sm leading-7 text-slate-700 sm:grid-cols-2">
-                <div>
-                  <p className="font-semibold text-slate-900">回饋方式</p>
-                  <p>{formatRewardType(resolvedOffer.rewardType)}</p>
-                </div>
-                <div>
-                  <p className="font-semibold text-slate-900">回饋內容</p>
-                  <p>{resolvedOffer.rewardValue ?? "請依官方公告為準"}</p>
-                </div>
-                <div className="sm:col-span-2">
-                  <p className="font-semibold text-slate-900">回饋上限</p>
-                  <p>{resolvedOffer.rewardCap ?? "請依官方公告為準"}</p>
-                </div>
-                {resolvedOffer.minSpend ? (
-                  <div className="sm:col-span-2">
-                    <p className="font-semibold text-slate-900">使用門檻</p>
-                    <p>{resolvedOffer.minSpend}</p>
-                  </div>
-                ) : null}
-                <div className="sm:col-span-2">
-                  <p className="font-semibold text-slate-900">注意事項</p>
-                  <p className="whitespace-pre-line">{resolvedOffer.conditions ?? "請依官方公告與銀行活動頁為準。"}</p>
-                </div>
-              </div>
+              <p className="mt-6 text-sm leading-7 text-slate-600">回饋內容請依官方公告與銀行活動頁為準。</p>
             )}
 
             <div className="mt-6 grid gap-5 border-t border-line pt-6 text-sm leading-7 text-slate-700 sm:grid-cols-2">

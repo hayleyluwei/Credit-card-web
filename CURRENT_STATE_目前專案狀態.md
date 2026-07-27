@@ -53,7 +53,17 @@
 - 功能已用真實資料驗證過（T16 匯入的卡片都正確顯示年費／等級／發卡組織／優缺點），且規格書 v2 與模板 v2 已實際交付整理人員並完成兩輪真實資料匯入，滿足任務卡定義的兩項人工驗收條件。`01-ACTIVE_TASK_INDEX` 與任務卡 Summary 的任務狀態欄位已正式改為「完成」。
 - Summary：`docs/implementation/summaries/T19-CARD_STRUCTURED_FIELDS_SUMMARY_卡片結構化欄位與蒐集規格擴充摘要-v1-2026-07-18.md`（2026-07-26 補記驗收結果）
 
-### T21 優惠條件結構化（重構 Offer＋RewardTier／Channel）— 已核准 v1（2026-07-27），**實作中，Phases 1-3 完成**
+### T21 優惠條件結構化（重構 Offer＋RewardTier／Channel）— 已核准 v1（2026-07-27），**五階段實作完成，待後台人工驗收**
+
+- Summary：`docs/implementation/summaries/T21-CONDITION_SCHEMA_SUMMARY-v1-2026-07-27.md`
+- 現況：Phases 1-5 全部完成。schema 已升至 **v4**（扁平回饋欄位已從 Offer 移除，回饋一律經 RewardTier）。前台、後台、匯入、seed 全部改用 tiers。`prisma validate`／`tsc`／`next build` 皆通過；16 offers/16 tiers；瀏覽器實測前台正確、無錯誤。
+- **唯一待驗收缺口**：後台 tier 動態表單需使用者登入實測（AI 無管理員密碼）。此項通過後 T21 才可標記「完成」。
+- 幣倍卡多層 seed 範例：使用者 2026-07-27 決定先跳過（seed 已具多層能力，多層資料改由後台表單建在正式資料上）。
+- schema 檔案（歷史留存）：v3＝擴張（加 RewardTier）、v4＝收縮（移除扁平欄位），備份與規格說明見 `engineering-data-model-spec/`。
+
+（以下為 2026-07-27 稍早的分階段細節，保留供追溯）
+
+### T21（分階段細節，2026-07-27 稍早）— 已核准 v1，實作中
 
 - 任務卡：`docs/implementation/tasks/T21-CONDITION_SCHEMA_優惠條件結構化規劃.md`（核准證據已填）
 - 核准狀態：**已核准**（使用者 2026-07-27 回覆「進入 T21」並選「直接動 schema」）。依 schema 專門流程進行，高風險步驟執行前先確認清單。
