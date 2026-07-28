@@ -9,6 +9,9 @@ type SearchPageProps = {
   };
 };
 
+// 熱門搜尋預設詞：從真實資料中挑選目前確實搜得到結果的關鍵字。
+const HOT_SEARCH_TERMS = ["現金回饋", "旅遊", "繳稅", "學費", "水電瓦斯", "分期"];
+
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const query = searchParams?.q?.trim() ?? "";
   const [siteSetting, offers] = await Promise.all([
@@ -44,6 +47,23 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       </header>
 
       <section className="rounded-3xl border border-line bg-white p-6 shadow-soft">
+        <div className="mb-6">
+          <p className="text-sm font-semibold text-ink">熱門搜尋</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {HOT_SEARCH_TERMS.map((term) => (
+              <Link
+                key={term}
+                href={`/search?q=${encodeURIComponent(term)}`}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  query === term ? "bg-brand-700 text-white" : "bg-brand-50 text-brand-700 hover:bg-brand-100"
+                }`}
+              >
+                {term}
+              </Link>
+            ))}
+          </div>
+        </div>
+
         <form className="space-y-4">
           <label className="block text-sm font-semibold text-ink" htmlFor="keyword">
             關鍵字
