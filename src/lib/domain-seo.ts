@@ -198,6 +198,12 @@ export function generateSitemapEntries(
       lastmod: new Date().toISOString().split("T")[0],
       priority: 0.9,
       changefreq: "weekly" as const
+    },
+    {
+      loc: getCanonicalUrl("/cards"),
+      lastmod: new Date().toISOString().split("T")[0],
+      priority: 0.9,
+      changefreq: "weekly" as const
     }
   ];
 

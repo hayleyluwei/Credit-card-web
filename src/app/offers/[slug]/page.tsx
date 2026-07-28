@@ -240,7 +240,7 @@ export default async function OfferDetailPage({ params }: OfferPageProps) {
                     <div>
                       <p className="text-sm font-semibold text-brand-700">{offerCard.card.bank.name}</p>
                       <p className="mt-1 font-semibold text-slate-900">{offerCard.card.name}</p>
-                      <p className="mt-2 text-sm text-slate-600">{offerCard.card.targetAudience ?? "尚未設定目標客群"}</p>
+                      <p className="mt-2 text-sm text-slate-600">{offerCard.card.targetAudience ?? "尚未設定適用對象"}</p>
                     </div>
                   </Link>
                 ))

@@ -108,7 +108,7 @@ export default async function CardDetailPage({ params }: CardPageProps) {
                 <p className="mt-2 text-sm text-slate-600">{card.bank.name}</p>
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-900">目標客群</p>
+                <p className="text-sm font-semibold text-slate-900">適用對象</p>
                 <p className="mt-2 text-sm text-slate-600">{card.targetAudience ?? "不限客群"}</p>
               </div>
               {card.cardLevel ? (

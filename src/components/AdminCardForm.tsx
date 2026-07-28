@@ -97,7 +97,7 @@ export function AdminCardForm({ action, banks, card }: AdminCardFormProps) {
       <AdminField label="描述">
         <textarea className={adminInputClass} name="description" rows={3} defaultValue={card.description ?? ""} />
       </AdminField>
-      <AdminField label="目標客群">
+      <AdminField label="適用對象">
         <input className={adminInputClass} name="targetAudience" defaultValue={card.targetAudience ?? ""} />
       </AdminField>
       <AdminField label="年費" help="寫給人看的短句，例：NT$36,000／終身免年費。">

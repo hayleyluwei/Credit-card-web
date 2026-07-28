@@ -203,7 +203,7 @@ export function AdminOfferForm({ action, cards, categories, offer }: AdminOfferF
         <AdminField label="列表摘要" help="顯示在首頁、搜尋頁、分類頁、信用卡詳情頁的優惠卡片摘要。">
           <textarea className={adminInputClass} name="summaryPreview" placeholder="例：每週四持 CUBE 卡於國內餐廳消費滿額，可取得加碼優惠券。" rows={2} defaultValue={offer?.summaryPreview ?? ""} />
         </AdminField>
-        <AdminField label="適合對象" help="給前台或後台辨識適合的使用者族群。">
+        <AdminField label="適用對象" help="給前台或後台辨識適合的使用者族群。">
           <input className={adminInputClass} name="targetAudience" placeholder="例：常用 CUBE 卡外食、聚餐的使用者" defaultValue={offer?.targetAudience ?? ""} />
         </AdminField>
         <AdminField label="標籤" help="以逗號分隔，供搜尋與後台篩選使用。">

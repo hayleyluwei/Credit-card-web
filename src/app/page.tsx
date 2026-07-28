@@ -104,9 +104,14 @@ export default async function HomePage() {
               不確定要看哪個分類時，先從手上的卡開始。點進信用卡頁，就能看到這張卡目前整理到的公開優惠。
             </p>
           </div>
-          <Link href="/search" className="text-sm font-semibold text-brand-700">
-            用關鍵字搜尋優惠 →
-          </Link>
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
+            <Link href="/cards" className="text-brand-700">
+              查看全部信用卡 →
+            </Link>
+            <Link href="/search" className="text-brand-700">
+              用關鍵字搜尋優惠 →
+            </Link>
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

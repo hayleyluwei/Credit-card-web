@@ -43,7 +43,7 @@ export default async function AdminCardsPage({ searchParams }: { searchParams?: 
             <input className={adminInputClass} name="imageUrl" placeholder="/uploads/cards/example.png" />
           </AdminField>
           <AdminField label="圖片 Alt"><input className={adminInputClass} name="imageAlt" placeholder="例：CUBE 卡卡面圖片" /></AdminField>
-          <AdminField label="目標客群"><input className={adminInputClass} name="targetAudience" placeholder="例：常用餐飲、網購與旅遊權益的使用者" /></AdminField>
+          <AdminField label="適用對象"><input className={adminInputClass} name="targetAudience" placeholder="例：常用餐飲、網購與旅遊權益的使用者" /></AdminField>
           <AdminField label="年費"><input className={adminInputClass} name="annualFee" placeholder="例：NT$36,000／終身免年費" /></AdminField>
           <AdminField label="免年費條件"><input className={adminInputClass} name="annualFeeWaiver" placeholder="例：首年免年費，次年起年刷 36 萬免年費" /></AdminField>
           <AdminField label="卡片等級"><input className={adminInputClass} name="cardLevel" placeholder="例：無限卡" /></AdminField>
