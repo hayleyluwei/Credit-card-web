@@ -9,8 +9,10 @@
 
 T17 完成後網站處於「可部署」狀態，但目前資料庫為本機 SQLite，無法部署到無伺服器平台。Roadmap（2026-07-07 討論）傾向方案為：網頁 Vercel Hobby、資料庫 Neon Free（PostgreSQL），該方案尚未正式核准。本任務完成 SQLite → PostgreSQL 遷移、部署與上線後驗證。
 
+**2026-07-27 更新**：本卡建立時 T21 尚未存在，當時設想遷移的是 T16 匯入後的扁平 `Offer` 結構。T21（優惠條件結構化）已於 2026-07-27 核准並完成，schema 已由 v2 依序演進至 **v4**：新增 `RewardTier`／`Channel`／`RewardTierChannel` 三個 model，`Offer` 的扁平回饋欄位（`rewardType`／`rewardValue`／`rewardCap`／`minSpend`／`conditions`）已移除，回饋內容一律經 `RewardTier` 承載。本任務執行 PostgreSQL 遷移時，遷移的對象是**現行 v4 schema**（見 `engineering-data-model-spec/prisma-schema-spec-v4-2026-07-27.md`），非原始設想的舊版扁平結構；遷移邏輯不變（型別對照、SQLite→PostgreSQL 轉換），只是多了三張表要一併轉換。
+
 上層計畫：`docs/superpowers/plans/2026-07-08-FIRST_RELEASE_第一版上線實作計畫.md`
-依賴：T16、T17 完成；使用者核准部署平台方案。
+依賴：T16、T17、**T21（2026-07-27 已完成）**；使用者核准部署平台方案。
 
 ## 已確認決策
 
@@ -25,9 +27,9 @@ T17 完成後網站處於「可部署」狀態，但目前資料庫為本機 SQL
 ## Scope v1
 
 - PostgreSQL 遷移（依 schema 專門流程）：
-  - `prisma/schema.prisma` datasource 調整與必要的型別確認。
+  - `prisma/schema.prisma` datasource 調整與必要的型別確認（現行 schema 為 T21 完成後的 v4，含 `RewardTier`／`Channel`／`RewardTierChannel`；`capPeriod` 等已拍板維持 String，不因遷移到 PostgreSQL 改用 enum）。
   - 建立正式 migration。
-  - 本機先以 PostgreSQL 連線完整驗證（T17 的自動驗證重跑一次）。
+  - 本機先以 PostgreSQL 連線完整驗證（T17 的自動驗證重跑一次，含 `scripts/verify-release-data.mjs`）。
 - 建立 Neon 專案與資料庫，把 T16 驗證過的正式資料載入 Neon。
 - Vercel 專案建立與部署：
   - 環境變數設定（資料庫連線、管理帳號相關設定），值不得出現在文件、Summary 或 log。
@@ -85,7 +87,8 @@ T17 完成後網站處於「可部署」狀態，但目前資料庫為本機 SQL
 - SQLite 與 PostgreSQL 型別差異可能需要 schema 微調，任何調整都走 schema 專門流程。
 - Vercel Hobby 商業用途限制：未來收益模式出現前必須升級或遷移（Roadmap 已記錄）。
 - Neon Free 0.5GB 與休眠限制：資料量小應足夠，冷啟動延遲需在上線後驗證觀察。
-- 待使用者決定：GitHub 遠端 repo 與 push 授權、是否需要自訂網域（部署平台與帳號持有人已於 2026-07-08 拍板）。
+- ~~待使用者決定：GitHub 遠端 repo 與 push 授權~~——**已於 2026-07-27 起實際發生**：本機 repo 已設定遠端 `hayleyluwei/Credit-card-web`，多輪工作皆已 push 上去且使用者知情同意，此項視為已事實授權（非本卡 Scope 核准時另立的高風險授權，而是使用者在對話中逐次同意的既成事實）。
+- 待使用者決定：是否需要自訂網域（部署平台與帳號持有人已於 2026-07-08 拍板）。
 
 ## 核准證據
 
@@ -99,3 +102,4 @@ T17 完成後網站處於「可部署」狀態，但目前資料庫為本機 SQL
 ## Scope 變更紀錄
 
 - v1／2026-07-08：建立草稿，待核准。
+- v1／2026-07-27：內容更新（非 Scope 變更，仍待核准）——補充 T21（優惠條件結構化）已完成、schema 現為 v4（含 RewardTier/Channel）的事實；記錄 GitHub push 授權已於本輪對話中事實發生。
