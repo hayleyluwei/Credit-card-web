@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { getPublicOffers, sortOffers } from "@/lib/domain-offers";
 import { parseJsonStringArray } from "@/lib/domain-parsing";
+import { CardImage } from "@/components/CardImage";
 import { OfferCard } from "@/components/OfferCard";
 import { generateWebPageJsonLd, getCanonicalUrl } from "@/lib/domain-seo";
 
@@ -80,22 +80,20 @@ export default async function CardDetailPage({ params }: CardPageProps) {
             <h1 className="mt-3 text-3xl font-bold text-ink">{card.name}</h1>
             <p className="mt-4 max-w-3xl text-base leading-7 text-slate-700">{card.summary ?? "這張信用卡提供多種優惠機會，詳情如下。"}</p>
           </div>
-          {card.imageUrl ? (
-            <div className="relative h-28 min-h-[112px] min-w-[112px] overflow-hidden rounded-3xl border border-line bg-brand-50 p-4 text-center shadow-soft">
-              <Image
-                src={card.imageUrl}
-                alt={card.imageAlt ?? card.name}
-                fill
-                sizes="112px"
-                className="object-contain p-4"
-                unoptimized
-              />
-            </div>
-          ) : (
-            <div className="flex h-28 min-h-[112px] min-w-[112px] items-center justify-center rounded-3xl border border-line bg-brand-50 text-4xl font-bold text-brand-700 shadow-soft">
-              {card.name.charAt(0)}
-            </div>
-          )}
+          <div className="w-full max-w-[260px] shrink-0">
+            <p className="sr-only">卡面圖片</p>
+            <CardImage
+              imageUrl={card.imageUrl}
+              alt={card.imageAlt}
+              name={card.name}
+              slug={card.slug}
+              cardBgColorFrom={card.cardBgColorFrom}
+              cardBgColorTo={card.cardBgColorTo}
+              cardTextColor={card.cardTextColor}
+              cardChipColorFrom={card.cardChipColorFrom}
+              cardChipColorTo={card.cardChipColorTo}
+            />
+          </div>
         </div>
       </header>
 

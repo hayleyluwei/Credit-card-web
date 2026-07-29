@@ -117,7 +117,7 @@ export default async function BankDetailPage({ params }: BankPageProps) {
         ) : null}
       </header>
 
-      <section className="grid gap-8 lg:grid-cols-[1.3fr_0.9fr]">
+      <section>
         <div className="space-y-8">
           <div className="rounded-3xl border border-line bg-white p-6 shadow-soft">
             <h2 className="text-2xl font-bold text-ink">本行相關卡片</h2>
@@ -140,8 +140,11 @@ export default async function BankDetailPage({ params }: BankPageProps) {
                         alt={card.imageAlt}
                         name={card.name}
                         slug={card.slug}
-                        cardNetwork={card.cardNetwork}
-                        cardLevel={card.cardLevel}
+                        cardBgColorFrom={card.cardBgColorFrom}
+                        cardBgColorTo={card.cardBgColorTo}
+                        cardTextColor={card.cardTextColor}
+                        cardChipColorFrom={card.cardChipColorFrom}
+                        cardChipColorTo={card.cardChipColorTo}
                       />
                     </div>
                     <div className="flex items-start justify-between gap-4">
@@ -183,17 +186,6 @@ export default async function BankDetailPage({ params }: BankPageProps) {
             </div>
           </div>
         </div>
-
-        <aside className="space-y-6">
-          <div className="rounded-3xl border border-line bg-white p-6 shadow-soft">
-            <h2 className="text-xl font-bold text-ink">銀行資訊</h2>
-            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-              <div>銀行名稱：{bank.name}</div>
-              <div>卡片數量：{bank.cards.length}</div>
-              <div>SEO 標題：{bank.seoTitle ?? "尚未設定"}</div>
-            </div>
-          </div>
-        </aside>
       </section>
 
       <script

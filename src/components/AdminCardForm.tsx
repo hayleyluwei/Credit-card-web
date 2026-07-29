@@ -112,6 +112,31 @@ export function AdminCardForm({ action, banks, card }: AdminCardFormProps) {
       <AdminField label="發卡組織" help="例：Visa、Mastercard、JCB。">
         <input className={adminInputClass} name="cardNetwork" defaultValue={card.cardNetwork ?? ""} />
       </AdminField>
+      <section className="rounded-md border border-line bg-paper p-4">
+        <h2 className="text-sm font-bold text-ink">卡面示意圖配色</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-700">
+          沒有填「卡面圖片 URL」時，前台會用這些顏色畫出卡面示意圖。顏色請填 <code>#RRGGBB</code> 六碼格式（例：<code>#DED5C6</code>），
+          取自該卡官網卡面的整體色彩印象即可，<strong>不要重製銀行 Logo 或卡片專屬圖案</strong>。
+          留白的欄位會自動採用系統預設色，不填也不會出錯。外框顏色會跟著晶片顏色走，不需另外設定。
+        </p>
+      </section>
+
+      <AdminField label="卡面底色（起始）" help="漸層左上角的顏色，例：#DED5C6。">
+        <input className={adminInputClass} name="cardBgColorFrom" placeholder="#RRGGBB" defaultValue={card.cardBgColorFrom ?? ""} />
+      </AdminField>
+      <AdminField label="卡面底色（結束）" help="漸層右下角的顏色。只填起始色時，系統會自動加深作為結束色。">
+        <input className={adminInputClass} name="cardBgColorTo" placeholder="#RRGGBB" defaultValue={card.cardBgColorTo ?? ""} />
+      </AdminField>
+      <AdminField label="卡片名稱文字顏色" help="卡面上信用卡名稱的顏色，例：深色卡面用 #F7F8FA。">
+        <input className={adminInputClass} name="cardTextColor" placeholder="#RRGGBB" defaultValue={card.cardTextColor ?? ""} />
+      </AdminField>
+      <AdminField label="晶片顏色（起始）" help="金色晶片用 #F4D385，銀色晶片用 #E5E7EB。外框會跟著此色系。">
+        <input className={adminInputClass} name="cardChipColorFrom" placeholder="#RRGGBB" defaultValue={card.cardChipColorFrom ?? ""} />
+      </AdminField>
+      <AdminField label="晶片顏色（結束）" help="金色晶片用 #B8860B，銀色晶片用 #9CA3AF。">
+        <input className={adminInputClass} name="cardChipColorTo" placeholder="#RRGGBB" defaultValue={card.cardChipColorTo ?? ""} />
+      </AdminField>
+
       <AdminField label="優點" help="一行一項，前台會以條列顯示。">
         <textarea className={adminInputClass} name="prosLines" rows={4} defaultValue={jsonArrayToLines(card.prosJson)} />
       </AdminField>

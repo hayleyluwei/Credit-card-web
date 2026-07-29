@@ -241,8 +241,11 @@ export default async function OfferDetailPage({ params }: OfferPageProps) {
                       alt={offerCard.card.imageAlt}
                       name={offerCard.card.name}
                       slug={offerCard.card.slug}
-                      cardNetwork={offerCard.card.cardNetwork}
-                      cardLevel={offerCard.card.cardLevel}
+                      cardBgColorFrom={offerCard.card.cardBgColorFrom}
+                      cardBgColorTo={offerCard.card.cardBgColorTo}
+                      cardTextColor={offerCard.card.cardTextColor}
+                      cardChipColorFrom={offerCard.card.cardChipColorFrom}
+                      cardChipColorTo={offerCard.card.cardChipColorTo}
                     />
                     <div>
                       <p className="text-sm font-semibold text-brand-700">{offerCard.card.bank.name}</p>

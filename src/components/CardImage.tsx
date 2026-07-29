@@ -1,17 +1,15 @@
 import Image from "next/image";
-import { extractNetworkLabel, getCardColorway, isPremiumTier } from "@/lib/cardVisual";
+import { resolveCardColors, wrapCardName, type CardColorInput } from "@/lib/cardVisual";
 
-type CardImageProps = {
+type CardImageProps = CardColorInput & {
   alt?: string | null;
   className?: string;
   imageUrl?: string | null;
   name: string;
   slug: string;
-  cardNetwork?: string | null;
-  cardLevel?: string | null;
 };
 
-export function CardImage({ alt, className = "", imageUrl, name, slug, cardNetwork, cardLevel }: CardImageProps) {
+export function CardImage({ alt, className = "", imageUrl, name, slug, ...colors }: CardImageProps) {
   return (
     <div
       className={`relative flex aspect-[1.58/1] min-h-[88px] w-full items-center justify-center overflow-hidden rounded-md border border-line bg-brand-50 text-brand-700 ${className}`}
@@ -19,39 +17,30 @@ export function CardImage({ alt, className = "", imageUrl, name, slug, cardNetwo
       {imageUrl ? (
         <Image src={imageUrl} alt={alt ?? name} fill sizes="220px" className="object-contain p-3" unoptimized />
       ) : (
-        <GeneratedCardArt slug={slug} name={name} cardNetwork={cardNetwork} cardLevel={cardLevel} />
+        <GeneratedCardArt slug={slug} name={name} colors={colors} />
       )}
     </div>
   );
 }
 
 /**
- * 零官方素材的參數化卡面（T23 v2）：底色雜湊自卡片代號，晶片／光澤／金色細邊框
- * 都是所有信用卡通用的視覺語言，未參考任何特定銀行的官方卡面設計。
+ * 零官方素材的參數化卡面（T23 v5）：配色優先取自資料庫欄位（抽自官網卡面的色彩印象），
+ * 留空則回退為依卡片代號雜湊的預設色。晶片／光澤／細邊框都是所有信用卡通用的視覺語言，
+ * 未重製任何銀行的 Logo 或專屬構圖。卡片名稱是主視覺，不顯示發卡組織。
  */
-function GeneratedCardArt({
-  slug,
-  name,
-  cardNetwork,
-  cardLevel
-}: {
-  slug: string;
-  name: string;
-  cardNetwork?: string | null;
-  cardLevel?: string | null;
-}) {
-  const { light, dark } = getCardColorway(slug);
-  const networkLabel = extractNetworkLabel(cardNetwork);
-  const premium = isPremiumTier(cardLevel);
-  const initial = name.charAt(0);
+function GeneratedCardArt({ slug, name, colors }: { slug: string; name: string; colors: CardColorInput }) {
+  const { bgFrom, bgTo, text, chipFrom, chipTo, chipLine, borderFrom, borderTo } = resolveCardColors(slug, colors);
 
   const bgId = `card-bg-${slug}`;
   const sheenId = `card-sheen-${slug}`;
   const chipId = `card-chip-${slug}`;
   const borderId = `card-border-${slug}`;
 
-  const pillWidth = networkLabel ? Math.max(56, networkLabel.length * 7.5 + 28) : 0;
-  const pillX = 344 - 26 - pillWidth;
+  const nameFontSize = 25;
+  const nameLineHeight = 30;
+  const nameMaxWidth = 344 - 26 - 26;
+  const nameLines = wrapCardName(name, nameMaxWidth, nameFontSize);
+  const lastLineY = 178;
 
   return (
     <svg
@@ -62,8 +51,8 @@ function GeneratedCardArt({
     >
       <defs>
         <linearGradient id={bgId} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor={light} />
-          <stop offset="1" stopColor={dark} />
+          <stop offset="0" stopColor={bgFrom} />
+          <stop offset="1" stopColor={bgTo} />
         </linearGradient>
         <radialGradient id={sheenId} cx="30%" cy="16%" r="70%">
           <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.2" />
@@ -71,58 +60,39 @@ function GeneratedCardArt({
           <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
         </radialGradient>
         <linearGradient id={chipId} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#F4D385" />
-          <stop offset="1" stopColor="#B8860B" />
+          <stop offset="0" stopColor={chipFrom} />
+          <stop offset="1" stopColor={chipTo} />
         </linearGradient>
-        {premium ? (
-          <linearGradient id={borderId} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#F4D385" />
-            <stop offset="0.5" stopColor="#D9A441" />
-            <stop offset="1" stopColor="#F4D385" />
-          </linearGradient>
-        ) : null}
+        <linearGradient id={borderId} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor={borderFrom} />
+          <stop offset="0.5" stopColor={borderTo} />
+          <stop offset="1" stopColor={borderFrom} />
+        </linearGradient>
       </defs>
 
       <rect x="0" y="0" width="344" height="216" rx="18" fill={`url(#${bgId})`} />
       <rect x="0" y="0" width="344" height="216" rx="18" fill={`url(#${sheenId})`} />
 
       <rect x="26" y="28" width="38" height="27" rx="4" fill={`url(#${chipId})`} />
-      <line x1="26" y1="41.5" x2="64" y2="41.5" stroke="#8A6106" strokeWidth="0.8" />
-      <line x1="45" y1="28" x2="45" y2="55" stroke="#8A6106" strokeWidth="0.8" />
+      <line x1="26" y1="41.5" x2="64" y2="41.5" stroke={chipLine} strokeWidth="0.8" />
+      <line x1="45" y1="28" x2="45" y2="55" stroke={chipLine} strokeWidth="0.8" />
 
-      <text
-        x="26"
-        y="140"
-        fontFamily="system-ui, -apple-system, 'Noto Sans TC', sans-serif"
-        fontSize="44"
-        fontWeight="600"
-        fill="#F7F8FA"
-        fillOpacity="0.96"
-      >
-        {initial}
-      </text>
+      {nameLines.map((line, i) => (
+        <text
+          key={i}
+          x="26"
+          y={lastLineY - (nameLines.length - 1 - i) * nameLineHeight}
+          fontFamily="system-ui, -apple-system, 'Noto Sans TC', sans-serif"
+          fontSize={nameFontSize}
+          fontWeight="700"
+          fill={text}
+          fillOpacity="0.97"
+        >
+          {line}
+        </text>
+      ))}
 
-      {networkLabel ? (
-        <>
-          <rect x={pillX} y="176" width={pillWidth} height="22" rx="11" fill="#0A1620" fillOpacity="0.32" />
-          <text
-            x={pillX + pillWidth / 2}
-            y="191"
-            textAnchor="middle"
-            fontFamily="system-ui, -apple-system, sans-serif"
-            fontSize="12.5"
-            fontWeight="600"
-            letterSpacing="1"
-            fill="#F7F8FA"
-          >
-            {networkLabel}
-          </text>
-        </>
-      ) : null}
-
-      {premium ? (
-        <rect x="4" y="4" width="336" height="208" rx="15" fill="none" stroke={`url(#${borderId})`} strokeWidth="2" />
-      ) : null}
+      <rect x="4" y="4" width="336" height="208" rx="15" fill="none" stroke={`url(#${borderId})`} strokeWidth="2" />
     </svg>
   );
 }

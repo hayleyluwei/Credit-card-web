@@ -1,7 +1,7 @@
 // Credit Card MVP - Prisma Schema
-// Version: 2026-07-27 / v4
+// Version: 2026-07-29 / v5
 // Product Spec: credit-card-mvp-spec-v11-2026-06-08
-// Schema Spec: prisma-schema-spec-v4-2026-07-27.md
+// Schema Spec: prisma-schema-spec-v5-2026-07-29.md
 // Target: personal developer MVP, low-cost setup
 // Database: SQLite for local MVP development
 // v3 (T21): add RewardTier / Channel / RewardTierChannel; Offer gains tiers
@@ -10,6 +10,9 @@
 // v4 (T21 Phase 5b): remove the transitional flat reward columns from Offer
 //   (rewardType/rewardValue/rewardCap/minSpend/conditions) now that all data,
 //   frontend, admin, and import paths use RewardTier.
+// v5 (T23): add optional card-art colour columns to Card so the generated
+//   card face can carry each card's real colour impression instead of a
+//   slug-hashed palette entry. All nullable; blank falls back to the hash.
 
 generator client {
   provider = "prisma-client-js"
@@ -69,21 +72,30 @@ model Bank {
 
 /// Credit card data. Offers are attached through OfferCard.
 model Card {
-  id             Int      @id @default(autoincrement())
-  bankId         Int
-  name           String
-  slug           String   @unique
-  imageUrl       String?
-  imageAlt       String?
-  summary        String?
-  description    String?
-  targetAudience String?
+  id              Int     @id @default(autoincrement())
+  bankId          Int
+  name            String
+  slug            String  @unique
+  imageUrl        String?
+  imageAlt        String?
+  summary         String?
+  description     String?
+  targetAudience  String?
   annualFee       String?
   annualFeeWaiver String?
   cardLevel       String?
   cardNetwork     String?
-  prosJson        String?
-  consJson        String?
+
+  // [T23] 卡面示意圖配色。取自官網卡面的整體色彩印象（不重製 Logo 或專屬構圖）。
+  // 全部可選：留空時前台自動回退為依卡片 slug 雜湊產生的預設色。
+  cardBgColorFrom   String?
+  cardBgColorTo     String?
+  cardTextColor     String?
+  cardChipColorFrom String?
+  cardChipColorTo   String?
+
+  prosJson       String?
+  consJson       String?
   seoTitle       String?
   seoDescription String?
   isActive       Boolean  @default(true)
@@ -132,8 +144,8 @@ model Offer {
   summaryPreview String?
   description    String?
 
-  startDate      DateTime?
-  endDate        DateTime?
+  startDate DateTime?
+  endDate   DateTime?
 
   // [T21 Phase 5b] 舊的扁平回饋欄位已移除，回饋一律由 RewardTier 承載。
   sourceUrl      String?

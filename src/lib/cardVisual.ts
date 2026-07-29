@@ -13,8 +13,6 @@ const PALETTE = [
   "#2E2A4A"
 ] as const;
 
-const PREMIUM_TIER_KEYWORDS = ["無限", "infinite", "御璽", "signature", "白金", "platinum"];
-
 function fnv1aHash(input: string): number {
   let hash = 0x811c9dc5;
   for (let i = 0; i < input.length; i++) {
@@ -58,19 +56,105 @@ export function getCardColorway(cardSlug: string): CardColorway {
   };
 }
 
-export function extractNetworkLabel(cardNetwork?: string | null): string | null {
-  if (!cardNetwork) return null;
-  const lower = cardNetwork.toLowerCase();
-  const found: string[] = [];
-  if (lower.includes("visa")) found.push("VISA");
-  if (lower.includes("jcb")) found.push("JCB");
-  if (lower.includes("mastercard") || lower.includes("master card")) found.push("MASTERCARD");
-  if (lower.includes("amex") || cardNetwork.includes("美國運通")) found.push("AMEX");
-  return found.length > 0 ? found.join(" / ") : null;
+const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
+
+/** 後台是自由文字輸入，擋掉空字串與格式不對的值，避免壞資料直接進 SVG。 */
+function validHex(value?: string | null): string | null {
+  const trimmed = value?.trim();
+  return trimmed && HEX_COLOR.test(trimmed) ? trimmed : null;
 }
 
-export function isPremiumTier(cardLevel?: string | null): boolean {
-  if (!cardLevel) return false;
-  const lower = cardLevel.toLowerCase();
-  return PREMIUM_TIER_KEYWORDS.some((keyword) => lower.includes(keyword.toLowerCase()));
+/** [T23 v5] 資料庫可填的卡面配色欄位，皆可選；留空的項目各自回退預設值。 */
+export type CardColorInput = {
+  cardBgColorFrom?: string | null;
+  cardBgColorTo?: string | null;
+  cardTextColor?: string | null;
+  cardChipColorFrom?: string | null;
+  cardChipColorTo?: string | null;
+};
+
+export type ResolvedCardColors = {
+  bgFrom: string;
+  bgTo: string;
+  text: string;
+  chipFrom: string;
+  chipTo: string;
+  chipLine: string;
+  borderFrom: string;
+  borderTo: string;
+};
+
+const DEFAULT_TEXT = "#F7F8FA";
+const DEFAULT_CHIP_FROM = "#F4D385";
+const DEFAULT_CHIP_TO = "#B8860B";
+
+/**
+ * [T23 v5] 解析一張卡的卡面配色：資料庫欄位優先，留空回退為 slug 雜湊的預設色。
+ * 邊框不另存欄位，跟著晶片色調走（同一組金屬色系），避免金晶片配銀邊框這種打架的組合。
+ */
+export function resolveCardColors(cardSlug: string, input: CardColorInput = {}): ResolvedCardColors {
+  const hashed = getCardColorway(cardSlug);
+
+  const bgFrom = validHex(input.cardBgColorFrom) ?? hashed.light;
+  const bgTo = validHex(input.cardBgColorTo) ?? (validHex(input.cardBgColorFrom) ? mix(bgFrom, [0, 0, 0], 0.28) : hashed.dark);
+  const chipFrom = validHex(input.cardChipColorFrom) ?? DEFAULT_CHIP_FROM;
+  const chipTo = validHex(input.cardChipColorTo) ?? DEFAULT_CHIP_TO;
+
+  return {
+    bgFrom,
+    bgTo,
+    text: validHex(input.cardTextColor) ?? DEFAULT_TEXT,
+    chipFrom,
+    chipTo,
+    chipLine: mix(chipTo, [0, 0, 0], 0.35),
+    borderFrom: chipFrom,
+    borderTo: chipTo
+  };
+}
+
+function isWideChar(char: string): boolean {
+  const code = char.codePointAt(0) ?? 0;
+  return (
+    (code >= 0x4e00 && code <= 0x9fff) || // CJK Unified Ideographs
+    (code >= 0x3000 && code <= 0x303f) || // CJK punctuation
+    (code >= 0xff00 && code <= 0xffef) // Fullwidth forms
+  );
+}
+
+/**
+ * 卡片名稱是卡面主視覺，長度不一（如「DAWHO現金回饋信用卡」vs「滙豐旅人無限卡」），
+ * 用寬窄字元估算寬度做斷行；超過 maxLines 時，末行截斷加刪節號防止溢出卡面。
+ */
+export function wrapCardName(name: string, maxWidth: number, fontSize: number, maxLines = 3): string[] {
+  const wideWidth = fontSize;
+  const narrowWidth = fontSize * 0.56;
+  const charWidth = (char: string) => (isWideChar(char) ? wideWidth : narrowWidth);
+
+  const lines: string[] = [];
+  let current = "";
+  let currentWidth = 0;
+
+  for (const char of name) {
+    const w = charWidth(char);
+    if (current && currentWidth + w > maxWidth) {
+      lines.push(current);
+      current = "";
+      currentWidth = 0;
+    }
+    current += char;
+    currentWidth += w;
+  }
+  if (current) lines.push(current);
+
+  if (lines.length <= maxLines) return lines;
+
+  const kept = lines.slice(0, maxLines);
+  let last = kept[maxLines - 1] + lines.slice(maxLines).join("");
+  let lastWidth = [...last].reduce((sum, c) => sum + charWidth(c), 0);
+  while (last.length > 0 && lastWidth + narrowWidth > maxWidth) {
+    lastWidth -= charWidth(last[last.length - 1]);
+    last = last.slice(0, -1);
+  }
+  kept[maxLines - 1] = `${last}…`;
+  return kept;
 }

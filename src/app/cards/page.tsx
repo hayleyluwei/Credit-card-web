@@ -76,8 +76,11 @@ export default async function CardsPage() {
                 alt={card.imageAlt}
                 name={card.name}
                 slug={card.slug}
-                cardNetwork={card.cardNetwork}
-                cardLevel={card.cardLevel}
+                cardBgColorFrom={card.cardBgColorFrom}
+                cardBgColorTo={card.cardBgColorTo}
+                cardTextColor={card.cardTextColor}
+                cardChipColorFrom={card.cardChipColorFrom}
+                cardChipColorTo={card.cardChipColorTo}
               />
               <div>
                 <p className="text-sm font-semibold text-brand-700">{card.bank.name}</p>
