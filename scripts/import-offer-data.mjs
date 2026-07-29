@@ -9,10 +9,19 @@ const projectRoot = path.resolve(__dirname, "..");
 
 const DEFAULT_XLSX = path.join(
   projectRoot,
-  "docs/data-collection/信用卡優惠資料整理模板-v2-2026-07-18.xlsx"
+  "docs/data-collection/信用卡優惠資料整理模板-v3-2026-07-29.xlsx"
 );
 
 const VALID_CATEGORIES = ["cashback", "dining", "travel", "online-shopping", "transport", "installment"];
+// [T23 v5] cards 工作表選填的卡面顏色欄位，對應 Card 的 5 個顏色欄位。
+const CARD_COLOR_COLUMNS = [
+  ["卡面底色（起始）", "cardBgColorFrom"],
+  ["卡面底色（結束）", "cardBgColorTo"],
+  ["卡片名稱文字顏色", "cardTextColor"],
+  ["晶片顏色（起始）", "cardChipColorFrom"],
+  ["晶片顏色（結束）", "cardChipColorTo"]
+];
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
 const REWARD_TYPE_MAP = {
   "現金回饋": "cashback",
   "點數回饋": "points",
@@ -105,6 +114,13 @@ function validate(banks, cards, offers, offerCards, existingBankSlugs = new Set(
     }
     if (isBlank(c["卡片官方頁面網址＊"])) errors.push(`cards 第${row}列：卡片官方頁面網址為必填`);
     if (isBlank(c["一句話摘要＊"])) errors.push(`cards 第${row}列：一句話摘要為必填`);
+
+    CARD_COLOR_COLUMNS.forEach(([column]) => {
+      const value = c[column];
+      if (!isBlank(value) && !HEX_COLOR_RE.test(String(value).trim())) {
+        warnings.push(`cards 第${row}列（${c["卡片代號＊"] ?? "?"}）：「${column}」的值「${value}」不是 #RRGGBB 格式，匯入時會忽略、卡面回退為預設色，建議人工核對`);
+      }
+    });
   });
 
   const offerCodes = new Set();
@@ -253,6 +269,23 @@ function cardJsonFields(c) {
   return { prosJson, consJson };
 }
 
+// [T23 v5] 只有格式正確的 #RRGGBB 才寫入；格式不對的已在 validate() 產生警告，一律當留空處理，
+// 讓卡面 fallback 回預設色，不會把壞資料寫進資料庫。
+//
+// 重要：舊版模板（v2 及更早）的 cards 工作表根本沒有這 5 個欄位。若不分青紅皂白一律寫入 null，
+// 拿舊版模板增量匯入時會把資料庫裡既有卡片已經填好的顏色整批洗掉。因此用「這份試算表的表頭
+// 有沒有這個欄位」來區分：欄位不存在＝這份表格對顏色沒有意見，不動資料庫既有值；欄位存在但
+// 儲存格空白＝使用者明確清空，才寫 null。
+function cardColorFields(c) {
+  const fields = {};
+  for (const [column, prismaField] of CARD_COLOR_COLUMNS) {
+    if (!(column in c)) continue;
+    const value = c[column];
+    fields[prismaField] = !isBlank(value) && HEX_COLOR_RE.test(String(value).trim()) ? String(value).trim() : null;
+  }
+  return fields;
+}
+
 function offerData(o, categoryId) {
   return {
     categoryId,
@@ -331,6 +364,7 @@ async function runReset(prisma, { banks, cards, offers, offerCards }) {
         annualFeeWaiver: c["免年費條件"] || null,
         cardLevel: c["卡片等級"] || null,
         cardNetwork: c["發卡組織"] || null,
+        ...cardColorFields(c),
         prosJson,
         consJson,
         isActive: true
@@ -431,6 +465,7 @@ async function runUpsert(prisma, { banks, cards, offers, offerCards }) {
       annualFeeWaiver: c["免年費條件"] || null,
       cardLevel: c["卡片等級"] || null,
       cardNetwork: c["發卡組織"] || null,
+      ...cardColorFields(c),
       prosJson,
       consJson
     };
