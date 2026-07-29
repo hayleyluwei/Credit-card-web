@@ -141,6 +141,7 @@ export function generateWebPageJsonLd(title: string, description: string, canoni
  * @param canonicalUrl - Article URL
  * @param datePublished - ISO date string
  * @param dateModified - ISO date string
+ * @param keywords - Optional comma-separated tag string
  * @returns JSON-LD object
  */
 export function generateArticleJsonLd(
@@ -148,7 +149,8 @@ export function generateArticleJsonLd(
   description: string,
   canonicalUrl: string,
   datePublished: string,
-  dateModified: string
+  dateModified: string,
+  keywords?: string
 ): object {
   return {
     "@context": "https://schema.org",
@@ -157,7 +159,8 @@ export function generateArticleJsonLd(
     description: description,
     url: canonicalUrl,
     datePublished: new Date(datePublished).toISOString(),
-    dateModified: new Date(dateModified).toISOString()
+    dateModified: new Date(dateModified).toISOString(),
+    ...(keywords ? { keywords: keywords.split(",").map((tag) => tag.trim()).filter(Boolean).join(", ") } : {})
   };
 }
 

@@ -119,7 +119,7 @@ export default async function OfferDetailPage({ params }: OfferPageProps) {
         </div>
       </header>
 
-      <section className="grid gap-8 lg:grid-cols-[1.4fr_0.8fr]">
+      <section className="space-y-8">
         <div className="space-y-8">
           {highlights.length > 0 ? (
             <div className="rounded-3xl border border-line bg-white p-6 shadow-soft">
@@ -260,17 +260,6 @@ export default async function OfferDetailPage({ params }: OfferPageProps) {
             </div>
           </div>
         </div>
-
-        <aside className="space-y-6">
-          <div className="rounded-3xl border border-line bg-white p-6 shadow-soft">
-            <h2 className="text-xl font-bold text-ink">優惠摘要</h2>
-            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-              <div>分類：{resolvedOffer.category.name}</div>
-              <div>標籤：{resolvedOffer.tags ?? "尚未設定"}</div>
-              {resolvedOffer.isFeatured ? <div>精選優惠</div> : null}
-            </div>
-          </div>
-        </aside>
       </section>
 
       <script
@@ -283,7 +272,8 @@ export default async function OfferDetailPage({ params }: OfferPageProps) {
               offer.seoDescription ?? offer.summary ?? `查看 ${offer.title} 的回饋內容、適用信用卡、消費門檻與注意事項。`,
               getCanonicalUrl(`/offers/${offer.slug}`),
               offer.createdAt.toISOString(),
-              offer.updatedAt.toISOString()
+              offer.updatedAt.toISOString(),
+              offer.tags ?? undefined
             )
           )
         }}

@@ -10,8 +10,8 @@
 - 工作區 alias：`C:/Users/user/Documents/信用卡查詢網站`
 - alias 類型：Windows junction，兩個路徑指向同一份檔案
 - branch：`main`
-- HEAD：`322049b`
-- 遠端關係：`origin/main` 落後 3 個 commit（`f512fdb`～`322049b`），**皆尚未 push**，需使用者確認後推送
+- HEAD：`7910d70`（2026-07-29 新 session 核對更新，比交接摘要記載的 `322049b` 多一個 commit：`7910d70 docs: write 2026-07-29 T23 session handoff and sync CURRENT_STATE`，即本文件與交接摘要本身的 commit）
+- 遠端關係：**已與 `origin/main` 同步，無待 push 的 commit**（2026-07-29 新 session 重新核對 `git status`／`git rev-list origin/main..HEAD` 確認；交接摘要與本文件先前記載的「3 個 commit 尚未 push」已過時，push 已在稍早完成）
 
 新 session 必須以 `git rev-parse --show-toplevel`、`git status` 及 `git rev-parse --short HEAD` 重新核對，不得只相信本文件。
 
@@ -91,7 +91,7 @@
 - **目前資料**：14 張卡中 11 張已有官網真實配色，3 張新卡（momo卡、滙豐現金回饋御璽卡、星展eco永續卡）尚未設定、走 fallback。
 - **相關檔案**：`src/lib/cardVisual.ts`（雜湊＋斷行＋顏色解析邏輯）、`src/components/CardImage.tsx`（SVG 生成）、`src/components/AdminCardForm.tsx`（後台 5 個顏色欄位）、4 個前台呼叫端頁面。
 - **待辦**：後台顏色欄位「儲存＋前台反映」完整迴圈待使用者找機會補測（已確認欄位存在，完整存檔測試未完全確認）；3 張新卡的真實配色待補；多卡面選項（玉山Unicard 白/黃/藍 3 色、中信LINE Pay卡 11 款角色卡面）目前資料庫只記一種代表色，是否需要新增欄位記錄尚未拍板。
-- Commit：`f512fdb`（SVG 實作）、`e6ea3a5`（schema v5）、`322049b`（資料蒐集 v4＋Codex 批次匯入），**皆尚未 push**。
+- Commit：`f512fdb`（SVG 實作）、`e6ea3a5`（schema v5）、`322049b`（資料蒐集 v4＋Codex 批次匯入），**已於 2026-07-29 confirm 為已 push**（見上方「專案與工作區」節）。
 
 ### T24 信用卡申辦導引連結 — 草案待核准，**v1 方向已拍板**
 
@@ -180,7 +180,7 @@
 
 **T15/T16/T17/T19/T21/T23 皆已完成。** 以下依優先順序：
 
-1. **本地 3 個 commit（`f512fdb`～`322049b`）尚未 push**，需與使用者確認後推送到 `hayleyluwei/Credit-card-web`。
+1. ~~本地 3 個 commit（`f512fdb`～`322049b`）尚未 push~~ **已確認 push 完成（2026-07-29 新 session 核對），此項不再是待辦。**
 2. T18（部署上線）待正式核准開工；Vercel/Neon 帳號需使用者自行申請（AI 不能代為建立帳號）；schema 現為 v5，PostgreSQL 遷移屆時一併處理。
 3. T24（申辦導引連結）v1 方向已拍板（純導引＋UTM），待正式核准 Scope 開工。
 4. T22（排程輔助資料更新）已起草待核准，依賴 T18／T21，5 個待決問題未拍板。
