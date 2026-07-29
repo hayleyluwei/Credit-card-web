@@ -2,7 +2,7 @@
 
 最後更新：2026-07-29（Asia/Taipei）  
 用途：所有新 AI session 接續本專案時的唯一目前狀態入口
-交接摘要：`docs/implementation/handoffs/2026-07-27-T16-T24-交接摘要.md`（本次對話的完整導覽，含逐一 commit 說明）
+交接摘要：`docs/implementation/handoffs/2026-07-29-T23-卡面配色與資料蒐集v4-交接摘要.md`（本次對話的完整導覽，T18/T20/T22/T24 現況仍見前一篇 `2026-07-27-T16-T24-交接摘要.md`）
 
 ## 專案與工作區
 
@@ -10,8 +10,8 @@
 - 工作區 alias：`C:/Users/user/Documents/信用卡查詢網站`
 - alias 類型：Windows junction，兩個路徑指向同一份檔案
 - branch：`main`
-- HEAD：`efcc213`
-- 遠端關係：`origin/main` 在 `ae369ec`，**本地領先 7 個 commit（`ce0dd72`～`efcc213`）尚未 push**，需使用者確認後推送
+- HEAD：`322049b`
+- 遠端關係：`origin/main` 落後 3 個 commit（`f512fdb`～`322049b`），**皆尚未 push**，需使用者確認後推送
 
 新 session 必須以 `git rev-parse --show-toplevel`、`git status` 及 `git rev-parse --short HEAD` 重新核對，不得只相信本文件。
 
@@ -83,20 +83,15 @@
 - 任務卡：`docs/implementation/tasks/T22-SCHEDULED_DATA_UPDATE_排程輔助資料更新.md`
 - 依賴 T18（資料庫上雲）、T21（已完成，結構化後比對較可靠）。5 個待決問題（排程機制/抓取方式/頻率/與其他任務排序/報告自動化程度）尚未拍板。
 
-### T23 卡面圖像視覺風格規則 — 草案待核准，**已選定最終視覺方向（2026-07-29），待正式核准 Scope**
+### T23 卡面圖像視覺風格規則 — 已核准 v1，**已完整實作並上線於本機環境**
 
-- 任務卡：`docs/implementation/tasks/T23-CARD_VISUAL_STYLE_卡面圖像視覺風格規則.md`
-- 背景：目前 11 張卡 0 張有真實 `imageUrl`，皆用單色字母佔位；使用者擔心之後補卡面圖片若直接抓官網照片有著作權/商標疑慮，且 AI 逐張生成插畫無法保證風格一致。
-- **選定方向（2026-07-29 拍板）：參數化 SVG 卡面樣板 v2 質感版**——雙色漸層＋光澤、金屬質感晶片圖示、頂級卡別金色細邊框、銀行首字縮小＋柔和投影；底色雜湊 key 改為卡片代號（非銀行代號）＋ FNV-1a 雜湊函式＋調色盤 8→12 色（解決同銀行不同卡片撞色問題，已用真實資料滙豐旅人系列 3 卡驗證）。**此決策取代原本「委託簡化插畫」的開放態度**，過程細節（同系列分色問題、油畫濾鏡方案評估後放棄、抓取官方素材的風險提醒與 7 家銀行唯讀研究結果）已記錄於任務卡「已確認決策」與「風險與待決問題」章節。
-- 原型 Artifact（皆未 commit、未觸及任何正式程式碼，`CardImage.tsx` 未修改）：
-  - 初版 4 案例：`https://claude.ai/code/artifact/01828680-4a8d-404c-a2af-bb2fc860a073`
-  - 濾鏡 vs SVG 風險對照：`https://claude.ai/code/artifact/5109acb1-4073-4e2e-bcf6-84d0ec01cfbe`
-  - 卡片代號雜湊修正驗證：`https://claude.ai/code/artifact/4f1fc921-e3af-4a50-b50f-3f4b03bef1d7`
-  - **v2 質感版（目前選定版本）**：`https://claude.ai/code/artifact/807ad0c9-02a3-42fb-b7e9-263e74912f3e`
-- **2026-07-29 後續迭代（schema v5：卡面配色欄位）**：卡面視覺再經多輪調整後定案——移除發卡組織標籤、卡片名稱改為主視覺大字、細邊框套用全部卡片。接著使用者決定**改用各卡官網卡面的真實色彩**（只抽色彩印象，不重製 Logo 與專屬圖案如富士山／街口小豬／菱形切面／森林剪影）。11 張卡全部以瀏覽器開官網截圖確認顏色，過程中修正 3 個先前用文字搜尋猜錯的顏色（街口非橘是紅、Richart 非藍是銀灰、滙豐無限卡非黑是深藍紫）。顏色存放位置使用者選定**存資料庫**（非程式碼對照表），理由是未來銀行授權圖片會長期零星混雜（`imageUrl` 有值走真圖、無值走生成卡面），兩者放同一張表才能維持單一後台維護流程。已依 schema 專門流程完成 v5：`Card` 新增 5 個可選欄位（`cardBgColorFrom`／`cardBgColorTo`／`cardTextColor`／`cardChipColorFrom`／`cardChipColorTo`），邊框跟隨晶片色不另設欄位；產出 `schema-checklist-2026-07-29.md`、`prisma-schema-spec-v5-2026-07-29.md`、`schema-v5-2026-07-29.prisma`；後台 `AdminCardForm` 已加入 5 個輸入欄位。**驗證**：`prisma validate`／`tsc`／`eslint`／`next build` 全通過；fallback 路徑（欄位留空）確認畫面與 v5 前一致；11 張卡填入真實色後前台正確反映且邊框跟隨晶片色。**待人工驗收**：後台顏色欄位需使用者登入實測（AI 無管理員憑證）。
-- **2026-07-29 資料蒐集規格升 v4＋Codex 交付批次匯入**：使用者發現 Codex 交付的 `信用卡優惠資料整理模板-v2-2026-07-18-202607推薦卡-20260729.xlsx` 用的是 v2 舊模板結構，沒有卡面配色欄位，且 `cards`／`offer_cards` 兩個工作表裡卡片代號誤植為 `ctbc-linepay-card`（資料庫既有的是 `ctbc-line-pay-card`，差一個連字號），若直接匯入會產生重複的中信 LINE Pay 卡。已修正該 xlsx 兩處代號（原始檔已備份於 `docs/data-collection/backups/`）。同時把資料蒐集模板升級為 **v3**（`信用卡優惠資料整理模板-v3-2026-07-29.xlsx`，`cards` 新增 5 個選填卡面配色欄位，範例列直接用 DAWHO／CUBE 已確認的真實色）與**規格書 v4**（新增 4.5 節「卡面示意圖配色」規則＋5.2 欄位表＋附錄對照）。`scripts/import-offer-data.mjs` 同步支援讀取這 5 欄，並修正一個過程中發現的潛在資料遺失風險：舊版模板（沒有這 5 個欄位）增量匯入時，原本會把資料庫既有卡片的顏色整批寫成 null（因為欄位在物件裡是 undefined，`|| null` 會清空）——已改為「試算表表頭完全沒有這個欄位＝不動資料庫既有值，欄位存在但儲存格空白＝明確清空」，寫入前用 dry-run 與真實匯入雙重驗證這 4 張既有卡（Richart／Unicard／DAWHO／CUBE）的顏色在匯入後原封不動保留。正式匯入 Codex 這批資料：新增 2 家銀行（台北富邦、星展）、3 張新卡（momo卡、滙豐現金回饋御璽卡、星展eco永續卡）、5 張既有卡更新、6 筆新優惠、8 筆優惠卡片對應，匯入前後皆有備份 `dev.db`，匯入後確認中信 LINE Pay 卡無重複、既有卡顏色無流失。**尚未 commit**。
-- **2026-07-29 兩處收尾**（使用者實際瀏覽後回報）：(1) `/cards/[slug]` 卡片詳情頁原本自己寫了一份舊的「色塊＋首字」區塊、沒有走 `CardImage`，已改為呼叫 `CardImage` 並移除未使用的 `next/image` import，卡面示意圖與其他頁一致；(2) 移除 `/banks/[slug]` 前台外露的「銀行資訊」面板（銀行名稱／卡片數量／**SEO 標題**屬內部欄位，同 `cc83cfc`／`0a0af1e` 已處理過的外露問題），移除後版面由雙欄改單欄，卡片名稱不再被擠成一字一行。`tsc`／`eslint`／`next build` 皆通過，瀏覽器與 dev server 0 錯誤。**未提交**。
-- **2026-07-29 使用者已核准 Scope，實作完成**：新增 `src/lib/cardVisual.ts`（底色雜湊依卡片代號＋FNV-1a＋12色調色盤、發卡組織標籤抽取、頂級卡別判斷）；`CardImage.tsx` fallback 分支改為 v2 質感版 SVG（漸層＋光澤＋金屬晶片＋金色細邊框）；同步更新 4 個呼叫端（首頁／`/cards`／`/cards/[slug]`優惠詳情頁／`/banks/[slug]`）多傳入 `slug`／`cardNetwork`／`cardLevel`。`tsc --noEmit`、`eslint` 皆通過。已 commit（`f512fdb`，2026-07-29，使用者另行授權 git add + local commit，僅本地、未 push）。**尚未瀏覽器實測**——本次 session 進行時偵測到另一個對話已在本機執行 dev server（port 3000），為避免 `.next` 快取因多個 dev server 交錯寫入而毀損（過去發生過的已知風險），本次未啟動第二個 dev server 驗證，待該 dev server 釋放或改由使用者在既有分頁中重新整理確認畫面。
+- 任務卡：`docs/implementation/tasks/T23-CARD_VISUAL_STYLE_卡面圖像視覺風格規則.md`（已核准，含完整迭代紀錄）
+- 完整過程見 `docs/implementation/handoffs/2026-07-29-T23-卡面配色與資料蒐集v4-交接摘要.md`，此處只記現況。
+- **現況**：卡片沒有真實 `imageUrl` 時，前台以參數化 SVG 樣板生成卡面示意圖（晶片圖示＋雙色漸層底＋卡片名稱主視覺＋金屬色系細邊框，邊框色調跟著晶片走）。底色／文字／晶片色優先取自 `Card` 的 5 個可選欄位（`cardBgColorFrom`／`cardBgColorTo`／`cardTextColor`／`cardChipColorFrom`／`cardChipColorTo`，schema v5 新增），皆取自各卡官網卡面的真實色彩印象（只抽色彩、不重製 Logo 或專屬圖案）；欄位留空則回退為依卡片代號雜湊（FNV-1a＋12色調色盤）的預設色，不會破版。
+- **目前資料**：14 張卡中 11 張已有官網真實配色，3 張新卡（momo卡、滙豐現金回饋御璽卡、星展eco永續卡）尚未設定、走 fallback。
+- **相關檔案**：`src/lib/cardVisual.ts`（雜湊＋斷行＋顏色解析邏輯）、`src/components/CardImage.tsx`（SVG 生成）、`src/components/AdminCardForm.tsx`（後台 5 個顏色欄位）、4 個前台呼叫端頁面。
+- **待辦**：後台顏色欄位「儲存＋前台反映」完整迴圈待使用者找機會補測（已確認欄位存在，完整存檔測試未完全確認）；3 張新卡的真實配色待補；多卡面選項（玉山Unicard 白/黃/藍 3 色、中信LINE Pay卡 11 款角色卡面）目前資料庫只記一種代表色，是否需要新增欄位記錄尚未拍板。
+- Commit：`f512fdb`（SVG 實作）、`e6ea3a5`（schema v5）、`322049b`（資料蒐集 v4＋Codex 批次匯入），**皆尚未 push**。
 
 ### T24 信用卡申辦導引連結 — 草案待核准，**v1 方向已拍板**
 
@@ -181,19 +176,19 @@
 - **僅剩待決問題 (d)**：T21 排在 T18（部署上線）之前還是之後執行，尚未拍板。決定後 T21 才能整體核准 Scope 進入實作階段。
 - 與 T16–T18 上線主線的關係：T21 目前完全不影響 T16–T18，兩者互不阻塞（T21 Non-scope 明確排除修改 schema／程式碼／既有規格書）。
 
-## 下一步（2026-07-27 更新，取代同日稍早版本）
+## 下一步（2026-07-29 更新，取代同日稍早版本）
 
-**T15/T16/T17/T19/T21 皆已完成。** 以下依優先順序：
+**T15/T16/T17/T19/T21/T23 皆已完成。** 以下依優先順序：
 
-1. **本地 7 個 commit（`ce0dd72`～`efcc213`）尚未 push**，需與使用者確認後推送到 `hayleyluwei/Credit-card-web`。
-2. **T23 已選定最終視覺方向**（參數化 SVG v2 質感版，Artifact：`https://claude.ai/code/artifact/807ad0c9-02a3-42fb-b7e9-263e74912f3e`），待使用者正式核准 Scope 才能開始實作。
-3. T18（部署上線）待正式核准開工；Vercel/Neon 帳號需使用者自行申請（AI 不能代為建立帳號）；schema 已是 v4，PostgreSQL 遷移屆時一併處理。任務卡內容已更新到反映 T21 完成現況。
-4. T24（申辦導引連結）v1 方向已拍板（純導引＋UTM），待正式核准 Scope 開工。
-5. T22（排程輔助資料更新）已起草待核准，依賴 T18／T21，5 個待決問題未拍板。
-6. Codex 若有後續資料蒐集批次，先確認 `.ai-worktree-lock.json` 再接手；重跑 `npm run data:import`（增量模式）不會清空既有資料。
-7. `esun-unicard-wallet-new-card-2026q3` 的「最低消費」欄位為欄位歸類問題（非事實錯誤），已隨 T21 遷移進 RewardTier.minSpend，待資料整理時再校正語意。
-8. T20（攻略文章功能）已起草待核准，仍建議排 T18 上線後。
-9. GA 網站流量分析：使用者已決定排 T18 上線後另開小任務，不佔用 T18 Scope。
+1. **本地 3 個 commit（`f512fdb`～`322049b`）尚未 push**，需與使用者確認後推送到 `hayleyluwei/Credit-card-web`。
+2. T18（部署上線）待正式核准開工；Vercel/Neon 帳號需使用者自行申請（AI 不能代為建立帳號）；schema 現為 v5，PostgreSQL 遷移屆時一併處理。
+3. T24（申辦導引連結）v1 方向已拍板（純導引＋UTM），待正式核准 Scope 開工。
+4. T22（排程輔助資料更新）已起草待核准，依賴 T18／T21，5 個待決問題未拍板。
+5. Codex 若有後續資料蒐集批次，先確認 `.ai-worktree-lock.json` 再接手；**指派任務時需明確指定使用 `DATA_COLLECTION_SPEC...v4-2026-07-29.md` 與 `信用卡優惠資料整理模板-v3-2026-07-29.xlsx`**（v3 模板含卡面配色欄位，這個切換不會自動發生）；重跑 `npm run data:import`（增量模式）不會清空既有資料。
+6. `esun-unicard-wallet-new-card-2026q3` 的「最低消費」欄位為欄位歸類問題（非事實錯誤），已隨 T21 遷移進 RewardTier.minSpend，待資料整理時再校正語意。
+7. T20（攻略文章功能）已起草待核准，仍建議排 T18 上線後。
+8. GA 網站流量分析：使用者已決定排 T18 上線後另開小任務，不佔用 T18 Scope。
+9. T23 後續：3 張新卡（momo卡、滙豐現金回饋御璽卡、星展eco永續卡）尚無真實卡面配色；多卡面選項（玉山Unicard、中信LINE Pay卡）的資料模型缺口未拍板，皆非阻塞項目。
 
 使用者已於 2026-07-08 拍板：清除 seed 測試資料（已完成）、部署平台 Vercel Hobby + Neon Free、後台帳號由使用者本人持有。首頁未提交變更與 T15 治理文件批次已於 2026-07-27 全部 commit 並 push（不再是待處理項）。
 
