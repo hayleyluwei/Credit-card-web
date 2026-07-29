@@ -122,7 +122,14 @@ export default async function HomePage() {
                 href={`/cards/${card.slug}`}
                 className="group grid gap-4 rounded-3xl border border-line bg-white p-5 shadow-soft transition duration-200 hover:-translate-y-1 hover:border-brand-300"
               >
-                <CardImage imageUrl={card.imageUrl} alt={card.imageAlt} name={card.name} />
+                <CardImage
+                  imageUrl={card.imageUrl}
+                  alt={card.imageAlt}
+                  name={card.name}
+                  slug={card.slug}
+                  cardNetwork={card.cardNetwork}
+                  cardLevel={card.cardLevel}
+                />
                 <div>
                   <p className="text-sm font-semibold text-brand-700">{card.bank.name}</p>
                   <h3 className="mt-2 text-xl font-bold text-ink">{card.name}</h3>

@@ -135,7 +135,14 @@ export default async function BankDetailPage({ params }: BankPageProps) {
                   <div className="grid gap-4 sm:grid-cols-[140px_1fr]">
                     <div>
                       <p className="sr-only">卡面圖片</p>
-                      <CardImage imageUrl={card.imageUrl} alt={card.imageAlt} name={card.name} />
+                      <CardImage
+                        imageUrl={card.imageUrl}
+                        alt={card.imageAlt}
+                        name={card.name}
+                        slug={card.slug}
+                        cardNetwork={card.cardNetwork}
+                        cardLevel={card.cardLevel}
+                      />
                     </div>
                     <div className="flex items-start justify-between gap-4">
                       <div>

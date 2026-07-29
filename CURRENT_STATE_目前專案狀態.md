@@ -1,6 +1,6 @@
 # 目前專案狀態
 
-最後更新：2026-07-27（Asia/Taipei）  
+最後更新：2026-07-29（Asia/Taipei）  
 用途：所有新 AI session 接續本專案時的唯一目前狀態入口
 交接摘要：`docs/implementation/handoffs/2026-07-27-T16-T24-交接摘要.md`（本次對話的完整導覽，含逐一 commit 說明）
 
@@ -83,12 +83,17 @@
 - 任務卡：`docs/implementation/tasks/T22-SCHEDULED_DATA_UPDATE_排程輔助資料更新.md`
 - 依賴 T18（資料庫上雲）、T21（已完成，結構化後比對較可靠）。5 個待決問題（排程機制/抓取方式/頻率/與其他任務排序/報告自動化程度）尚未拍板。
 
-### T23 卡面圖像視覺風格規則 — 草案待核准，**已選定方向並建原型，等使用者回饋**
+### T23 卡面圖像視覺風格規則 — 草案待核准，**已選定最終視覺方向（2026-07-29），待正式核准 Scope**
 
 - 任務卡：`docs/implementation/tasks/T23-CARD_VISUAL_STYLE_卡面圖像視覺風格規則.md`
 - 背景：目前 11 張卡 0 張有真實 `imageUrl`，皆用單色字母佔位；使用者擔心之後補卡面圖片若直接抓官網照片有著作權/商標疑慮，且 AI 逐張生成插畫無法保證風格一致。
-- 使用者選定方向：委託簡化插畫（保留意象、不逐像素重製）。AI 提議改用**參數化 SVG 樣板**（依銀行 slug 雜湊固定色、依 cardNetwork/cardLevel 關鍵字比對顯示發卡組織標籤與 tier 裝飾線）取代逐張 AI 生成，保證風格一致。
-- **已建原型**（2026-07-27，未 commit、未觸及任何正式程式碼）：用 4 張真實卡片（涵蓋乾淨值/英文 tier/複合雜亂字串/全 null）產生示範，發布 Artifact：`https://claude.ai/code/artifact/01828680-4a8d-404c-a2af-bb2fc860a073`。**待使用者對視覺方向給回饋**，才決定是否正式寫入核准 Scope。
+- **選定方向（2026-07-29 拍板）：參數化 SVG 卡面樣板 v2 質感版**——雙色漸層＋光澤、金屬質感晶片圖示、頂級卡別金色細邊框、銀行首字縮小＋柔和投影；底色雜湊 key 改為卡片代號（非銀行代號）＋ FNV-1a 雜湊函式＋調色盤 8→12 色（解決同銀行不同卡片撞色問題，已用真實資料滙豐旅人系列 3 卡驗證）。**此決策取代原本「委託簡化插畫」的開放態度**，過程細節（同系列分色問題、油畫濾鏡方案評估後放棄、抓取官方素材的風險提醒與 7 家銀行唯讀研究結果）已記錄於任務卡「已確認決策」與「風險與待決問題」章節。
+- 原型 Artifact（皆未 commit、未觸及任何正式程式碼，`CardImage.tsx` 未修改）：
+  - 初版 4 案例：`https://claude.ai/code/artifact/01828680-4a8d-404c-a2af-bb2fc860a073`
+  - 濾鏡 vs SVG 風險對照：`https://claude.ai/code/artifact/5109acb1-4073-4e2e-bcf6-84d0ec01cfbe`
+  - 卡片代號雜湊修正驗證：`https://claude.ai/code/artifact/4f1fc921-e3af-4a50-b50f-3f4b03bef1d7`
+  - **v2 質感版（目前選定版本）**：`https://claude.ai/code/artifact/807ad0c9-02a3-42fb-b7e9-263e74912f3e`
+- **2026-07-29 使用者已核准 Scope，實作完成**：新增 `src/lib/cardVisual.ts`（底色雜湊依卡片代號＋FNV-1a＋12色調色盤、發卡組織標籤抽取、頂級卡別判斷）；`CardImage.tsx` fallback 分支改為 v2 質感版 SVG（漸層＋光澤＋金屬晶片＋金色細邊框）；同步更新 4 個呼叫端（首頁／`/cards`／`/cards/[slug]`優惠詳情頁／`/banks/[slug]`）多傳入 `slug`／`cardNetwork`／`cardLevel`。`tsc --noEmit`、`eslint` 皆通過。**尚未 git add/commit**（任務卡 Git 授權未涵蓋，需另行確認）。**尚未瀏覽器實測**——本次 session 進行時偵測到另一個對話已在本機執行 dev server（port 3000），為避免 `.next` 快取因多個 dev server 交錯寫入而毀損（過去發生過的已知風險），本次未啟動第二個 dev server 驗證，待該 dev server 釋放或改由使用者在既有分頁中重新整理確認畫面。
 
 ### T24 信用卡申辦導引連結 — 草案待核准，**v1 方向已拍板**
 
@@ -178,7 +183,7 @@
 **T15/T16/T17/T19/T21 皆已完成。** 以下依優先順序：
 
 1. **本地 7 個 commit（`ce0dd72`～`efcc213`）尚未 push**，需與使用者確認後推送到 `hayleyluwei/Credit-card-web`。
-2. **T23 卡面視覺原型已建好、待使用者回饋**（Artifact：`https://claude.ai/code/artifact/01828680-4a8d-404c-a2af-bb2fc860a073`）。回饋後才決定是否寫入正式 Scope。
+2. **T23 已選定最終視覺方向**（參數化 SVG v2 質感版，Artifact：`https://claude.ai/code/artifact/807ad0c9-02a3-42fb-b7e9-263e74912f3e`），待使用者正式核准 Scope 才能開始實作。
 3. T18（部署上線）待正式核准開工；Vercel/Neon 帳號需使用者自行申請（AI 不能代為建立帳號）；schema 已是 v4，PostgreSQL 遷移屆時一併處理。任務卡內容已更新到反映 T21 完成現況。
 4. T24（申辦導引連結）v1 方向已拍板（純導引＋UTM），待正式核准 Scope 開工。
 5. T22（排程輔助資料更新）已起草待核准，依賴 T18／T21，5 個待決問題未拍板。

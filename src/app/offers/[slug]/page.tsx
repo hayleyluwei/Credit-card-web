@@ -236,7 +236,14 @@ export default async function OfferDetailPage({ params }: OfferPageProps) {
                     href={`/cards/${offerCard.card.slug}`}
                     className="grid gap-4 rounded-2xl border border-line p-4 transition hover:border-brand-300 sm:grid-cols-[140px_1fr]"
                   >
-                    <CardImage imageUrl={offerCard.card.imageUrl} alt={offerCard.card.imageAlt} name={offerCard.card.name} />
+                    <CardImage
+                      imageUrl={offerCard.card.imageUrl}
+                      alt={offerCard.card.imageAlt}
+                      name={offerCard.card.name}
+                      slug={offerCard.card.slug}
+                      cardNetwork={offerCard.card.cardNetwork}
+                      cardLevel={offerCard.card.cardLevel}
+                    />
                     <div>
                       <p className="text-sm font-semibold text-brand-700">{offerCard.card.bank.name}</p>
                       <p className="mt-1 font-semibold text-slate-900">{offerCard.card.name}</p>
