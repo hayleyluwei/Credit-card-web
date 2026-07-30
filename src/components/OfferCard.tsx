@@ -57,7 +57,7 @@ export function OfferCard({ offer }: OfferCardProps) {
         >
           查看優惠
         </Link>
-        <span className="text-sm text-slate-500">{offer.isFeatured ? "精選" : "一般"}</span>
+        {offer.isFeatured ? <span className="text-sm text-slate-500">精選</span> : null}
       </div>
     </article>
   );

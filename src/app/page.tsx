@@ -76,29 +76,27 @@ export default async function HomePage() {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-5 py-8 sm:px-8 lg:px-10">
-      <header className="mb-10 rounded-3xl border border-line bg-white p-8 shadow-soft">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-sm font-semibold text-brand-700">信用卡優惠查詢</p>
-            <h1 className="mt-3 text-3xl font-bold text-ink sm:text-4xl">找到最適合你的信用卡優惠</h1>
-            <p className="mt-4 text-base leading-7 text-slate-700">
-              依照分類、銀行、卡片與優惠內容快速瀏覽公開優惠。首頁提供精選優惠、最新優惠與常見分類入口。
-            </p>
-          </div>
-
-          <nav className="flex flex-wrap gap-3 text-sm font-semibold">
-            <Link className="rounded-full bg-brand-700 px-5 py-3 text-white transition hover:bg-brand-800" href="/search">
-              搜尋優惠
-            </Link>
-            <Link className="rounded-full border border-brand-700 px-5 py-3 text-brand-700 transition hover:bg-brand-50" href="/categories">
-              瀏覽分類
-            </Link>
-            <Link className="rounded-full border border-brand-700 px-5 py-3 text-brand-700 transition hover:bg-brand-50" href="/guides">
-              攻略文章
-            </Link>
-          </nav>
+      <header className="mb-6 rounded-3xl border border-line bg-white p-8 shadow-soft">
+        <div className="max-w-2xl">
+          <p className="text-sm font-semibold text-brand-700">信用卡優惠查詢</p>
+          <h1 className="mt-3 text-3xl font-bold text-ink sm:text-4xl">找到最適合你的信用卡優惠</h1>
+          <p className="mt-4 text-base leading-7 text-slate-700">
+            依照分類、銀行、卡片與優惠內容快速瀏覽公開優惠。首頁提供精選優惠、最新優惠與常見分類入口。
+          </p>
         </div>
       </header>
+
+      <nav className="mb-10 flex flex-wrap gap-3 text-sm font-semibold">
+        <Link className="rounded-full bg-brand-700 px-5 py-3 text-white transition hover:bg-brand-800" href="/search">
+          搜尋優惠
+        </Link>
+        <Link className="rounded-full border border-brand-700 px-5 py-3 text-brand-700 transition hover:bg-brand-50" href="/categories">
+          瀏覽分類
+        </Link>
+        <Link className="rounded-full border border-brand-700 px-5 py-3 text-brand-700 transition hover:bg-brand-50" href="/guides">
+          攻略文章
+        </Link>
+      </nav>
 
       <section className="mb-10">
         <div className="mb-6">

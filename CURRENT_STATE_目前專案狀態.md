@@ -102,13 +102,17 @@
 - **2026-07-27 舊決策**：曾明確排除「標籤自動聚合頁」，選擇只做人工攻略文章。
 - **2026-07-30 決策反轉**：AI 用 mockup 具體呈現自動情境頁的樣子（單薄清單、但有獨立網址可被索引）供使用者評估後，使用者決定**兩者都做**——自動情境頁（`/scenarios/[slug]`，核心情境標籤各一頁）負責「先有網址、全部標籤一次上線」，人工攻略文章負責「結論、比較表、FAQ」的深度內容，兩者互補、非取代關係。
 - **2026-07-30（同日稍晚）核心情境標籤擴充為 14 項**：使用者參考同業網站的情境分類截圖，比對後新增電影／高鐵台鐵／eTag／停車／道路救援 5 項（高鐵與台鐵合併為一個標籤），明確排除「首刷禮行李箱」這類促銷型項目不列入情境標籤；規格書同步升版至 **v6**（v5 已加註取代說明）。T20 任務卡同步更新為 v3。
-- **現況（2026-07-30 更新）**：Scope v3 已完整實作。schema 升版至 v6（新增 `Article` model，依 schema 專門流程走完清單確認→migration→spec 同步）；`/scenarios/[slug]` 14 個情境頁、`/guides`＋`/guides/[slug]` 攻略文章前台、`/admin/articles` 後台 CRUD、sitemap／llms.txt／首頁入口／撰寫準則文件皆已完成。自動驗證（`prisma validate`／`tsc`／`eslint`／`next build`／瀏覽器唯讀驗證）全數通過，包含防 XSS 驗證（Markdown 中的 `<script>` 標籤確認未被執行）。**後台文章新增／編輯／發布／下架流程需使用者親自登入驗收**（AI 無管理員憑證，不代為輸入密碼），見人工測試腳本 `docs/implementation/manual-test-scripts/T20-攻略文章與自動情境頁測試腳本-v1-2026-07-30.md`。Summary：`docs/implementation/summaries/T20-GUIDE_ARTICLES_SUMMARY-v1-2026-07-30.md`。已 `git add`＋local commit（`9e75c95`），未 push。
+- **現況（2026-07-30 更新）**：Scope v3 已完整實作。schema 升版至 v6（新增 `Article` model，依 schema 專門流程走完清單確認→migration→spec 同步）；`/scenarios/[slug]` 14 個情境頁、`/guides`＋`/guides/[slug]` 攻略文章前台、`/admin/articles` 後台 CRUD、sitemap／llms.txt／首頁入口／撰寫準則文件皆已完成。自動驗證（`prisma validate`／`tsc`／`eslint`／`next build`／瀏覽器唯讀驗證）全數通過，包含防 XSS 驗證（Markdown 中的 `<script>` 標籤確認未被執行）。**後台文章新增／編輯／發布／下架流程需使用者親自登入驗收**（AI 無管理員憑證，不代為輸入密碼），見人工測試腳本 `docs/implementation/manual-test-scripts/T20-攻略文章與自動情境頁測試腳本-v1-2026-07-30.md`。Summary：`docs/implementation/summaries/T20-GUIDE_ARTICLES_SUMMARY-v1-2026-07-30.md`。已 `git add`＋local commit（`9e75c95`），並已於同輪對話後續 push（見下方「本輪對話收尾」）。
+- **人工測試腳本已有部分自然驗證跡象（非正式跑完 8 項清單）**：使用者已自行登入後台，發布了一篇測試文章 `test0730`（對應腳本第 2-5 項：新增／編輯／發布／前台可見皆已實際發生），並在 CUBE 卡優惠填上行銷徽章「小樹點!」（驗證 `badgeLabel` 後台可填、前台正確顯示）。腳本第 6-8 項（下架後前台 404、刪除測試文章、Slug 修改提醒）**仍未確認**，人工測試腳本狀態維持「待人工驗收」，不得逕自標記完成。
 - Non-scope／風險（詳見任務卡）：情境頁與攻略文章若涵蓋同一情境，需注意 Google 關鍵字互搶風險；情境標籤對照表 v1 先寫死在程式碼、不開後台管理；部分情境標籤目前資料量很少（如訂閱服務目前僅 1 筆優惠），頁面內容單薄的問題待實作時定案。
 - 相依：建議排在 T18（上線）之後（非強制）；Markdown 渲染套件選型（`react-markdown`＋`remark-gfm`）已確認並安裝。
 - **2026-07-30（同輪對話延伸）首頁 ad-hoc UX 修正（非既有任務卡，對話中即時核准）**：
   1. **優惠卡片徽章**：使用者發現右上角「進行中／已過期」徽章恆真（已過期優惠早被 `getPublicOffers()` 過濾，前台看到的永遠是進行中），改為 `Offer.badgeLabel` 自由文字欄位（schema 升版至 **v7**，`schema-checklist-2026-07-30-badge.md`），行銷可自行填「最新優惠」之類文字，留空不顯示徽章；`OfferCard`／`AdminOfferForm`／`admin-actions.ts` 已同步。既有 16 筆優惠此欄位皆為空，前台徽章暫時全部不顯示，待後台個別補填。
   2. **首頁區塊重排＋圖示**：順序改為「熱門情境 → 熱門優惠分類 → 信用卡優惠（原「選你手上的信用卡」已更名）→ 精選優惠 → 最新優惠」；新增 `src/components/EntryIcon.tsx`（手刻 inline SVG，未新增圖示套件相依），情境標籤與分類卡片皆換成風格一致的圖示（本輪僅測試風格一致性，非最終視覺定案）。
-  - 自動驗證：`prisma validate`／`tsc --noEmit`／`eslint`／`next build` 全過；瀏覽器實測確認新順序、圖示正確渲染、徽章留空不顯示。
+  3. **首頁導覽按鈕移出表頭**：「搜尋優惠／瀏覽分類／攻略文章」三個按鈕原本在 hero 表頭右側，使用者認為不適合放在表頭，改為獨立一排置於表頭下方、熱門情境上方（`src/app/page.tsx`）。
+  4. **分類詳情頁移除側欄**：`/categories/[slug]` 移除「分類說明」與「常見問題」側欄（純文字重複、與 T23 之前優惠詳情頁清理的側欄同類問題），版面改單欄；`FAQPage` JSON-LD 結構化資料維持保留供 AI／Google 讀取，只拿掉畫面上的視覺重複（`src/app/categories/[slug]/page.tsx`）。
+  5. **優惠卡片「一般」字樣移除**：`OfferCard` 右下角原本「精選／一般」二選一顯示，使用者認為「一般」沒有資訊量，改為只在 `isFeatured` 為真時顯示「精選」，其餘不顯示任何字（`src/components/OfferCard.tsx`）。
+  - 自動驗證：`prisma validate`／`tsc --noEmit`／`eslint`／`next build` 全過；瀏覽器實測確認新順序、圖示正確渲染、徽章留空不顯示、側欄移除後版面正常、「一般」字樣已不顯示。
 
 ### T24 信用卡申辦導引連結 — 草案待核准，**v1 方向已拍板**
 
