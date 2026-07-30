@@ -5,6 +5,7 @@ import { CardImage } from "@/components/CardImage";
 import { CategoryCard } from "@/components/CategoryCard";
 import { OfferCard } from "@/components/OfferCard";
 import { generateOrganizationJsonLd, getCanonicalUrl } from "@/lib/domain-seo";
+import { SCENARIO_TAGS } from "@/lib/domain-scenarios";
 
 export const metadata = {
   title: "信用卡優惠查詢網站",
@@ -91,6 +92,9 @@ export default async function HomePage() {
             <Link className="rounded-full border border-brand-700 px-5 py-3 text-brand-700 transition hover:bg-brand-50" href="/categories">
               瀏覽分類
             </Link>
+            <Link className="rounded-full border border-brand-700 px-5 py-3 text-brand-700 transition hover:bg-brand-50" href="/guides">
+              攻略文章
+            </Link>
           </nav>
         </div>
       </header>
@@ -168,6 +172,25 @@ export default async function HomePage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {categories.map((category) => (
             <CategoryCard key={category.id} category={category} offerCount={category._count.offers} />
+          ))}
+        </div>
+      </section>
+
+      <section className="mb-10">
+        <div className="mb-6">
+          <p className="text-sm font-semibold text-brand-700">情境入口</p>
+          <h2 className="mt-2 text-2xl font-bold text-ink">熱門情境</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">依生活情境快速找優惠，例如繳稅、學費、水電瓦斯或訂閱服務。</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {SCENARIO_TAGS.map((scenario) => (
+            <Link
+              key={scenario.slug}
+              href={`/scenarios/${scenario.slug}`}
+              className="rounded-full bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-100"
+            >
+              {scenario.tagLabel}
+            </Link>
           ))}
         </div>
       </section>

@@ -3,7 +3,7 @@
  * Handles URL generation, metadata fallback, and JSON-LD schema generation
  */
 
-import type { Category, Bank, Card, Offer } from "@prisma/client";
+import type { Category, Bank, Card, Offer, Article } from "@prisma/client";
 
 const SITE_BASE_URL = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
 
@@ -176,14 +176,21 @@ export function generateSitemapEntries(
   categories: Pick<Category, "slug" | "updatedAt">[],
   banks: Pick<Bank, "slug" | "updatedAt">[],
   cards: Pick<Card, "slug" | "updatedAt">[],
-  offers: Pick<Offer, "slug" | "updatedAt">[]
+  offers: Pick<Offer, "slug" | "updatedAt">[],
+  scenarioSlugs: string[] = [],
+  articles: Pick<Article, "slug" | "updatedAt">[] = []
 ): {
   loc: string;
   lastmod: string;
   priority: number;
   changefreq: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
 }[] {
-  const entries = [
+  const entries: {
+    loc: string;
+    lastmod: string;
+    priority: number;
+    changefreq: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
+  }[] = [
     {
       loc: getCanonicalUrl("/"),
       lastmod: new Date().toISOString().split("T")[0],
@@ -243,6 +250,24 @@ export function generateSitemapEntries(
       lastmod: new Date(offer.updatedAt).toISOString().split("T")[0],
       priority: 0.6,
       changefreq: "weekly" as const
+    });
+  });
+
+  scenarioSlugs.forEach((slug) => {
+    entries.push({
+      loc: getCanonicalUrl(`/scenarios/${slug}`),
+      lastmod: new Date().toISOString().split("T")[0],
+      priority: 0.7,
+      changefreq: "weekly" as const
+    });
+  });
+
+  articles.forEach((article) => {
+    entries.push({
+      loc: getCanonicalUrl(`/guides/${article.slug}`),
+      lastmod: new Date(article.updatedAt).toISOString().split("T")[0],
+      priority: 0.7,
+      changefreq: "monthly" as const
     });
   });
 

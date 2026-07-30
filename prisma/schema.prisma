@@ -1,7 +1,7 @@
 // Credit Card MVP - Prisma Schema
-// Version: 2026-07-29 / v5
+// Version: 2026-07-30 / v6
 // Product Spec: credit-card-mvp-spec-v11-2026-06-08
-// Schema Spec: prisma-schema-spec-v5-2026-07-29.md
+// Schema Spec: prisma-schema-spec-v6-2026-07-30.md
 // Target: personal developer MVP, low-cost setup
 // Database: SQLite for local MVP development
 // v3 (T21): add RewardTier / Channel / RewardTierChannel; Offer gains tiers
@@ -13,6 +13,8 @@
 // v5 (T23): add optional card-art colour columns to Card so the generated
 //   card face can carry each card's real colour impression instead of a
 //   slug-hashed palette entry. All nullable; blank falls back to the hash.
+// v6 (T20): add Article model for guide articles (/guides, /guides/[slug]).
+//   Scenario-tag config for /scenarios/[slug] stays in code, not a table.
 
 generator client {
   provider = "prisma-client-js"
@@ -237,4 +239,23 @@ model RewardTierChannel {
 
   @@id([rewardTierId, channelId])
   @@index([channelId])
+}
+
+/// [T20] Guide article (long-form scenario content), rendered from Markdown.
+model Article {
+  id             Int       @id @default(autoincrement())
+  title          String
+  slug           String    @unique
+  summary        String?
+  contentMd      String
+  seoTitle       String?
+  seoDescription String?
+  faqJson        String?
+  lastVerifiedAt DateTime?
+  isPublished    Boolean   @default(false)
+  publishedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([isPublished, publishedAt])
 }

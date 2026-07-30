@@ -32,7 +32,7 @@ function intValue(formData: FormData, key: string, fallback = 0): number {
   return Number.isFinite(value) ? value : fallback;
 }
 
-async function ensureUniqueSlug(model: "bank" | "card" | "category" | "offer", slug: string, id?: number) {
+async function ensureUniqueSlug(model: "bank" | "card" | "category" | "offer" | "article", slug: string, id?: number) {
   const where = { slug };
   const existing =
     model === "bank"
@@ -41,7 +41,9 @@ async function ensureUniqueSlug(model: "bank" | "card" | "category" | "offer", s
         ? await prisma.card.findUnique({ where })
         : model === "category"
           ? await prisma.category.findUnique({ where })
-          : await prisma.offer.findUnique({ where });
+          : model === "offer"
+            ? await prisma.offer.findUnique({ where })
+            : await prisma.article.findUnique({ where });
 
   if (existing && existing.id !== id) {
     throw new Error(`Slug already exists: ${slug}`);
@@ -484,6 +486,72 @@ export async function updateOffer(_prevState: AdminActionState, formData: FormDa
   revalidatePath("/search");
   revalidatePath(`/offers/${slug}`);
   return { errors: [], message: publish ? "已儲存並發布。" : unpublish ? "已取消發布。" : "已儲存草稿。", ok: true };
+}
+
+function validateArticleFaq(formData: FormData) {
+  const faqJson = nullableText(formData, "faqJson");
+  const result = validateFaqJson(faqJson);
+  if (!result.valid) {
+    throw new Error(result.error ?? "FAQ JSON is invalid");
+  }
+}
+
+function articleData(formData: FormData, slug: string) {
+  return {
+    title: text(formData, "title"),
+    slug,
+    summary: nullableText(formData, "summary"),
+    contentMd: text(formData, "contentMd"),
+    seoTitle: nullableText(formData, "seoTitle"),
+    seoDescription: nullableText(formData, "seoDescription"),
+    faqJson: nullableText(formData, "faqJson"),
+    lastVerifiedAt: dateValue(formData, "lastVerifiedAt")
+  };
+}
+
+export async function createArticle(formData: FormData) {
+  const title = text(formData, "title");
+  const slug = text(formData, "slug") || generateSlug(title);
+  await ensureUniqueSlug("article", slug);
+  validateArticleFaq(formData);
+  await prisma.article.create({ data: articleData(formData, slug) });
+  revalidatePath("/admin/articles");
+  revalidatePath("/guides");
+  revalidatePath("/sitemap.xml");
+  redirect("/admin/articles");
+}
+
+export async function updateArticle(formData: FormData) {
+  const id = intValue(formData, "id");
+  const title = text(formData, "title");
+  const slug = text(formData, "slug") || generateSlug(title);
+  await ensureUniqueSlug("article", slug, id);
+  validateArticleFaq(formData);
+  await prisma.article.update({ where: { id }, data: articleData(formData, slug) });
+  revalidatePath("/admin/articles");
+  revalidatePath(`/admin/articles/${id}`);
+  revalidatePath("/guides");
+  revalidatePath(`/guides/${slug}`);
+  revalidatePath("/sitemap.xml");
+}
+
+export async function toggleArticlePublish(formData: FormData) {
+  const id = intValue(formData, "id");
+  const nextIsPublished = booleanValue(formData, "nextIsPublished");
+  const article = await prisma.article.findUnique({ where: { id } });
+  await prisma.article.update({
+    where: { id },
+    data: {
+      isPublished: nextIsPublished,
+      publishedAt: nextIsPublished ? (article?.publishedAt ?? new Date()) : article?.publishedAt
+    }
+  });
+  revalidatePath("/admin/articles");
+  revalidatePath("/guides");
+  if (article) {
+    revalidatePath(`/guides/${article.slug}`);
+  }
+  revalidatePath("/sitemap.xml");
 }
 
 export async function redirectToAdmin(path: string) {

@@ -9,6 +9,7 @@ const navItems = [
   { label: "銀行管理", href: "/admin/banks" },
   { label: "信用卡管理", href: "/admin/cards" },
   { label: "分類管理", href: "/admin/categories" },
+  { label: "攻略文章管理", href: "/admin/articles" },
   { label: "網站設定", href: "/admin/settings" }
 ];
 

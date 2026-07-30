@@ -1,9 +1,10 @@
 import { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { generateSitemapEntries } from "@/lib/domain-seo";
+import { SCENARIO_TAGS } from "@/lib/domain-scenarios";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [categories, banks, cards, offers] = await Promise.all([
+  const [categories, banks, cards, offers, articles] = await Promise.all([
     prisma.category.findMany({
       where: { isActive: true },
       select: { slug: true, updatedAt: true }
@@ -19,10 +20,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     prisma.offer.findMany({
       where: { isPublished: true },
       select: { slug: true, updatedAt: true }
+    }),
+    prisma.article.findMany({
+      where: { isPublished: true },
+      select: { slug: true, updatedAt: true }
     })
   ]);
 
-  const entries = generateSitemapEntries(categories, banks, cards, offers);
+  const scenarioSlugs = SCENARIO_TAGS.map((entry) => entry.slug);
+  const entries = generateSitemapEntries(categories, banks, cards, offers, scenarioSlugs, articles);
 
   return entries.map((entry) => ({
     url: entry.loc,
