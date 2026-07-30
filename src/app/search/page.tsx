@@ -10,7 +10,7 @@ type SearchPageProps = {
 };
 
 // 熱門搜尋預設詞：從真實資料中挑選目前確實搜得到結果的關鍵字。
-const HOT_SEARCH_TERMS = ["現金回饋", "旅遊", "繳稅", "學費", "水電瓦斯", "分期"];
+const HOT_SEARCH_TERMS = ["現金回饋", "旅遊", "繳稅", "學費", "水電瓦斯", "分期", "訂閱服務"];
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const query = searchParams?.q?.trim() ?? "";
