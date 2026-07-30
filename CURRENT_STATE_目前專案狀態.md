@@ -10,7 +10,7 @@
 - 工作區 alias：`C:/Users/user/Documents/信用卡查詢網站`
 - alias 類型：Windows junction，兩個路徑指向同一份檔案
 - branch：`main`
-- HEAD：`3fd8e4d`（2026-07-30 08:44 更新；`f0f6ecc`／`42c6108` 為 2026-07-29 晚間 commit，`3fd8e4d` 為跨午夜後 2026-07-30 上午 commit，三個皆本輪對話產生，見下方各任務段落與新交接摘要）
+- HEAD：`25e2582`（2026-07-30；`81c3ba7` 為前一輪對話收尾 commit，`9e75c95`／`cf073a3`／`25e2582` 為本輪對話新產生的 3 個 commit：T20 攻略文章與自動情境頁實作、優惠徽章改為可自訂文字＋首頁圖示、首頁導覽/分類頁側欄/優惠卡片的收尾 UX 修正，見下方 T20 段落）
 - 遠端關係：**已與 `origin/main` 同步，無待 push 的 commit**（每次 commit 後皆已 push，最後核對時間 2026-07-30）
 
 新 session 必須以 `git rev-parse --show-toplevel`、`git status` 及 `git rev-parse --short HEAD` 重新核對，不得只相信本文件。
