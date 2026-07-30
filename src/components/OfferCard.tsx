@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { isOfferExpired } from "@/lib/domain-offers";
 import { resolveSummaryPreview } from "@/lib/domain-parsing";
 import type { Bank, Card, Offer } from "@prisma/client";
 
@@ -20,7 +19,6 @@ export function OfferCard({ offer }: OfferCardProps) {
       summaryPreview: offer.summary,
       title: offer.title
     });
-  const expired = isOfferExpired(offer);
   const cardSources = offer.cards
     .map((item) => {
       if (!item.card) return null;
@@ -35,13 +33,9 @@ export function OfferCard({ offer }: OfferCardProps) {
           <p className="text-sm font-semibold text-brand-700">{offer.category?.name ?? "優惠"}</p>
           <h3 className="mt-2 text-xl font-bold text-ink">{offer.title}</h3>
         </div>
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-semibold ${
-            expired ? "bg-red-100 text-red-700" : "bg-brand-100 text-brand-800"
-          }`}
-        >
-          {expired ? "已過期" : "進行中"}
-        </span>
+        {offer.badgeLabel ? (
+          <span className="rounded-full bg-brand-100 px-3 py-1 text-xs font-semibold text-brand-800">{offer.badgeLabel}</span>
+        ) : null}
       </div>
 
       <p className="mt-4 text-sm leading-6 text-slate-600">{summary}</p>

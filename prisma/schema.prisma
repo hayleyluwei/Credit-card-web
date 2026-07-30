@@ -1,7 +1,7 @@
 // Credit Card MVP - Prisma Schema
-// Version: 2026-07-30 / v6
+// Version: 2026-07-30 / v7
 // Product Spec: credit-card-mvp-spec-v11-2026-06-08
-// Schema Spec: prisma-schema-spec-v6-2026-07-30.md
+// Schema Spec: prisma-schema-spec-v7-2026-07-30.md
 // Target: personal developer MVP, low-cost setup
 // Database: SQLite for local MVP development
 // v3 (T21): add RewardTier / Channel / RewardTierChannel; Offer gains tiers
@@ -15,6 +15,10 @@
 //   slug-hashed palette entry. All nullable; blank falls back to the hash.
 // v6 (T20): add Article model for guide articles (/guides, /guides/[slug]).
 //   Scenario-tag config for /scenarios/[slug] stays in code, not a table.
+// v7 (ad-hoc UX fix): add Offer.badgeLabel, a free-text marketing badge.
+//   Replaces the old computed "進行中/已過期" badge, which was always
+//   "進行中" in practice since expired offers are filtered out before
+//   display. Optional; blank hides the badge.
 
 generator client {
   provider = "prisma-client-js"
@@ -166,6 +170,9 @@ model Offer {
   recommendScore Int     @default(0)
   sortOrder      Int     @default(0)
   isPublished    Boolean @default(false)
+
+  // [ad-hoc UX] 行銷可自訂的卡片徽章文字（例：最新優惠、加碼中）。留空前台不顯示徽章。
+  badgeLabel String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -355,6 +355,9 @@ export function AdminOfferForm({ action, cards, categories, offer }: AdminOfferF
         <AdminField label="排序">
           <input className={adminInputClass} name="sortOrder" type="number" defaultValue={offer?.sortOrder ?? 0} />
         </AdminField>
+        <AdminField label="行銷徽章" help="顯示於優惠卡片右上角的短文字，例：最新優惠、加碼中。留空則不顯示徽章。">
+          <input className={adminInputClass} name="badgeLabel" defaultValue={offer?.badgeLabel ?? ""} />
+        </AdminField>
         <label className="flex items-center gap-3 text-sm font-semibold">
           <input name="isFeatured" type="checkbox" defaultChecked={offer?.isFeatured ?? false} />
           精選優惠

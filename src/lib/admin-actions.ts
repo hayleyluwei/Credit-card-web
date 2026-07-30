@@ -342,7 +342,8 @@ function offerData(formData: FormData, slug: string) {
     faqJson: nullableText(formData, "faqJson"),
     isFeatured: booleanValue(formData, "isFeatured"),
     recommendScore: intValue(formData, "recommendScore"),
-    sortOrder: intValue(formData, "sortOrder")
+    sortOrder: intValue(formData, "sortOrder"),
+    badgeLabel: nullableText(formData, "badgeLabel")
   };
 
   return {

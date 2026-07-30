@@ -97,14 +97,18 @@
 
 ### T20 攻略文章功能與自動情境頁 — Scope v3 已核准，**自動驗證通過，待人工驗收**（2026-07-30）
 
-- 任務卡：`docs/implementation/tasks/T20-GUIDE_ARTICLES_攻略文章功能.md`（v3，2026-07-30 更新，待核准）
+- 任務卡：`docs/implementation/tasks/T20-GUIDE_ARTICLES_攻略文章功能.md`（v3，2026-07-30 已核准）
 - **背景**：使用者實測發現，搜尋「繳稅/學費/機票 信用卡優惠」這類情境查詢，網站雖然資料都有（站內搜尋能比對 `Offer.tags` 找到），但外部 Google／AI 搜尋幾乎找不到——因為 `/search?q=` 沒有 `generateMetadata`、沒有 JSON-LD，帶參數的搜尋結果頁對 SEO 是隱形的；情境標籤只活在優惠內文裡，沒有自己的網址。
 - **2026-07-27 舊決策**：曾明確排除「標籤自動聚合頁」，選擇只做人工攻略文章。
 - **2026-07-30 決策反轉**：AI 用 mockup 具體呈現自動情境頁的樣子（單薄清單、但有獨立網址可被索引）供使用者評估後，使用者決定**兩者都做**——自動情境頁（`/scenarios/[slug]`，核心情境標籤各一頁）負責「先有網址、全部標籤一次上線」，人工攻略文章負責「結論、比較表、FAQ」的深度內容，兩者互補、非取代關係。
 - **2026-07-30（同日稍晚）核心情境標籤擴充為 14 項**：使用者參考同業網站的情境分類截圖，比對後新增電影／高鐵台鐵／eTag／停車／道路救援 5 項（高鐵與台鐵合併為一個標籤），明確排除「首刷禮行李箱」這類促銷型項目不列入情境標籤；規格書同步升版至 **v6**（v5 已加註取代說明）。T20 任務卡同步更新為 v3。
-- **現況（2026-07-30 更新）**：Scope v3 已完整實作。schema 升版至 v6（新增 `Article` model，依 schema 專門流程走完清單確認→migration→spec 同步）；`/scenarios/[slug]` 14 個情境頁、`/guides`＋`/guides/[slug]` 攻略文章前台、`/admin/articles` 後台 CRUD、sitemap／llms.txt／首頁入口／撰寫準則文件皆已完成。自動驗證（`prisma validate`／`tsc`／`eslint`／`next build`／瀏覽器唯讀驗證）全數通過，包含防 XSS 驗證（Markdown 中的 `<script>` 標籤確認未被執行）。**後台文章新增／編輯／發布／下架流程需使用者親自登入驗收**（AI 無管理員憑證，不代為輸入密碼），見人工測試腳本 `docs/implementation/manual-test-scripts/T20-攻略文章與自動情境頁測試腳本-v1-2026-07-30.md`。Summary：`docs/implementation/summaries/T20-GUIDE_ARTICLES_SUMMARY-v1-2026-07-30.md`。尚未 `git add`／commit（見下方「既有未提交變更」）。
+- **現況（2026-07-30 更新）**：Scope v3 已完整實作。schema 升版至 v6（新增 `Article` model，依 schema 專門流程走完清單確認→migration→spec 同步）；`/scenarios/[slug]` 14 個情境頁、`/guides`＋`/guides/[slug]` 攻略文章前台、`/admin/articles` 後台 CRUD、sitemap／llms.txt／首頁入口／撰寫準則文件皆已完成。自動驗證（`prisma validate`／`tsc`／`eslint`／`next build`／瀏覽器唯讀驗證）全數通過，包含防 XSS 驗證（Markdown 中的 `<script>` 標籤確認未被執行）。**後台文章新增／編輯／發布／下架流程需使用者親自登入驗收**（AI 無管理員憑證，不代為輸入密碼），見人工測試腳本 `docs/implementation/manual-test-scripts/T20-攻略文章與自動情境頁測試腳本-v1-2026-07-30.md`。Summary：`docs/implementation/summaries/T20-GUIDE_ARTICLES_SUMMARY-v1-2026-07-30.md`。已 `git add`＋local commit（`9e75c95`），未 push。
 - Non-scope／風險（詳見任務卡）：情境頁與攻略文章若涵蓋同一情境，需注意 Google 關鍵字互搶風險；情境標籤對照表 v1 先寫死在程式碼、不開後台管理；部分情境標籤目前資料量很少（如訂閱服務目前僅 1 筆優惠），頁面內容單薄的問題待實作時定案。
-- 相依：建議排在 T18（上線）之後，Markdown 渲染套件選型（`react-markdown`＋`remark-gfm`）待核准。
+- 相依：建議排在 T18（上線）之後（非強制）；Markdown 渲染套件選型（`react-markdown`＋`remark-gfm`）已確認並安裝。
+- **2026-07-30（同輪對話延伸）首頁 ad-hoc UX 修正（非既有任務卡，對話中即時核准）**：
+  1. **優惠卡片徽章**：使用者發現右上角「進行中／已過期」徽章恆真（已過期優惠早被 `getPublicOffers()` 過濾，前台看到的永遠是進行中），改為 `Offer.badgeLabel` 自由文字欄位（schema 升版至 **v7**，`schema-checklist-2026-07-30-badge.md`），行銷可自行填「最新優惠」之類文字，留空不顯示徽章；`OfferCard`／`AdminOfferForm`／`admin-actions.ts` 已同步。既有 16 筆優惠此欄位皆為空，前台徽章暫時全部不顯示，待後台個別補填。
+  2. **首頁區塊重排＋圖示**：順序改為「熱門情境 → 熱門優惠分類 → 信用卡優惠（原「選你手上的信用卡」已更名）→ 精選優惠 → 最新優惠」；新增 `src/components/EntryIcon.tsx`（手刻 inline SVG，未新增圖示套件相依），情境標籤與分類卡片皆換成風格一致的圖示（本輪僅測試風格一致性，非最終視覺定案）。
+  - 自動驗證：`prisma validate`／`tsc --noEmit`／`eslint`／`next build` 全過；瀏覽器實測確認新順序、圖示正確渲染、徽章留空不顯示。
 
 ### T24 信用卡申辦導引連結 — 草案待核准，**v1 方向已拍板**
 

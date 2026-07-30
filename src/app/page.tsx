@@ -6,6 +6,7 @@ import { CategoryCard } from "@/components/CategoryCard";
 import { OfferCard } from "@/components/OfferCard";
 import { generateOrganizationJsonLd, getCanonicalUrl } from "@/lib/domain-seo";
 import { SCENARIO_TAGS } from "@/lib/domain-scenarios";
+import { EntryIcon } from "@/components/EntryIcon";
 
 export const metadata = {
   title: "信用卡優惠查詢網站",
@@ -100,10 +101,48 @@ export default async function HomePage() {
       </header>
 
       <section className="mb-10">
+        <div className="mb-6">
+          <p className="text-sm font-semibold text-brand-700">情境入口</p>
+          <h2 className="mt-2 text-2xl font-bold text-ink">熱門情境</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">依生活情境快速找優惠，例如繳稅、學費、水電瓦斯或訂閱服務。</p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          {SCENARIO_TAGS.map((scenario) => (
+            <Link
+              key={scenario.slug}
+              href={`/scenarios/${scenario.slug}`}
+              className="flex w-24 flex-col items-center gap-2 rounded-2xl border border-line bg-white p-3 text-center shadow-soft transition duration-200 hover:-translate-y-1 hover:border-brand-300"
+            >
+              <EntryIcon className="h-10 w-10" iconKey={scenario.slug} />
+              <span className="text-xs font-semibold text-ink">{scenario.tagLabel}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="mb-10">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-brand-700">分類入口</p>
+            <h2 className="mt-2 text-2xl font-bold text-ink">熱門優惠分類</h2>
+          </div>
+          <Link href="/categories" className="text-sm font-semibold text-brand-700">
+            查看全部分類 →
+          </Link>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {categories.map((category) => (
+            <CategoryCard key={category.id} category={category} offerCount={category._count.offers} />
+          ))}
+        </div>
+      </section>
+
+      <section className="mb-10">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm font-semibold text-brand-700">依信用卡查優惠</p>
-            <h2 className="mt-2 text-2xl font-bold text-ink">選你手上的信用卡</h2>
+            <h2 className="mt-2 text-2xl font-bold text-ink">信用卡優惠</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
               不確定要看哪個分類時，先從手上的卡開始。點進信用卡頁，就能看到這張卡目前整理到的公開優惠。
             </p>
@@ -155,43 +194,6 @@ export default async function HomePage() {
               目前尚無可顯示的信用卡。
             </div>
           )}
-        </div>
-      </section>
-
-      <section className="mb-10">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-brand-700">分類入口</p>
-            <h2 className="mt-2 text-2xl font-bold text-ink">熱門優惠分類</h2>
-          </div>
-          <Link href="/categories" className="text-sm font-semibold text-brand-700">
-            查看全部分類 →
-          </Link>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {categories.map((category) => (
-            <CategoryCard key={category.id} category={category} offerCount={category._count.offers} />
-          ))}
-        </div>
-      </section>
-
-      <section className="mb-10">
-        <div className="mb-6">
-          <p className="text-sm font-semibold text-brand-700">情境入口</p>
-          <h2 className="mt-2 text-2xl font-bold text-ink">熱門情境</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">依生活情境快速找優惠，例如繳稅、學費、水電瓦斯或訂閱服務。</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {SCENARIO_TAGS.map((scenario) => (
-            <Link
-              key={scenario.slug}
-              href={`/scenarios/${scenario.slug}`}
-              className="rounded-full bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-100"
-            >
-              {scenario.tagLabel}
-            </Link>
-          ))}
         </div>
       </section>
 

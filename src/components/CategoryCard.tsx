@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Category } from "@prisma/client";
+import { EntryIcon } from "@/components/EntryIcon";
 
 interface CategoryCardProps {
   category: Category;
@@ -13,9 +14,7 @@ export function CategoryCard({ category, offerCount }: CategoryCardProps) {
       className="group block rounded-3xl border border-line bg-white p-6 shadow-soft transition duration-200 hover:-translate-y-1 hover:border-brand-300"
     >
       <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
-          {category.iconName ? category.iconName.charAt(0).toUpperCase() : "C"}
-        </div>
+        <EntryIcon iconKey={category.slug} />
         <div>
           <p className="text-sm font-semibold text-brand-700">{category.name}</p>
           <p className="text-xs text-slate-500">{offerCount} 則優惠</p>
