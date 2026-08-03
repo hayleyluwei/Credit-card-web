@@ -489,14 +489,6 @@ export async function updateOffer(_prevState: AdminActionState, formData: FormDa
   return { errors: [], message: publish ? "已儲存並發布。" : unpublish ? "已取消發布。" : "已儲存草稿。", ok: true };
 }
 
-function validateArticleFaq(formData: FormData) {
-  const faqJson = nullableText(formData, "faqJson");
-  const result = validateFaqJson(faqJson);
-  if (!result.valid) {
-    throw new Error(result.error ?? "FAQ JSON is invalid");
-  }
-}
-
 function articleData(formData: FormData, slug: string) {
   return {
     title: text(formData, "title"),
@@ -510,11 +502,24 @@ function articleData(formData: FormData, slug: string) {
   };
 }
 
-export async function createArticle(formData: FormData) {
+export async function createArticle(_prevState: AdminActionState, formData: FormData): Promise<AdminActionState> {
   const title = text(formData, "title");
   const slug = text(formData, "slug") || generateSlug(title);
-  await ensureUniqueSlug("article", slug);
-  validateArticleFaq(formData);
+
+  const faqResult = validateFaqJson(nullableText(formData, "faqJson"));
+  if (!faqResult.valid) {
+    return { errors: [faqResult.error ?? "FAQ JSON 格式錯誤，請檢查 question／answer 欄位名稱與逗號。"], ok: false };
+  }
+
+  try {
+    await ensureUniqueSlug("article", slug);
+  } catch (error) {
+    return {
+      errors: [error instanceof Error && error.message.includes("Slug already exists") ? `Slug 已被使用：${slug}` : "儲存失敗，請稍後再試。"],
+      ok: false
+    };
+  }
+
   await prisma.article.create({ data: articleData(formData, slug) });
   revalidatePath("/admin/articles");
   revalidatePath("/guides");
@@ -522,18 +527,32 @@ export async function createArticle(formData: FormData) {
   redirect("/admin/articles");
 }
 
-export async function updateArticle(formData: FormData) {
+export async function updateArticle(_prevState: AdminActionState, formData: FormData): Promise<AdminActionState> {
   const id = intValue(formData, "id");
   const title = text(formData, "title");
   const slug = text(formData, "slug") || generateSlug(title);
-  await ensureUniqueSlug("article", slug, id);
-  validateArticleFaq(formData);
+
+  const faqResult = validateFaqJson(nullableText(formData, "faqJson"));
+  if (!faqResult.valid) {
+    return { errors: [faqResult.error ?? "FAQ JSON 格式錯誤，請檢查 question／answer 欄位名稱與逗號。"], ok: false };
+  }
+
+  try {
+    await ensureUniqueSlug("article", slug, id);
+  } catch (error) {
+    return {
+      errors: [error instanceof Error && error.message.includes("Slug already exists") ? `Slug 已被使用：${slug}` : "儲存失敗，請稍後再試。"],
+      ok: false
+    };
+  }
+
   await prisma.article.update({ where: { id }, data: articleData(formData, slug) });
   revalidatePath("/admin/articles");
   revalidatePath(`/admin/articles/${id}`);
   revalidatePath("/guides");
   revalidatePath(`/guides/${slug}`);
   revalidatePath("/sitemap.xml");
+  return { errors: [], message: "已儲存文章。", ok: true };
 }
 
 export async function toggleArticlePublish(formData: FormData) {
@@ -547,6 +566,18 @@ export async function toggleArticlePublish(formData: FormData) {
       publishedAt: nextIsPublished ? (article?.publishedAt ?? new Date()) : article?.publishedAt
     }
   });
+  revalidatePath("/admin/articles");
+  revalidatePath("/guides");
+  if (article) {
+    revalidatePath(`/guides/${article.slug}`);
+  }
+  revalidatePath("/sitemap.xml");
+}
+
+export async function deleteArticle(formData: FormData) {
+  const id = intValue(formData, "id");
+  const article = await prisma.article.findUnique({ where: { id } });
+  await prisma.article.delete({ where: { id } });
   revalidatePath("/admin/articles");
   revalidatePath("/guides");
   if (article) {

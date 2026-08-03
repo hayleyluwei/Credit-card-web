@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { createArticle, toggleArticlePublish } from "@/lib/admin-actions";
-import { AdminField, adminInputClass } from "@/components/AdminField";
+import { createArticle, deleteArticle, toggleArticlePublish } from "@/lib/admin-actions";
+import { AdminArticleForm } from "@/components/AdminArticleForm";
+import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
 
 export default async function AdminArticlesPage() {
   const articles = await prisma.article.findMany({ orderBy: { updatedAt: "desc" } });
@@ -15,39 +16,7 @@ export default async function AdminArticlesPage() {
 
       <section className="mb-6 rounded-md border border-line bg-white p-5 shadow-soft">
         <h2 className="text-xl font-bold text-ink">新增文章</h2>
-        <form action={createArticle} className="mt-4 grid gap-4 md:grid-cols-2">
-          <AdminField label="標題">
-            <input className={adminInputClass} name="title" required />
-          </AdminField>
-          <AdminField label="Slug" help="留空會自動依標題產生，建立後不建議修改。">
-            <input className={adminInputClass} name="slug" />
-          </AdminField>
-          <AdminField label="摘要">
-            <textarea className={adminInputClass} name="summary" rows={2} />
-          </AdminField>
-          <AdminField label="最後查證日期">
-            <input className={adminInputClass} name="lastVerifiedAt" type="date" />
-          </AdminField>
-          <div className="md:col-span-2">
-            <AdminField label="內文（Markdown）" help="支援表格語法；不接受 raw HTML，會以純文字顯示。">
-              <textarea className={adminInputClass} name="contentMd" rows={12} required />
-            </AdminField>
-          </div>
-          <AdminField label="SEO 標題">
-            <input className={adminInputClass} name="seoTitle" />
-          </AdminField>
-          <AdminField label="SEO 描述">
-            <textarea className={adminInputClass} name="seoDescription" rows={2} />
-          </AdminField>
-          <div className="md:col-span-2">
-            <AdminField label="FAQ JSON" help='格式：[{"question":"問題","answer":"答案"}]，留空則不顯示 FAQ 區塊。'>
-              <textarea className={adminInputClass} name="faqJson" rows={4} />
-            </AdminField>
-          </div>
-          <button className="rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white md:col-span-2" type="submit">
-            新增文章（草稿）
-          </button>
-        </form>
+        <AdminArticleForm action={createArticle} />
       </section>
 
       <section className="grid gap-3">
@@ -74,6 +43,13 @@ export default async function AdminArticlesPage() {
                       {article.isPublished ? "下架" : "發布"}
                     </button>
                   </form>
+                  <ConfirmSubmitButton
+                    action={deleteArticle}
+                    confirmMessage={`確定要刪除「${article.title}」嗎？此操作無法復原。`}
+                    hiddenFields={{ id: article.id }}
+                    label="刪除"
+                    tone="danger"
+                  />
                 </div>
               </div>
             </article>
