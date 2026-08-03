@@ -1,8 +1,8 @@
 # 目前專案狀態
 
-最後更新：2026-07-30（Asia/Taipei）  
+最後更新：2026-08-03（Asia/Taipei）  
 用途：所有新 AI session 接續本專案時的唯一目前狀態入口
-交接摘要：`docs/implementation/handoffs/2026-07-30-T20情境頁與訂閱標籤-交接摘要.md`（最新一輪對話的完整導覽，內容橫跨 2026-07-29 晚間至 2026-07-30 上午；2026-07-29 稍早的 T23 定案過程見 `2026-07-29-T23-卡面配色與資料蒐集v4-交接摘要.md`；T18/T21/T22/T24 現況仍見前一篇 `2026-07-27-T16-T24-交接摘要.md`）
+交接摘要：`docs/implementation/handoffs/2026-08-03-T20攻略文章實作與收尾-交接摘要.md`（最新一輪對話的完整導覽，內容橫跨 2026-07-30 至 2026-08-03，同一輪對話跨日繼續；2026-07-30 之前的細節見前一篇 `2026-07-30-T20情境頁與訂閱標籤-交接摘要.md`；2026-07-29 的 T23 定案過程見 `2026-07-29-T23-卡面配色與資料蒐集v4-交接摘要.md`；T18/T21/T22/T24 更早現況見 `2026-07-27-T16-T24-交接摘要.md`）
 
 ## 專案與工作區
 
@@ -10,8 +10,8 @@
 - 工作區 alias：`C:/Users/user/Documents/信用卡查詢網站`
 - alias 類型：Windows junction，兩個路徑指向同一份檔案
 - branch：`main`
-- HEAD：`25e2582`（2026-07-30；`81c3ba7` 為前一輪對話收尾 commit，`9e75c95`／`cf073a3`／`25e2582` 為本輪對話新產生的 3 個 commit：T20 攻略文章與自動情境頁實作、優惠徽章改為可自訂文字＋首頁圖示、首頁導覽/分類頁側欄/優惠卡片的收尾 UX 修正，見下方 T20 段落）
-- 遠端關係：**已與 `origin/main` 同步，無待 push 的 commit**（每次 commit 後皆已 push，最後核對時間 2026-07-30）
+- HEAD：`31af704`（2026-08-03；`81c3ba7` 為 2026-07-30 較早前一輪對話收尾 commit，`9e75c95`／`cf073a3`／`25e2582`／`65b350b`／`31af704` 為本輪對話產生的 5 個 commit，其中 `31af704` 是同一輪對話跨日到 2026-08-03 才產生，詳見新交接摘要的「Git 事實」表）
+- 遠端關係：**已與 `origin/main` 同步，無待 push 的 commit**（每次 commit 後皆已 push，最後核對時間 2026-08-03）
 
 新 session 必須以 `git rev-parse --show-toplevel`、`git status` 及 `git rev-parse --short HEAD` 重新核對，不得只相信本文件。
 
@@ -103,8 +103,9 @@
 - **2026-07-30 決策反轉**：AI 用 mockup 具體呈現自動情境頁的樣子（單薄清單、但有獨立網址可被索引）供使用者評估後，使用者決定**兩者都做**——自動情境頁（`/scenarios/[slug]`，核心情境標籤各一頁）負責「先有網址、全部標籤一次上線」，人工攻略文章負責「結論、比較表、FAQ」的深度內容，兩者互補、非取代關係。
 - **2026-07-30（同日稍晚）核心情境標籤擴充為 14 項**：使用者參考同業網站的情境分類截圖，比對後新增電影／高鐵台鐵／eTag／停車／道路救援 5 項（高鐵與台鐵合併為一個標籤），明確排除「首刷禮行李箱」這類促銷型項目不列入情境標籤；規格書同步升版至 **v6**（v5 已加註取代說明）。T20 任務卡同步更新為 v3。
 - **現況（2026-07-30 更新）**：Scope v3 已完整實作。schema 升版至 v6（新增 `Article` model，依 schema 專門流程走完清單確認→migration→spec 同步）；`/scenarios/[slug]` 14 個情境頁、`/guides`＋`/guides/[slug]` 攻略文章前台、`/admin/articles` 後台 CRUD、sitemap／llms.txt／首頁入口／撰寫準則文件皆已完成。自動驗證（`prisma validate`／`tsc`／`eslint`／`next build`／瀏覽器唯讀驗證）全數通過，包含防 XSS 驗證（Markdown 中的 `<script>` 標籤確認未被執行）。**後台文章新增／編輯／發布／下架流程需使用者親自登入驗收**（AI 無管理員憑證，不代為輸入密碼），見人工測試腳本 `docs/implementation/manual-test-scripts/T20-攻略文章與自動情境頁測試腳本-v1-2026-07-30.md`。Summary：`docs/implementation/summaries/T20-GUIDE_ARTICLES_SUMMARY-v1-2026-07-30.md`。已 `git add`＋local commit（`9e75c95`），並已於同輪對話後續 push（見下方「本輪對話收尾」）。
-- **人工測試腳本 8 項已於 2026-07-30 由使用者跑完**：過程中發現並回報兩個問題，AI 已修正——① 新增／編輯文章時 FAQ JSON 格式錯誤或 Slug 重複會讓整頁崩潰（`throw new Error` 未被 Server Action 捕捉），已改為 `AdminActionState` 錯誤回傳模式並顯示於表單內（新增 `src/components/AdminArticleForm.tsx`）；② 後台原本無刪除文章功能，已新增 `deleteArticle`＋帶瀏覽器 `confirm()` 二次確認的刪除按鈕（新增 `src/components/ConfirmSubmitButton.tsx`）。詳見人工測試腳本「執行結果」段落。**新增的刪除功能與修正後的錯誤訊息顯示，尚待使用者再次確認**，確認後測試腳本才算全數通過，目前仍標「待人工驗收」。
-- 修正過程中 AI 誤在 dev server 執行中又跑一次 `next build`，導致 `.next` 快取損毀（`Cannot find module`），已清除 `.next` 並重啟 dev server 排除，純本機建置快取問題，未影響原始碼或資料。
+- **人工測試腳本 8 項已於 2026-08-03（同一輪對話跨日繼續）由使用者跑完**：過程中發現並回報兩個問題，AI 已修正——① 新增／編輯文章時 FAQ JSON 格式錯誤或 Slug 重複會讓整頁崩潰（`throw new Error` 未被 Server Action 捕捉），已改為 `AdminActionState` 錯誤回傳模式並顯示於表單內（新增 `src/components/AdminArticleForm.tsx`）；② 後台原本無刪除文章功能，已新增 `deleteArticle`＋帶瀏覽器 `confirm()` 二次確認的刪除按鈕（新增 `src/components/ConfirmSubmitButton.tsx`）。詳見人工測試腳本「執行結果」段落。**新增的刪除功能與修正後的錯誤訊息顯示，尚待使用者再次確認**，確認後測試腳本才算全數通過，目前仍標「待人工驗收」。
+- 修正過程中（2026-08-03）AI 誤在 dev server 執行中又跑一次 `next build`，導致 `.next` 快取損毀（`Cannot find module`），已清除 `.next` 並重啟 dev server 排除，純本機建置快取問題，未影響原始碼或資料。
+- 上述人工測試回饋與修正（`31af704`）已 push（2026-08-03，使用者於對話中指示「push」）。
 - Non-scope／風險（詳見任務卡）：情境頁與攻略文章若涵蓋同一情境，需注意 Google 關鍵字互搶風險；情境標籤對照表 v1 先寫死在程式碼、不開後台管理；部分情境標籤目前資料量很少（如訂閱服務目前僅 1 筆優惠），頁面內容單薄的問題待實作時定案。
 - 相依：建議排在 T18（上線）之後（非強制）；Markdown 渲染套件選型（`react-markdown`＋`remark-gfm`）已確認並安裝。
 - **2026-07-30（同輪對話延伸）首頁 ad-hoc UX 修正（非既有任務卡，對話中即時核准）**：
