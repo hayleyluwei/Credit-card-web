@@ -2,7 +2,7 @@
 
 日期：2026-07-30（Asia/Taipei）
 任務卡：`docs/implementation/tasks/T20-GUIDE_ARTICLES_攻略文章功能.md`（v3 已核准 2026-07-30）
-任務狀態：**自動驗證通過，待人工驗收**（後台文章 CRUD 需使用者親自登入操作，見人工測試腳本）
+任務狀態：**已完成**（自動驗證與人工測試腳本 8 項皆已通過，見人工測試腳本「執行結果」段落；最後確認日 2026-08-03）
 
 ## 核准與方針
 
@@ -60,7 +60,7 @@ Summary 定案後，同一輪對話中使用者實際瀏覽首頁與新頁面時
 4. **`/categories/[slug]` 移除側欄**：拿掉「分類說明」與「常見問題」視覺重複區塊，版面改單欄，`FAQPage` JSON-LD 結構化資料維持保留。
 5. **`OfferCard` 移除「一般」字樣**：只在 `isFeatured` 為真時顯示「精選」，其餘不顯示文字。
 
-使用者已於 2026-08-03（同一輪對話跨日繼續）完整跑過人工測試腳本 8 項，過程中發現並回報兩個問題，AI 已修正：`createArticle`／`updateArticle` 原本用 `throw new Error` 處理 FAQ JSON 格式錯誤／Slug 重複，導致 Server Action 未捕捉例外、整頁崩潰，已改為 `AdminActionState` 錯誤回傳模式（新增 `src/components/AdminArticleForm.tsx`）；後台原本無刪除功能，已新增 `deleteArticle`＋帶確認提示的刪除按鈕（`src/components/ConfirmSubmitButton.tsx`）。詳見人工測試腳本「執行結果」段落。新增的刪除功能本身尚待使用者實測確認，任務狀態維持「自動驗證通過，待人工驗收」（待確認新功能）。
+使用者已於 2026-08-03（同一輪對話跨日繼續）完整跑過人工測試腳本 8 項，過程中發現並回報兩個問題，AI 已修正：`createArticle`／`updateArticle` 原本用 `throw new Error` 處理 FAQ JSON 格式錯誤／Slug 重複，導致 Server Action 未捕捉例外、整頁崩潰，已改為 `AdminActionState` 錯誤回傳模式（新增 `src/components/AdminArticleForm.tsx`）；後台原本無刪除功能，已新增 `deleteArticle`＋帶確認提示的刪除按鈕（`src/components/ConfirmSubmitButton.tsx`）。詳見人工測試腳本「執行結果」段落。新增的刪除功能與修正後的錯誤訊息顯示，使用者已於 2026-08-03 再次登入實測確認皆符合預期，人工測試腳本 8 項全數通過，任務狀態正式改為「已完成」。
 
 自動驗證：`prisma validate`／`tsc --noEmit`／`eslint`／`next build` 皆通過；瀏覽器唯讀驗證確認上述 5 項改動皆正確顯示。
 
