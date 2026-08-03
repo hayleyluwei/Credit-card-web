@@ -1,9 +1,9 @@
 // Credit Card MVP - Prisma Schema
-// Version: 2026-07-30 / v7
+// Version: 2026-08-03 / v8
 // Product Spec: credit-card-mvp-spec-v11-2026-06-08
-// Schema Spec: prisma-schema-spec-v7-2026-07-30.md
+// Schema Spec: prisma-schema-spec-v8-2026-08-03.md
 // Target: personal developer MVP, low-cost setup
-// Database: SQLite for local MVP development
+// Database: PostgreSQL (Neon) for production; also used for local dev
 // v3 (T21): add RewardTier / Channel / RewardTierChannel; Offer gains tiers
 //   relation + headlineRate/headlineSummary. Reconciled the drifted v2
 //   spec-dir copy (missing T19 Card fields).
@@ -19,13 +19,16 @@
 //   Replaces the old computed "進行中/已過期" badge, which was always
 //   "進行中" in practice since expired offers are filtered out before
 //   display. Optional; blank hides the badge.
+// v8 (T18): switch datasource provider from sqlite to postgresql for
+//   production deployment on Neon. No model, field, or type changes --
+//   every column already used provider-agnostic scalar types.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
