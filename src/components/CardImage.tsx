@@ -3,13 +3,14 @@ import { resolveCardColors, wrapCardName, type CardColorInput } from "@/lib/card
 
 type CardImageProps = CardColorInput & {
   alt?: string | null;
+  bankName: string;
   className?: string;
   imageUrl?: string | null;
   name: string;
   slug: string;
 };
 
-export function CardImage({ alt, className = "", imageUrl, name, slug, ...colors }: CardImageProps) {
+export function CardImage({ alt, bankName, className = "", imageUrl, name, slug, ...colors }: CardImageProps) {
   return (
     <div
       className={`relative flex aspect-[1.58/1] min-h-[88px] w-full items-center justify-center overflow-hidden rounded-md border border-line bg-brand-50 text-brand-700 ${className}`}
@@ -17,7 +18,7 @@ export function CardImage({ alt, className = "", imageUrl, name, slug, ...colors
       {imageUrl ? (
         <Image src={imageUrl} alt={alt ?? name} fill sizes="220px" className="object-contain p-3" unoptimized />
       ) : (
-        <GeneratedCardArt slug={slug} name={name} colors={colors} />
+        <GeneratedCardArt slug={slug} name={name} bankName={bankName} colors={colors} />
       )}
     </div>
   );
@@ -28,26 +29,36 @@ export function CardImage({ alt, className = "", imageUrl, name, slug, ...colors
  * 留空則回退為依卡片代號雜湊的預設色。晶片／光澤／細邊框都是所有信用卡通用的視覺語言，
  * 未重製任何銀行的 Logo 或專屬構圖。卡片名稱是主視覺，不顯示發卡組織。
  */
-function GeneratedCardArt({ slug, name, colors }: { slug: string; name: string; colors: CardColorInput }) {
-  const { bgFrom, bgTo, text, chipFrom, chipTo, chipLine, borderFrom, borderTo } = resolveCardColors(slug, colors);
+function GeneratedCardArt({
+  slug,
+  name,
+  bankName,
+  colors
+}: {
+  slug: string;
+  name: string;
+  bankName: string;
+  colors: CardColorInput;
+}) {
+  const { bgFrom, bgTo, text, chipFrom, chipTo, borderFrom, borderTo } = resolveCardColors(slug, colors);
 
   const bgId = `card-bg-${slug}`;
   const sheenId = `card-sheen-${slug}`;
   const chipId = `card-chip-${slug}`;
   const borderId = `card-border-${slug}`;
 
-  const nameFontSize = 25;
-  const nameLineHeight = 30;
+  const nameFontSize = 22;
+  const nameLineHeight = 27;
   const nameMaxWidth = 344 - 26 - 26;
   const nameLines = wrapCardName(name, nameMaxWidth, nameFontSize);
-  const lastLineY = 178;
+  const lastLineY = 182;
 
   return (
     <svg
       viewBox="0 0 344 216"
       className="absolute inset-0 h-full w-full"
       role="img"
-      aria-label={`${name} 卡面示意圖`}
+      aria-label={`${bankName} ${name} 卡面示意圖`}
     >
       <defs>
         <linearGradient id={bgId} x1="0" y1="0" x2="1" y2="1">
@@ -73,9 +84,19 @@ function GeneratedCardArt({ slug, name, colors }: { slug: string; name: string; 
       <rect x="0" y="0" width="344" height="216" rx="18" fill={`url(#${bgId})`} />
       <rect x="0" y="0" width="344" height="216" rx="18" fill={`url(#${sheenId})`} />
 
-      <rect x="26" y="28" width="38" height="27" rx="4" fill={`url(#${chipId})`} />
-      <line x1="26" y1="41.5" x2="64" y2="41.5" stroke={chipLine} strokeWidth="0.8" />
-      <line x1="45" y1="28" x2="45" y2="55" stroke={chipLine} strokeWidth="0.8" />
+      <text
+        x="26"
+        y="42"
+        fontFamily="system-ui, -apple-system, 'Noto Sans TC', sans-serif"
+        fontSize="20"
+        fontWeight="700"
+        fill={text}
+        fillOpacity="0.97"
+      >
+        {bankName}
+      </text>
+
+      <rect x="26" y="68" width="40" height="28" rx="4" fill={`url(#${chipId})`} />
 
       {nameLines.map((line, i) => (
         <text
@@ -84,9 +105,9 @@ function GeneratedCardArt({ slug, name, colors }: { slug: string; name: string; 
           y={lastLineY - (nameLines.length - 1 - i) * nameLineHeight}
           fontFamily="system-ui, -apple-system, 'Noto Sans TC', sans-serif"
           fontSize={nameFontSize}
-          fontWeight="700"
+          fontWeight="400"
           fill={text}
-          fillOpacity="0.97"
+          fillOpacity="0.92"
         >
           {line}
         </text>

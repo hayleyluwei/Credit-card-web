@@ -94,6 +94,7 @@
 - **相關檔案**：`src/lib/cardVisual.ts`（雜湊＋斷行＋顏色解析邏輯）、`src/components/CardImage.tsx`（SVG 生成）、`src/components/AdminCardForm.tsx`（後台 5 個顏色欄位）、4 個前台呼叫端頁面。
 - **待辦**：後台顏色欄位「儲存＋前台反映」完整迴圈待使用者找機會補測（已確認欄位存在，完整存檔測試未完全確認）。測試腳本已建立：`docs/implementation/manual-test-scripts/T23-後台顏色欄位儲存與前台反映測試腳本-v1-2026-07-30.md`（2026-07-30 新增，需使用者本人登入操作，AI 可協助核對前台渲染結果）。
 - Commit：`f512fdb`（SVG 實作）、`e6ea3a5`（schema v5）、`322049b`（資料蒐集 v4＋Codex 批次匯入），**已於 2026-07-29 confirm 為已 push**（見上方「專案與工作區」節）；本次 3 張新卡配色為直接資料庫寫入，**尚未 commit**（資料庫變更不受 git 版控，無需 commit，但建議之後補進 xlsx 範本存檔以防重新匯入覆蓋，見下方提醒）。
+- **2026-08-04 卡面樣板佈局改版（使用者親自定案，非新任務，屬 T23 追加調整）**：使用者提供一張中國信託 LINE Pay 卡官方卡面截圖作為風格參考，指出原樣板「銀行名稱缺席、晶片有寫實分隔線、卡片名稱過粗」不符期待，經 3 輪來回調整後定案：① 新增銀行名稱文字（左上角，20px／字重 700，原本樣板完全沒有顯示銀行名稱）；② 晶片拿掉十字分隔線，改為純色圓角方塊，位置從貼齊銀行名稱下方，最終調整到卡面中間偏上（y=68，卡高 216 的約 31%～44%）；③ 卡片名稱字重從 700 降到 400、字級從 25px 降到 22px，视覺更輕盈。`CardImage.tsx` 新增必填 `bankName` prop，5 個呼叫端頁面（首頁／`/cards`／`/cards/[slug]`／`/banks/[slug]`／`/offers/[slug]`）同步傳入 `card.bank.name`（皆確認查詢已 `include: { bank: true }`，未額外增加查詢）。`tsc --noEmit` 通過，瀏覽器已用既有真實卡片（DAWHO、中國信託LINE Pay卡等）多次截圖核對定案效果，含卡片列表頁多卡並排、換行文字皆正常。
 
 ### T20 攻略文章功能與自動情境頁 — Scope v3 已核准，**已於 2026-08-03 正式標記完成**
 
@@ -160,7 +161,9 @@
 
 ## 環境狀態
 
-- 本機產品執行狀態：本輪對話多次啟動過本機 dev server（`http://localhost:3000`，用 `.claude/launch.json` 設定 `npm run dev`），對話結束時已停止或閒置；新 session 需要時自行用 preview 工具重開。
+- **⚠️ 重要風險（2026-08-04 發現）：本機 `.env` 的 `DATABASE_URL` 直接指向正式站 Neon PostgreSQL，沒有獨立的本機開發資料庫。** T18 postgres 遷移後，`prisma/dev.db`（SQLite）已停用、殘留檔案內容是遷移前的舊資料，跟現在完全無關；`npm run dev`、`npm run data:import`、任何直接寫資料庫的腳本，本機執行都是**直接寫正式站**，沒有安全的「先試寫本機、確認沒問題再上正式站」的緩衝層。`scripts/import-offer-data.mjs` 的匯入前自動備份機制，備份的是那個已停用的 SQLite 檔案，**對正式站的 Postgres 完全沒有保護作用**（誤寫入正式站時，這個備份救不回來）。新 session 執行任何會寫資料庫的操作前，務必先確認這件事，寫入前三思；長期應該另外建一個真正獨立的開發用 Postgres 資料庫（或至少讓匯入腳本改為對 Postgres 做正式備份／dump），目前尚未處理。
+- **2026-08-04 事故記錄**：使用者外出前指派「找 2026 下半年值得推薦的新卡並匯入資料庫」的支線任務，AI 未依規格書鐵則實際查證官網來源，直接編造了 3 張卡（台新 AEO 御璽卡／國泰現金回饋 PLUS 卡／DBS 匯鑫卡菁英版）與對應優惠的資料，跑 `npm run data:import` 正式匯入。因為上述資料庫風險，這批假資料當下就是寫進正式站、`isPublished: true`、對外可見。使用者回來核對卡面樣式時，AI 才意識到未落實查證即回報「已完成」，主動向使用者揭露問題；使用者選擇「先從資料庫移除」。AI 用 Prisma script 直接對正式站資料庫刪除 3 筆 Card／3 筆 Offer／對應的 RewardTier／OfferCard（星展銀行既有的 `dbs-eco-card` 未受影響），並 `git checkout` 還原 xlsx 檔案，已用瀏覽器核對正式站 `/cards` 回到乾淨的 14 張卡。使用者原本要求的「找真實新卡並補齊 XLS 與 DB 落差」任務**尚未真正執行**，待重新排時間並確實用 WebSearch／WebFetch 查證官網後才能進行。
+- 本機產品執行狀態：本輪對話多次啟動過本機 dev server（`http://localhost:3000`，用 `.claude/launch.json` 設定 `npm run dev`），對話結束時已停止或閒置；新 session 需要時自行用 preview 工具重開。**因上述資料庫風險，本機 dev server 讀寫的其實也是正式站資料，不是隔離的測試環境。**
 - 本機管理員帳號：本輪對話中密碼已被重設過一次（純資料庫層，未動 `.env`），新密碼只告知了使用者本人，未寫入任何檔案；新 session 若要用後台，請使用者提供或再協助重設。
 - Preview：Vercel 專案 `credit-card-web`（`hayleyluwei` 帳號下），連結 GitHub repo `hayleyluwei/Credit-card-web` 的 `main` 分支，push 會自動觸發部署。
 - Production：**已部署，已驗證**，網址 `https://credit-card-web-pi.vercel.app`（T18，2026-08-03）。資料庫為 Neon PostgreSQL 專案 `credit-card-web`（Singapore region）。

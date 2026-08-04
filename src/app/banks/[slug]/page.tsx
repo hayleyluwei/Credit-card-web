@@ -138,6 +138,7 @@ export default async function BankDetailPage({ params }: BankPageProps) {
                         imageUrl={card.imageUrl}
                         alt={card.imageAlt}
                         name={card.name}
+                        bankName={bank.name}
                         slug={card.slug}
                         cardBgColorFrom={card.cardBgColorFrom}
                         cardBgColorTo={card.cardBgColorTo}

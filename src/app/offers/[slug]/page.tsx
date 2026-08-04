@@ -240,6 +240,7 @@ export default async function OfferDetailPage({ params }: OfferPageProps) {
                       imageUrl={offerCard.card.imageUrl}
                       alt={offerCard.card.imageAlt}
                       name={offerCard.card.name}
+                      bankName={offerCard.card.bank.name}
                       slug={offerCard.card.slug}
                       cardBgColorFrom={offerCard.card.cardBgColorFrom}
                       cardBgColorTo={offerCard.card.cardBgColorTo}
