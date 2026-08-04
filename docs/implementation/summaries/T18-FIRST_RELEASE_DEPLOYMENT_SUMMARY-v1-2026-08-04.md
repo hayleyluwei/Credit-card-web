@@ -1,6 +1,6 @@
 # T18 第一版部署上線 Summary
 
-日期：2026-08-03（Asia/Taipei）
+日期：2026-08-04（Asia/Taipei）；本輪對話橫跨兩個實際日期（2026-08-03 至 2026-08-04，同一輪對話中間有真實時間間隔，commit 時間戳可證實：schema 遷移／Neon 建立／資料搬遷／Vercel 第一次部署與 `postinstall` 修正為 08-03 `bd6e7c7`；`NEXTAUTH_URL` 修正、後台登入確認、本文件與 T25 建立為 08-04 `241598e`）
 任務卡：`docs/implementation/tasks/T18-FIRST_RELEASE_DEPLOYMENT_第一版部署上線.md`（v1 已核准 2026-07-30）
 任務狀態：**已完成**
 
