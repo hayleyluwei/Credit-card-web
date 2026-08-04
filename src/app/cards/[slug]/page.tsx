@@ -172,7 +172,6 @@ export default async function CardDetailPage({ params }: CardPageProps) {
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-ink">相關優惠</h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">顯示與此卡片相關的公開優惠。</p>
               </div>
               <span className="rounded-full bg-brand-50 px-3 py-1 text-sm text-brand-700">{sortedOffers.length} 筆</span>
             </div>

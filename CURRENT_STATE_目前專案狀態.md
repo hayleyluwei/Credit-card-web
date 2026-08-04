@@ -162,9 +162,9 @@
 
 - 本機產品執行狀態：本輪對話多次啟動過本機 dev server（`http://localhost:3000`，用 `.claude/launch.json` 設定 `npm run dev`），對話結束時已停止或閒置；新 session 需要時自行用 preview 工具重開。
 - 本機管理員帳號：本輪對話中密碼已被重設過一次（純資料庫層，未動 `.env`），新密碼只告知了使用者本人，未寫入任何檔案；新 session 若要用後台，請使用者提供或再協助重設。
-- Preview：未知
-- Production：未知
-- 正式站是否為最新 commit：未知
+- Preview：Vercel 專案 `credit-card-web`（`hayleyluwei` 帳號下），連結 GitHub repo `hayleyluwei/Credit-card-web` 的 `main` 分支，push 會自動觸發部署。
+- Production：**已部署，已驗證**，網址 `https://credit-card-web-pi.vercel.app`（T18，2026-08-03）。資料庫為 Neon PostgreSQL 專案 `credit-card-web`（Singapore region）。
+- 正式站是否為最新 commit：截至 `0958296`（2026-08-03）為最新已部署 commit；此後若有新 commit push 到 `main`，需重新確認正式站是否已更新（Vercel 通常會自動部署，但仍建議新 session 核對 Deployments 分頁的最新一筆對應的 commit）。
 
 未知表示本輪沒有可靠證據，不代表失敗或未部署。
 
@@ -203,10 +203,10 @@
 
 ## 下一步（2026-08-03 更新，取代前一版本）
 
-**T15/T16/T17/T19/T20/T21/T23 皆已完成。** 以下依優先順序：
+**T15/T16/T17/T18/T19/T20/T21/T23 皆已完成。** 以下依優先順序：
 
 1. ~~本地 3 個 commit（`f512fdb`～`322049b`）尚未 push~~ **已確認 push 完成（2026-07-29 新 session 核對），此項不再是待辦。**
-2. T18（部署上線）：**Scope v1 已核准（2026-07-30）**，Vercel/Neon 帳號已就緒，排進實作；schema 現為 v7（含 T20 新增的 Article model 與 badgeLabel），PostgreSQL 遷移屆時一併處理；schema 型別調整／migration 執行／Neon 正式資料載入／Production promote 等個別高風險步驟仍逐一於執行前確認。實際建立 Neon 資料庫、Vercel 專案、環境變數需使用者於各自主控台操作，AI 無法代為建立帳號或專案。
+2. T18（部署上線）：**已於 2026-08-03 正式標記完成**。schema 遷移至 PostgreSQL（v8）、Neon 資料庫（`credit-card-web`，Singapore region）建立並載入正式資料、Vercel 部署成功（`https://credit-card-web-pi.vercel.app`，第一次因 Vercel 依賴快取導致 Prisma Client 未重新產生失敗，已加 `postinstall: prisma generate` 修正，commit `bd6e7c7`）、正式管理員帳號建立（`hayleylu0902@gmail.com`）。`NEXTAUTH_URL` 一開始填錯猜測網址，修正後 Redeploy 生效。上線後驗證全數通過：首頁／六個分類頁／搜尋／三個優惠詳情頁／銀行頁／卡片頁皆正常，**使用者本人已在正式網址親自登入後台成功**，Dashboard 資料正確。已知風險：Neon Free／Vercel Hobby 有冷啟動延遲，確認為免費方案預期行為，非錯誤。詳見 `summaries/T18-FIRST_RELEASE_DEPLOYMENT_SUMMARY-v1-2026-08-03.md`。測試期間順手移除情境頁重複標題卡片（commit `0958296`）與銀行/卡片頁重複說明文字（本機已驗證，待 commit）。
 3. T24（申辦導引連結）v1 方向已拍板（純導引＋UTM），待正式核准 Scope 開工。
 4. T22（排程輔助資料更新）已起草待核准，依賴 T18／T21，5 個待決問題未拍板。
 5. Codex 若有後續資料蒐集批次，先確認 `.ai-worktree-lock.json` 再接手；**指派任務時需明確指定使用 `DATA_COLLECTION_SPEC...v6-2026-07-30.md` 與 `信用卡優惠資料整理模板-v3-2026-07-29.xlsx`**（v6 規格書核心情境標籤共 14 項；v3 模板含卡面配色欄位；這個切換不會自動發生）；重跑 `npm run data:import`（增量模式）不會清空既有資料。
@@ -216,6 +216,7 @@
 9. T23 現況：**14 張卡已全數補上官網真實配色**（2026-07-29 完成最後 3 張）；多卡面選項（玉山Unicard、中信LINE Pay卡）已拍板採「官網第一張卡片/色版」為代表色原則，非阻塞項目。T23 補測腳本（後台顏色欄位儲存與前台反映）已建立但尚未執行，使用者有空時可登入操作。
 10. 優惠詳情頁移除了重複顯示分類/標籤的「優惠摘要」側欄，標籤改寫入 Article JSON-LD 的 `keywords` 欄位（2026-07-29，commit `f0f6ecc`，已 push），詳見下方「AI 引用性」段落。
 11. 搜尋頁 `/search` 的「熱門搜尋」快速入口已補上「訂閱服務」（2026-07-30，`src/app/search/page.tsx`，commit `3fd8e4d`，已 push），與 CUBE 卡「玩數位」標籤回補一起處理。
+12. **T25（優惠網址穩定性與過期轉址）v1 草案，待核准（新增，2026-08-03）**：T18 測試期間使用者發現，優惠依規格書 3.4「情況二」換新 Slug 後，舊優惠過期會被前台判 404，不會轉址到新版本，長期會流失 SEO 收錄與排名（若未來走向營利更明顯）。已建任務卡記錄問題與可能方向（`tasks/T25-OFFER_URL_STABILITY_優惠網址穩定性與過期轉址.md`），5 個待決問題未拍板，不影響現有資料（多屬「情況一」延續，尚未真的發生過情況二），不擋 T18 上線。
 
 使用者已於 2026-07-08 拍板：清除 seed 測試資料（已完成）、部署平台 Vercel Hobby + Neon Free、後台帳號由使用者本人持有。首頁未提交變更與 T15 治理文件批次已於 2026-07-27 全部 commit 並 push（不再是待處理項）。
 

@@ -121,7 +121,6 @@ export default async function BankDetailPage({ params }: BankPageProps) {
         <div className="space-y-8">
           <div className="rounded-3xl border border-line bg-white p-6 shadow-soft">
             <h2 className="text-2xl font-bold text-ink">本行相關卡片</h2>
-            <p className="mt-3 text-sm leading-6 text-slate-600">顯示此銀行可用的信用卡與它們所對應的公開優惠數。</p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -171,7 +170,6 @@ export default async function BankDetailPage({ params }: BankPageProps) {
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-ink">相關優惠</h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">顯示此銀行包含的所有公開優惠。</p>
               </div>
               <span className="rounded-full bg-brand-50 px-3 py-1 text-sm text-brand-700">共 {sortedOffers.length} 筆</span>
             </div>
