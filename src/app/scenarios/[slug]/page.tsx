@@ -80,13 +80,6 @@ export default async function ScenarioDetailPage({ params }: ScenarioPageProps) 
       </header>
 
       <section className="space-y-8">
-        <div className="rounded-3xl border border-line bg-white p-6 shadow-soft">
-          <h2 className="text-2xl font-bold text-ink">符合「{scenario.tagLabel}」情境的優惠</h2>
-          <p className="mt-3 text-sm leading-6 text-slate-600">
-            以下優惠已標註適用「{scenario.tagLabel}」情境，請進入優惠詳情確認適用信用卡、消費門檻、回饋上限與官方條件。
-          </p>
-        </div>
-
         <div className="space-y-4">
           {sortedOffers.length > 0 ? (
             sortedOffers.map((offer) => <OfferCard key={offer.id} offer={offer} />)
