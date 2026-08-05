@@ -13,6 +13,7 @@ import {
   evaluateHealth,
   checkOffer,
   summarize,
+  normalizeNumericText,
   MIN_PAGE_TEXT_LENGTH
 } from "./t22/assertions.mjs";
 
@@ -61,11 +62,11 @@ check("空字串輸入不會誤判為找到", !containsNumericToken("", "3%"));
 // 若正規化只套用在其中一邊，比對會永遠落空，把沒變的優惠誤報成疑似有變。
 check(
   "【回歸】資料庫寫 1,000、官網寫 1000 時仍比對得到",
-  containsNumericToken(normalizeText("單筆滿1000元"), extractAssertableTokens("單筆滿 1,000 元")[0])
+  containsNumericToken(normalizeNumericText("單筆滿1000元"), extractAssertableTokens("單筆滿 1,000 元")[0])
 );
 check(
   "【回歸】資料庫寫 1000、官網寫 1,000 時仍比對得到",
-  containsNumericToken(normalizeText("單筆滿1,000元"), extractAssertableTokens("單筆滿 1000 元")[0])
+  containsNumericToken(normalizeNumericText("單筆滿1,000元"), extractAssertableTokens("單筆滿 1000 元")[0])
 );
 
 // --- extractAssertableTokens ----------------------------------------------
@@ -89,6 +90,34 @@ equal(
   "重複 token 會去重",
   JSON.stringify(extractAssertableTokens("3% 與 3%")),
   JSON.stringify(["3%"])
+);
+
+// 回歸測試：2026-08-05 跑完整 34 筆時，在國泰 CUBE 卡發現的嚴重抽取錯誤。
+// 原本的正規化會刪掉所有空白，使「Level 1 2%」黏成「level12%」，於是抽出資料裡
+// 根本不存在的 token「12%」（必然找不到 → 假警報），真正的回饋率 2% 反而完全沒被檢查。
+const cubeRate = "Level 1 2%；Level 2 3%；Level 3 3.3%；集精選2%；一般消費0.3%";
+const cubeTokens = extractAssertableTokens(cubeRate);
+check("【回歸】不得抽出被空白黏合而成的假 token 12%", !cubeTokens.includes("12%"));
+check("【回歸】不得抽出被空白黏合而成的假 token 23%", !cubeTokens.includes("23%"));
+check("【回歸】不得抽出被空白黏合而成的假 token 33.3%", !cubeTokens.includes("33.3%"));
+check("【回歸】真正的回饋率 2% 要被抽出來檢查", cubeTokens.includes("2%"));
+check("【回歸】真正的回饋率 3% 要被抽出來檢查", cubeTokens.includes("3%"));
+check("【回歸】真正的回饋率 3.3% 要被抽出來檢查", cubeTokens.includes("3.3%"));
+check("【回歸】真正的回饋率 0.3% 要被抽出來檢查", cubeTokens.includes("0.3%"));
+
+// 官網把數字與百分號分開寫（「3 %」）時，仍應視為同一個值。
+equal(
+  "數字與百分號之間的空白會被收斂",
+  JSON.stringify(extractAssertableTokens("回饋 3 %")),
+  JSON.stringify(["3%"])
+);
+check(
+  "【回歸】頁面寫「Level 1 2%」時，2% 要找得到（保留空白邊界）",
+  containsNumericToken(normalizeNumericText("Level 1 2% 起"), "2%")
+);
+check(
+  "【回歸】頁面寫「Level 1 2%」時，不應誤判為含有 12%",
+  !containsNumericToken(normalizeNumericText("Level 1 2% 起"), "12%")
 );
 
 // --- buildAssertions / buildAnchors ---------------------------------------

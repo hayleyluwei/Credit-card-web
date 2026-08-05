@@ -29,6 +29,30 @@ export function normalizeText(input) {
     .toLowerCase();
 }
 
+/**
+ * 數值比對專用的正規化：與 normalizeText 的關鍵差異是「保留空白」。
+ *
+ * 兩者不能共用一套規則，因為需求互相矛盾：
+ *   - 錨點比對要刪掉所有空白。卡片名稱在頁面上常被換行或不同 DOM 節點切開
+ *     （「中國信託\n中華航空聯名卡」），不刪空白就比不到。
+ *   - 數值比對要保留空白當邊界。2026-08-05 實測發現，刪掉空白會讓
+ *     「Level 1 2%」黏成「level12%」，於是抽出憑空捏造的 token「12%」，
+ *     真正的回饋率 2% 反而完全沒被檢查——假警報與漏檢同時發生。
+ *
+ * 空白統一收斂為單一半形空格；但數字與百分號之間的空白要去掉，
+ * 因為官網常寫成「3 %」而資料庫寫「3%」，那是同一個值。
+ */
+export function normalizeNumericText(input) {
+  if (typeof input !== "string") return "";
+  return input
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/(\d)\s+%/gu, "$1%")
+    .replace(/(?<=\d),(?=\d)/gu, "")
+    .replace(/\s+/gu, " ")
+    .trim();
+}
+
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }
@@ -52,8 +76,8 @@ export function containsNumericToken(normalizedPageText, token) {
  * 官網上，因此比對的對象是其中的數字，而不是整個字串。
  */
 export function extractAssertableTokens(rawValue) {
-  // 直接沿用 normalizeText，確保與頁面文字走完全相同的正規化規則（含千分位處理）。
-  const normalized = normalizeText(rawValue);
+  // 必須用保留空白的正規化，否則「Level 1 2%」會黏成「level12%」而抽出錯誤的 12%。
+  const normalized = normalizeNumericText(rawValue);
   if (!normalized) return [];
 
   const matches = normalized.match(/\d+(?:\.\d+)?%?/gu) ?? [];
@@ -223,7 +247,9 @@ export function evaluateHealth({ fetchResult, anchors, normalizedPageText }) {
  * verdict 只有四種，且「健康檢查未過」永遠不會被歸類為 unchanged。
  */
 export function checkOffer({ offer, fetchResult, pageText }) {
+  // 同一份頁面文字要用兩套正規化：錨點比對刪空白，數值比對保留空白當邊界。
   const normalizedPageText = normalizeText(pageText);
+  const numericPageText = normalizeNumericText(pageText);
   const anchors = buildAnchors(offer);
   const health = evaluateHealth({ fetchResult, anchors, normalizedPageText });
 
@@ -249,7 +275,7 @@ export function checkOffer({ offer, fetchResult, pageText }) {
 
   const assertions = buildAssertions(offer).map((assertion) => ({
     ...assertion,
-    found: containsNumericToken(normalizedPageText, assertion.token)
+    found: containsNumericToken(numericPageText, assertion.token)
   }));
 
   const missing = assertions.filter((assertion) => !assertion.found);
