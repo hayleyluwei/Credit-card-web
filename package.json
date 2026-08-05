@@ -31,7 +31,10 @@
     "smoke:real-data": "node scripts/verify-real-card-data.mjs",
     "smoke:admin-ux-v2": "node scripts/verify-admin-ux-fixes-v2.mjs",
     "smoke:admin-ux-v3": "node scripts/verify-admin-ux-fixes-v3.mjs",
-    "smoke:homepage-card-entry": "node scripts/verify-homepage-card-entry.mjs"
+    "smoke:homepage-card-entry": "node scripts/verify-homepage-card-entry.mjs",
+    "t22:check": "node scripts/check-offer-sources.mjs",
+    "t22:check:dry": "node scripts/check-offer-sources.mjs --dry-run",
+    "smoke:t22": "node scripts/verify-t22-source-check.mjs"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -50,6 +53,7 @@
     "autoprefixer": "^10.4.19",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.0",
+    "playwright": "^1.62.1",
     "postcss": "^8.4.38",
     "prisma": "^5.22.0",
     "tailwindcss": "^3.4.3",
