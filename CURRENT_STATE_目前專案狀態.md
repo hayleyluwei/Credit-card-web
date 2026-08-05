@@ -11,16 +11,17 @@
 - alias 類型：Windows junction，兩個路徑指向同一份檔案
 - branch：`main`
 - HEAD：**`63a3794`**（2026-08-05）
-- 遠端關係：**⚠️ 本地領先 `origin/main` 共 5 個 commit，尚未 push**（最後核對時間 2026-08-05）。本輪對話的 Git 授權為「`git add` ＋ local commit，**不含 push**」，因此刻意停在本地，待使用者決定何時 push。
-- **本輪 5 個未 push 的 commit**（由舊到新）：
+- 遠端關係：**已與 `origin/main` 同步，無待 push 的 commit**。使用者於 2026-08-06 明確指示 push，已完成（`554cb60..d4cd835`，共 6 個 commit）。本輪對話的 Git 授權原本不含 push，push 為使用者當下另行明確授權。
+- **本輪已 push 的 6 個 commit**（由舊到新）：
   - `476d150` docs：design-system 納入版控、新增 T26／T27／T28 任務卡、T22 改版為 v2
   - `c5be854` docs：記錄 T22 Scope v2 正式核准
   - `e37f07f` feat：T22 瘦身版實作（抓取／比對／健康檢查／通知／排程）
   - `5fb5a88` fix：修正正規化刪空白導致 token 捏造的缺陷
   - `63a3794` docs：記錄 T22 全量實測與 4 筆逐筆查證結果
+  - `d4cd835` docs：同步 CURRENT_STATE 與任務索引至 T22 實作後狀態
 - 本輪之前的歷史：`fdc7432`（2026-08-05）及更早的 7 個 commit 詳見 `docs/implementation/handoffs/2026-08-05-新卡資料補齊與多層回饋支援-交接摘要.md`
 - **未追蹤且刻意未 commit**：`docs/data-collection/backups/`（既有 xlsx 舊快照，非本輪產生，先前交接摘要已明確標記不得未經同意 commit 或刪除）
-- **push 後注意**：push 到 `main` 會觸發 Vercel 自動部署。本輪變更皆為文件與獨立腳本，**未修改任何前台程式碼**，部署後網站外觀與行為不會改變。
+- **push 觸發的部署（2026-08-06）**：push 到 `main` 會觸發 Vercel 自動部署。本批變更皆為文件、獨立腳本與 GitHub Actions workflow，**未修改 `src/` 任何檔案**（push 前已用 `git diff --name-only` 確認），因此網站外觀與行為不會改變。push 前亦已掃描待送內容確認無連線字串、API 金鑰、Telegram token 或私鑰。**新 session 若要確認正式站是否已更新到最新 commit，仍應核對 Vercel Deployments 分頁。**
 
 新 session 必須以 `git rev-parse --show-toplevel`、`git status` 及 `git rev-parse --short HEAD` 重新核對，不得只相信本文件。
 
