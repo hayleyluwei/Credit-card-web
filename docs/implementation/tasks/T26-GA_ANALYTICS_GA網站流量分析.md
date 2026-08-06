@@ -1,11 +1,11 @@
 # T26 GA 網站流量分析
 
 建立日期：2026-08-05（Asia/Taipei）
-任務卡版本：v1（草案）
-核准狀態：待核准
+任務卡版本：v1（已核准）
+核准狀態：已核准（2026-08-06，Asia/Taipei）
 問題類型：功能需求／驗收部署
 
-> **狀態說明**：本任務卡只記錄規劃內容，**不構成任何實作授權**。在使用者針對「風險與待決問題」逐項拍板、並正式核准 Scope 版本之前，不得安裝套件、不得修改程式碼、不得建立或連結任何 Google 帳號／服務。
+> **狀態說明**：使用者已於 2026-08-06 核准 T26 Scope。核准範圍為 Production only、使用 `next/script` 手動載入 GA4 `gtag.js`、不新增套件、暫不做 cookie banner。AI 仍不得建立或登入任何 Google 帳號／服務。
 
 ## 背景
 
@@ -21,27 +21,28 @@
 
 - 使用 Google Analytics（GA4，目前 Google 官方唯一現行版本）做網站流量分析。
 - 排在 T18（部署上線）之後執行，不佔用 T18 Scope（2026-07-27 拍板）。
-- 其餘做法（帳號歸屬、追蹤範圍、隱私揭露方式）尚未拍板，見下方待決問題。
+- 使用者需自行建立 GA4 資源並取得 Measurement ID；AI 不代為建立或登入 Google 帳號。
+- GA 只在 Production 環境且有 `NEXT_PUBLIC_GA_MEASUREMENT_ID` 時載入，本機開發不追蹤。
+- 技術實作採 `next/script` 手動載入 `gtag.js`，不新增 npm 套件。
+- 暫不做 cookie banner；隱私權政策或追蹤揭露可另案處理。
 
 ## 目標
 
 網站上線後的訪客流量（頁面瀏覽、流量來源、熱門頁面等）能被記錄到使用者自己的 GA4 帳號，讓使用者可以在 GA 後台查看網站實際使用狀況。
 
-## Scope（規劃內容；核准實作前不得執行）
+## Scope（v1 已核准）
 
-若後續拍板通過，預期實作範圍包含（實際做法待「風險與待決問題」拍板後定案，以下為初步方向，非定案）：
-
-- 在 `src/app/layout.tsx`（或等效的全站共用佈局）加入 GA4 追蹤程式碼（預期使用 `@next/third-parties` 的 `GoogleAnalytics` 元件，或官方 `gtag.js` 片段，兩者擇一，見待決問題）。
+- 在 `src/app/layout.tsx`（或等效的全站共用佈局）加入 GA4 追蹤程式碼，使用 `next/script` 載入官方 `gtag.js` 片段，不新增套件。
 - 新增環境變數（例如 `NEXT_PUBLIC_GA_MEASUREMENT_ID`）存放 GA4 Measurement ID，於 Vercel 專案設定與本機 `.env` 分別設定；Measurement ID 本身不是機密資訊（GA4 設計上會出現在前端原始碼），但仍集中管理、不寫死在程式碼中。
-- 確認正式站（Vercel Production）與本機開發環境的追蹤是否需要區分（例如本機開發時不應把測試流量記進正式 GA 資料，見待決問題）。
-- 視待決問題結果，評估是否需要新增或更新隱私權政策頁面，向訪客揭露有使用分析工具。
+- 只在正式站（Vercel Production / `NODE_ENV=production`）且存在 Measurement ID 時載入 GA；本機開發環境不載入，避免測試流量進入正式 GA 資料。
+- 暫不新增 cookie banner；隱私權政策或追蹤揭露若需要，另開或另核准文件／頁面任務處理。
 - 建立 T26 Summary、更新任務索引與 CURRENT_STATE。
 
 ## Non-scope
 
 - **不由 AI 建立或登入使用者的 Google／GA4 帳號**：GA4 資源（帳號、資源、資料串流）需要使用者自己用 Google 帳號在 [analytics.google.com](https://analytics.google.com) 建立，AI 只能在使用者提供 Measurement ID 後協助接線，不代為註冊或登入任何 Google 服務。
 - 不做進階事件追蹤（如自訂轉換事件、電子商務追蹤）——目前網站無交易行為，v1 只做基本頁面瀏覽與流量來源分析。
-- 不做 Cookie 同意管理平台（Consent Management Platform）等完整合規機制，除非待決問題 (c) 拍板需要。
+- 不做 Cookie 同意管理平台（Consent Management Platform）或 cookie banner；如後續需要隱私權政策頁或退出追蹤機制，另案處理。
 - 不涉及 T24（申辦導引連結）UTM 參數本身的設計與實作，只確保串接後 GA 能正確接收帶 UTM 的流量來源。
 - 不修改 T18 已完成的部署設定以外的其他任務範圍。
 
@@ -57,9 +58,9 @@
 - 頁面與 route：全站共用佈局（`src/app/layout.tsx`），追蹤程式碼會影響所有頁面。
 - API：不涉及。
 - 資料模型與資料流：不涉及，GA 資料存於 Google 端，不寫入本專案資料庫。
-- 共用元件：可能新增一個 Analytics 相關元件（視採用 `@next/third-parties` 或手動 `gtag.js` 而定）。
-- 文件與測試：`.env.example` 新增欄位說明；視待決問題 (c) 結果可能新增或更新隱私權政策頁面；T26 Summary。
-- 外部服務：新增 Google Analytics（GA4）——需使用者自行建立帳號與資源；若採用 `@next/third-parties` 套件，屬新增 npm 相依（依 `AI_WORKFLOW_AI協作流程.md` 第三層，需先確認）。
+- 共用元件：不新增共用元件，直接在全站 layout 以 `next/script` 載入 GA。
+- 文件與測試：`.env.example` 新增欄位說明；新增 T26 專用檢查腳本；T26 Summary。
+- 外部服務：新增 Google Analytics（GA4）——需使用者自行建立帳號與資源；本任務不新增 npm 相依。
 
 ## 驗證方式與完成定義
 
@@ -76,35 +77,36 @@
 
 ## Git 授權
 
-- 允許：status、diff、log 唯讀操作；本任務卡草稿本身的建立與文件更新（治理紀錄範疇）。
-- 不允許（核准時可另行授權）：建立或切換 branch、`git add`、local commit、push、破壞性或重寫歷史操作、修改程式碼、安裝套件。
+- 允許：status、diff、log 唯讀操作；在 `codex/t26-ga-analytics` 隔離 worktree 中進行 T26 實作與文件更新。
+- 不允許：`git add`、local commit、push、破壞性或重寫歷史操作，除非使用者另行明確授權。
 
 ## 風險與待決問題
 
-以下為尚未拍板的分岔路，任一項未決定前不應核准 Scope 進入實作：
+以下分岔路已於 2026-08-06 由使用者拍板：
 
-1. **(a) GA4 資源由誰建立、用哪個 Google 帳號？** 使用者需自行在 [analytics.google.com](https://analytics.google.com) 建立 GA4 帳號與資源（AI 不代為註冊或登入），並提供 Measurement ID（格式如 `G-XXXXXXXXXX`）給 AI 接線。時程上這是實作前的前置動作。
+1. **(a) GA4 資源由誰建立、用哪個 Google 帳號？** 使用者需自行在 [analytics.google.com](https://analytics.google.com) 建立 GA4 帳號與資源（AI 不代為註冊或登入），並提供或自行設定 Measurement ID（格式如 `G-XXXXXXXXXX`）。
 2. **(b) 本機開發環境的追蹤要不要排除？** 選項：
    - 只在 Production 環境（`NODE_ENV=production` 或 Vercel 環境變數區分）載入 GA 追蹤程式碼，本機 `npm run dev` 完全不載入。
    - 本機也載入但用不同的 GA 資源（開發用資源，資料分開看）。
    - 都用同一個資源，不特別區分（會讓開發測試流量混進正式流量資料，較不建議）。
-   建議選第一種（僅 Production 載入），但需使用者確認。
+   **拍板：採第一種，僅 Production 載入。**
 3. **(c) 是否需要 Cookie／隱私權同意機制？** GA4 預設會在使用者裝置寫入 cookie／識別碼。台灣個資法對此沒有強制要求歐盟 GDPR 式的 cookie 同意彈窗，但：
    - 是否至少需要新增或更新一個隱私權政策頁面，說明網站有使用 Google Analytics？
    - 是否需要加入同意橫幅（consent banner），讓使用者可選擇退出追蹤？
-   這會影響 Scope 大小與 Non-scope 邊界，需使用者決定要做到哪個程度。
-4. **(d) 技術實作方式：`@next/third-parties` 套件 vs 手動 `gtag.js` 片段？** 前者是 Next.js 官方套件，寫法簡潔但屬新增 npm 相依（依流程第三層需先確認）；後者不新增套件，手動維護追蹤程式碼片段，彈性較低但無新相依。兩者功能上對使用者體驗無明顯差異，需拍板選一個。
+   **拍板：暫不做 cookie banner；隱私權政策或追蹤揭露另案處理。**
+4. **(d) 技術實作方式：`@next/third-parties` 套件 vs 手動 `gtag.js` 片段？** 前者是 Next.js 官方套件，寫法簡潔但屬新增 npm 相依（依流程第三層需先確認）；後者不新增套件，手動維護追蹤程式碼片段，彈性較低但無新相依。**拍板：使用 `next/script` 手動載入 `gtag.js`，不新增套件。**
 5. **(e) 是否要與 T24（申辦導引連結）的 UTM 參數設計同時規劃？** T24 目前仍是草案待核准，若兩者的 GA 事件／流量來源命名規則能一併設計，可以避免之後 T24 核准實作時要回頭配合本任務調整；但若優先順序上想讓 GA 基本追蹤先單獨上線，也可以本任務先獨立完成，T24 之後再對接。
 
 ## 核准證據
 
-- 核准者：（待核准）
-- 核准日期與時區：（待核准）
-- 核准 Scope 版本：（待核准）
-- 核准原文或可追溯摘要：（待核准）
-- Git 特別授權：（待核准）
-- 高風險操作特別授權：（待核准）
+- 核准者：使用者
+- 核准日期與時區：2026-08-06（Asia/Taipei）
+- 核准 Scope 版本：v1
+- 核准原文或可追溯摘要：「核准 T26 Scope。採 Production only。使用 next/script，不新增套件。暫不做 cookie banner。」
+- Git 特別授權：允許在 `codex/t26-ga-analytics` 隔離 worktree / branch 實作；未授權 `git add`、local commit、push、合併。
+- 高風險操作特別授權：無；不得建立或登入 Google 帳號，不得修改正式環境變數，Vercel Production Measurement ID 由使用者自行設定或另行授權。
 
 ## Scope 變更紀錄
 
 - v1／2026-08-05：建立草稿，記錄 2026-07-27 已拍板的「GA 網站流量分析，排 T18 之後另開任務」方向，展開待決問題，待核准。
+- v1 核准／2026-08-06：使用者核准 T26 Scope；拍板 Production only、使用 `next/script`、不新增套件、暫不做 cookie banner。
