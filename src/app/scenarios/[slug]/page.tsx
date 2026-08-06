@@ -6,7 +6,7 @@ import { OfferCard } from "@/components/OfferCard";
 import { generateWebPageJsonLd, getCanonicalUrl } from "@/lib/domain-seo";
 import { getScenarioTagBySlug, offerHasTag, SCENARIO_TAGS } from "@/lib/domain-scenarios";
 import { getScenarioCopy } from "@/lib/domain-scenario-copy";
-import { Breadcrumb, PageContainer, SectionHead } from "@/components/design-system";
+import { Breadcrumb, CardFoot, PageContainer, SectionHead } from "@/components/design-system";
 
 interface ScenarioPageProps {
   params: {
@@ -71,6 +71,22 @@ export default async function ScenarioDetailPage({ params }: ScenarioPageProps) 
 
   const copy = getScenarioCopy(scenario.slug, scenario.tagLabel);
 
+  /**
+   * 14 個情境標籤中有幾個目前還沒有任何優惠資料（規格先行、資料待補）。
+   * 沒有資料時頁面會非常單薄而且是死路，因此一律附上其他「確實有資料」的情境當出口。
+   */
+  const otherScenarios = SCENARIO_TAGS.filter((entry) => entry.slug !== scenario.slug)
+    .map((entry) => ({
+      entry,
+      count: getPublicOffers(
+        offers.filter((offer) => offerHasTag(offer.tags, entry.tagLabel)),
+        siteSetting?.showExpiredOffers ?? false
+      ).length
+    }))
+    .filter((item) => item.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6);
+
   return (
     <PageContainer>
       <Breadcrumb items={[{ label: "首頁", href: "/" }, { label: "生活情境" }, { label: scenario.tagLabel }]} />
@@ -89,11 +105,35 @@ export default async function ScenarioDetailPage({ params }: ScenarioPageProps) 
             sortedOffers.map((offer) => <OfferCard key={offer.id} offer={offer} />)
           ) : (
             <p className="rounded-card border border-line bg-paper p-7 text-center text-[13px] text-muted">
-              目前還沒有標註「{scenario.tagLabel}」情境的已發布優惠，之後有相關資料會更新在這裡。
+              這個情境還在整理中，目前沒有已發布的優惠。下面有幾個現在就找得到東西的情境。
             </p>
           )}
         </div>
       </section>
+
+      {otherScenarios.length > 0 ? (
+        <section className="mt-9">
+          <SectionHead
+            copy={sortedOffers.length > 0 ? "順手看看其他常用的情境。" : "這些情境現在都有整理好的優惠。"}
+            title="其他生活情境"
+          />
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {otherScenarios.map(({ entry, count }) => {
+              const otherCopy = getScenarioCopy(entry.slug, entry.tagLabel);
+              return (
+                <Link className="cl-card flex flex-col justify-between" href={`/scenarios/${entry.slug}`} key={entry.slug}>
+                  <div>
+                    <span className="cl-tag">{otherCopy.group}</span>
+                    <h3 className="mt-2.5 text-[17px] font-[850] leading-snug text-ink">{otherCopy.title}</h3>
+                    <p className="mt-1.5 text-[11.5px] leading-relaxed text-muted">{otherCopy.description}</p>
+                  </div>
+                  <CardFoot action={`${count} 筆優惠`} value={entry.tagLabel} />
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
 
       {guide ? (
         <section className="mt-9">

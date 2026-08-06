@@ -50,8 +50,10 @@ export function OfferCard({ offer }: OfferCardProps) {
       </div>
 
       {offer.headlineRate ? (
-        <div className="text-left tabular-nums sm:text-right">
-          <p className="text-[19px] font-[850] leading-tight text-ink">{offer.headlineRate}</p>
+        // 回饋值必須比標題小：真實資料常是一整句條件敘述（而非「5%」這種短數字），
+        // 字級一旦追上標題就會蓋過標題、破壞資訊層級。
+        <div className="text-left tabular-nums sm:max-w-[210px] sm:text-right">
+          <p className="text-[13.5px] font-[850] leading-snug text-ink">{offer.headlineRate}</p>
           <p className="mt-1 text-[10px] text-muted">查看活動條件 →</p>
         </div>
       ) : (

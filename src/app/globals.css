@@ -134,6 +134,14 @@
 
   .cl-preview-card {
     @apply flex min-h-[206px] flex-col justify-between rounded-preview border border-black/25 p-4 shadow-preview;
+    /**
+     * preview-bob 會讓卡片停在非整數像素位置。若不提升為獨立合成層，半透明的
+     * 1.5px 框線每一幀都要重新光柵化，在部分位移量下會被抹到幾乎看不見
+     * （視覺上就是「浮上去時框線消失」）。提升之後框線只光柵化一次，
+     * 位移交給合成器處理，動畫全程都看得到框線。
+     */
+    will-change: transform;
+    backface-visibility: hidden;
   }
 
   .cl-preview-card--blue {
