@@ -34,7 +34,8 @@
     "smoke:homepage-card-entry": "node scripts/verify-homepage-card-entry.mjs",
     "t22:check": "node scripts/check-offer-sources.mjs",
     "t22:check:dry": "node scripts/check-offer-sources.mjs --dry-run",
-    "smoke:t22": "node scripts/verify-t22-source-check.mjs"
+    "smoke:t22": "node scripts/verify-t22-source-check.mjs",
+    "smoke:t26": "node scripts/verify-t26-ga.mjs"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
