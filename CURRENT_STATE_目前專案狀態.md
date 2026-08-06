@@ -1,6 +1,6 @@
 # 目前專案狀態
 
-最後更新：2026-08-06（Asia/Taipei，T22 端對端驗收通過）  
+最後更新：2026-08-06（Asia/Taipei，T28 視覺改版與 T26 GA 皆已上線）  
 用途：所有新 AI session 接續本專案時的唯一目前狀態入口
 交接摘要：`docs/implementation/handoffs/2026-08-05-新卡資料補齊與多層回饋支援-交接摘要.md`（最新一輪對話的完整導覽，內容橫跨 2026-08-04 至 2026-08-05，同一輪對話跨日繼續，含一次資料事故與善後；2026-08-04 稍早的 T18 部署與 T25 草案見前一篇 `2026-08-04-T18部署上線與T25草案-交接摘要.md`；2026-08-03 之前的細節見 `2026-08-03-T20攻略文章實作與收尾-交接摘要.md`；2026-07-30 之前的細節見 `2026-07-30-T20情境頁與訂閱標籤-交接摘要.md`；2026-07-29 的 T23 定案過程見 `2026-07-29-T23-卡面配色與資料蒐集v4-交接摘要.md`）
 
@@ -9,9 +9,10 @@
 - 正式 Git root：`C:/Users/user/Documents/Credit card web project`
 - 工作區 alias：`C:/Users/user/Documents/信用卡查詢網站`
 - alias 類型：Windows junction，兩個路徑指向同一份檔案
-- branch：`main`
-- HEAD：**`0fdbc85`**（2026-08-06）
-- 遠端關係：**本地領先 `origin/main` 1 個 commit（`0fdbc85`），尚未 push**（`ef28462` 以前已 push；本次 T22 驗收記錄為之後新增）。使用者於 2026-08-06 稍早已明確指示 push 過一輪（`554cb60..d4cd835..ef28462`），本輪對話的 Git 授權原本不含 push，該次 push 為使用者當下另行明確授權，尚未確認是否延續至本次新 commit。
+- branch：**`feat/t28-design-system-rollout`**（T28 的工作分支；內容已全部合併進 `origin/main`）
+- HEAD：**`911eed8`**（2026-08-06）
+- 遠端關係：**已與 `origin/main` 同步**。2026-08-06 使用者外出前明確授權 push（「先commit& push…先把視覺更新上正式網站」），以快轉方式推送 `4e7e871..911eed8` 至 `origin/main`，Vercel 已自動部署完成並驗證。
+- **⚠️ 本地 `main` 分支落後**：本地 `main` 被 Codex 的 worktree（`.claude/worktrees/codex-t26-ga-analytics`）佔用，無法在主工作區 checkout，因此是直接 `git push origin HEAD:main`。**本地 `main` ref 仍停在 `4e7e871`，比 `origin/main` 舊**。新 session 若要回到 `main`，先 `git fetch` 再處理，不要以本地 `main` 為準。
 - **累計 commit 歷程**（由舊到新，含已 push 與待 push）：
   - `476d150` docs：design-system 納入版控、新增 T26／T27／T28 任務卡、T22 改版為 v2
   - `c5be854` docs：記錄 T22 Scope v2 正式核准
@@ -212,7 +213,27 @@
 - 任務卡：`docs/implementation/tasks/T27-HOMEPAGE_EDITORIAL_SPOTLIGHT_首頁本月情境選讀模組.md`
 - 使用者已拍板首頁手機版保留「本月情境選讀」區塊（選項 A），但目前正式架構的 `Article`／`SiteSetting` 尚無可按月排程、編輯與停用的資料來源。T27 v2 草案暫以獨立 `HomepageSpotlight` 資料模型、首頁只讀取一筆有效內容、後台最小 CRUD 為規劃方向；新增導覽回路驗收：選讀連結必須導向既有公開頁面，落地頁只能使用真實可抵達的麵包屑層級，卡片與發卡銀行等關聯必須有可點選入口。全站導覽重構仍為 Non-scope。8 項待決問題中，**(e) 正式風格契約已因契約交付而解決**（見下方 T28）；其餘（模型選擇、連結限制、重疊排程、無有效內容時行為、後台範圍、正式資料庫遷移安全、首筆真實內容來源）尚未拍板。未核准前不得修改 schema、資料庫、程式、網站架構或部署。
 
-### T28 卡片生活誌設計系統套用（公開頁面視覺改版）— v1 草案待核准（2026-08-05 建卡）
+### T26 GA 網站流量分析 — **v1 已核准並上線**（2026-08-06，由 Codex 實作）
+
+- 任務卡：`docs/implementation/tasks/T26-GA_ANALYTICS_GA網站流量分析.md`（v1 已核准）
+- 拍板內容：**僅 Production 載入**、使用 `next/script` 手動載入 `gtag.js`、**不新增 npm 套件**、暫不做 cookie banner（隱私權政策另案）。
+- 實作：Codex 於 `codex/t26-ga-analytics` 完成，commit `4e7e871`，已在 `main`。異動 `src/app/layout.tsx`（GA script，`NODE_ENV=production` 且有 Measurement ID 才載入）、新增 `scripts/verify-t26-ga.mjs`、`.env.example` 新增 `NEXT_PUBLIC_GA_MEASUREMENT_ID`、`package.json`。
+- **與 T28 零檔案重疊**，合併時無衝突（T28 未動 `layout.tsx`）。
+- 上線驗證（2026-08-06，T28 部署後一併核對）：正式站首頁確認 `googletagmanager` script 已載入、Measurement ID 已於 Vercel 設定。
+- **待使用者本人驗收**：登入自己的 GA4 帳號，於「即時」報表確認看得到自己瀏覽正式站產生的流量。
+
+### T28 卡片生活誌設計系統套用（公開頁面視覺改版）— **Scope v2 已核准，實作完成並已上線**（2026-08-06）
+
+- 任務卡：`docs/implementation/tasks/T28-DESIGN_SYSTEM_ROLLOUT_卡片生活誌設計系統套用.md`（v2）
+- Summary：`docs/implementation/summaries/T28-DESIGN_SYSTEM_ROLLOUT_SUMMARY-v1-2026-08-06.md`（**完整內容請讀這份**）
+- 人工驗收腳本：`docs/implementation/manual-test-scripts/T28-設計系統套用驗收腳本-v1-2026-08-06.md`（**待使用者執行**）
+- **已完成**：11 個公開 route 全部套用契約；補上網站原本**完全沒有**的全站表頭（含手機漢堡選單）與頁尾；修正卡片詳情頁與銀行頁的假麵包屑層級；首頁區塊順序改依契約（覆蓋 2026-07-30 舊排序）。
+- **實測抓到並修正**：預覽卡浮動時框線消失（合成層問題）、優惠卡回饋值字級大於標題、空情境頁是死路（順帶解決 T20 列為待定的「頁面單薄」問題）。
+- **已知影響**：後台外觀會偏移（`ink`／`paper`／`line` 為共用 token，`paper` 語意翻轉、框線變深變粗、字體改變），**但未修改任何後台程式碼**；已保留 `brand.*` 與 `shadow-soft` 確保後台不會靜默破版。使用者已知悉並接受。
+- **文案未經使用者逐字審閱**：14 個情境的問句標題與分組標籤（`src/lib/domain-scenario-copy.ts`）、各區塊標題、頁尾文字皆由 AI 撰寫，可逐句調整。
+- 頁尾聯絡信箱 `hayleylushop@gmail.com` 已做防爬混淆（base64＋掛載後才解出，伺服器輸出的 HTML 不含明碼）。
+
+### T28（以下為 2026-08-05 建卡時的原始規劃紀錄，保留供追溯）
 
 - 任務卡：`docs/implementation/tasks/T28-DESIGN_SYSTEM_ROLLOUT_卡片生活誌設計系統套用.md`
 - **使用者於 2026-08-05 自行完成並交付整站視覺風格移交包**：`docs/design-system/card-life-pop-style/`（v1，7 個檔案：`STYLE_CONTRACT.md`／`README.md`／`CLAUDE_STYLE_LOCK_PROMPT.md`／`tailwind.config.js`／`globals.css`／`reference-components.tsx`／`visual-reference.html`）。該資料夾原為未追蹤，2026-08-05 已納入版控。
@@ -262,7 +283,7 @@
 - 本機管理員帳號：本輪對話中密碼已被重設過一次（純資料庫層，未動 `.env`），新密碼只告知了使用者本人，未寫入任何檔案；新 session 若要用後台，請使用者提供或再協助重設。
 - Preview：Vercel 專案 `credit-card-web`（`hayleyluwei` 帳號下），連結 GitHub repo `hayleyluwei/Credit-card-web` 的 `main` 分支，push 會自動觸發部署。
 - Production：**已部署，已驗證**，網址 `https://credit-card-web-pi.vercel.app`（T18，2026-08-03）。資料庫為 Neon PostgreSQL 專案 `credit-card-web`（Singapore region）。
-- 正式站是否為最新 commit：截至 `0958296`（2026-08-03）為最新已部署 commit；此後若有新 commit push 到 `main`，需重新確認正式站是否已更新（Vercel 通常會自動部署，但仍建議新 session 核對 Deployments 分頁的最新一筆對應的 commit）。
+- 正式站是否為最新 commit：**截至 `911eed8`（2026-08-06）為最新已部署 commit，已實測驗證**（12 個公開 URL 全數 200；表頭／漢堡按鈕／頁尾免責皆存在；舊 `brand-700` 已 0 處；聯絡信箱明碼與 `mailto:` 皆 0 處，代表防爬混淆生效；T26 的 GA script 存在；`/admin/login` 200 且未誤帶公開表頭）。此後若有新 commit push 到 `main`，需重新確認。
 
 未知表示本輪沒有可靠證據，不代表失敗或未部署。
 
@@ -299,7 +320,22 @@
 - **待決問題 (d) 已拍板（2026-07-18）並已生效**：T21 排序為 T16 → T17 → T21 → T18（晚於 T16/T17、早於 T18）；T21 已於 2026-07-27 依此順序核准並完成實作，此問題不再待決（2026-07-30 使用者確認並補記，修正此段此前未同步更新的殘留文字）。
 - 與 T16–T18 上線主線的關係：T21 目前完全不影響 T16–T18，兩者互不阻塞（T21 Non-scope 明確排除修改 schema／程式碼／既有規格書）。
 
-## 下一步（2026-08-03 更新，取代前一版本）
+## 下一步（2026-08-06 更新，取代下方 2026-08-03 版本）
+
+**使用者於 2026-08-06 外出，約 2026-08-09 後才會再使用電腦。** 本輪已把 T28 視覺改版推上正式站並驗證完成。
+
+**回來後的第一件事：執行 T28 人工驗收腳本**
+`docs/implementation/manual-test-scripts/T28-設計系統套用驗收腳本-v1-2026-08-06.md`
+視覺類任務最終需人眼判定，自動驗證不能取代。腳本只列需要人眼判斷的項目，含後台是否仍可正常使用。
+
+**其次可考慮**：
+1. T26 的人工驗收（登入 GA4 看「即時」報表確認有流量）。
+2. T28 的文案逐句審閱（14 個情境問句、區塊標題、頁尾文字皆為 AI 撰寫）。
+3. T27（首頁本月情境選讀）——T28 已把版位與視覺做好預留，只差資料模型與後台 CRUD；8 個待決問題待拍板。
+4. T24／T25 待決問題拍板。
+5. 非阻塞：T22 的 4 項改善候選；優惠詳情頁 `rewardType=other` 顯示英文的既有缺陷。
+
+## 下一步（2026-08-03 版本，已被上方取代，保留供追溯）
 
 **T15/T16/T17/T18/T19/T20/T21/T23 皆已完成。** 以下依優先順序：
 
