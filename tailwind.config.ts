@@ -35,6 +35,19 @@ const config: Config = {
         rose: "#FFDDE3",
         yellow: "#FFF1A8",
         mint: "#C9F2DF",
+        /**
+         * 契約 token 表只定義了主要文字 `ink`，但移交包的 visual-reference.html
+         * 另外用了一組中性灰階與狀態色。這裡把它們收成具名 token，避免 hex 散落在
+         * TSX（契約「交付前檢查」明訂不得散落自行決定的 hex）。值一律照移交包原樣，
+         * 未自行調色。
+         */
+        muted: "#707179",
+        subtle: "#9B9DA5",
+        prose: "#4F5057",
+        "lime-ink": "#404942",
+        "callout-ink": "#455271",
+        "status-ok": "#176445",
+        "status-off": "#8C2436",
         // 舊 token：僅供後台沿用，公開頁面不得再使用
         brand: {
           50: "#EEF8F6",

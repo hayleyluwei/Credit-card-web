@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getPublicOffers, sortOffers } from "@/lib/domain-offers";
 import { OfferCard } from "@/components/OfferCard";
 import { generateWebPageJsonLd, generateFaqJsonLd, getCanonicalUrl } from "@/lib/domain-seo";
+import { Breadcrumb, PageContainer, SectionHead } from "@/components/design-system";
 
 interface CategoryPageProps {
   params: {
@@ -61,34 +61,26 @@ export default async function CategoryDetailPage({ params }: CategoryPageProps) 
   const sortedOffers = sortOffers(publicOffers);
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-6xl px-5 py-8 sm:px-8 lg:px-10">
-      <header className="mb-10 border-b border-line pb-6">
-        <nav className="text-sm font-semibold text-brand-700">
-          <Link href="/">首頁</Link>
-          <span className="mx-2">/</span>
-          <Link href="/categories">分類列表</Link>
-          <span className="mx-2">/</span>
-          {category.name}
-        </nav>
-        <h1 className="mt-4 text-3xl font-bold text-ink">{category.name}</h1>
-        <p className="mt-3 text-base leading-7 text-slate-700">{category.description ?? "這個分類包含多種精選信用卡優惠。"}</p>
-      </header>
+    <PageContainer>
+      <Breadcrumb
+        items={[{ label: "首頁", href: "/" }, { label: "分類列表", href: "/categories" }, { label: category.name }]}
+      />
+      <p className="cl-eyebrow">Category</p>
+      <h1 className="cl-page-title">{category.name}</h1>
+      <p className="cl-lead mt-3 max-w-xl">{category.description ?? "這個分類包含多種信用卡優惠。"}</p>
 
-      <section className="space-y-8">
-        <div className="rounded-3xl border border-line bg-white p-6 shadow-soft">
-          <h2 className="text-2xl font-bold text-ink">{category.name} 優惠</h2>
-          <p className="mt-3 text-sm leading-6 text-slate-600">
-            已發布優惠會依據推薦排序顯示，請進入優惠詳情確認適用信用卡、消費門檻、回饋上限與官方條件。
-          </p>
-        </div>
-
-        <div className="space-y-4">
+      <section className="mt-9">
+        <SectionHead
+          copy="依推薦排序顯示。進入優惠詳情可以確認適用卡片、消費門檻、回饋上限與官方條件。"
+          title={`${category.name}的優惠`}
+        />
+        <div className="grid gap-3">
           {sortedOffers.length > 0 ? (
             sortedOffers.map((offer) => <OfferCard key={offer.id} offer={offer} />)
           ) : (
-            <div className="rounded-3xl border border-line bg-white p-8 text-center text-slate-600 shadow-soft">
+            <p className="rounded-card border border-line bg-paper p-7 text-center text-[13px] text-muted">
               目前沒有可公開顯示的優惠。
-            </div>
+            </p>
           )}
         </div>
       </section>
@@ -116,6 +108,6 @@ export default async function CategoryDetailPage({ params }: CategoryPageProps) 
           }}
         />
       ) : null}
-    </main>
+    </PageContainer>
   );
 }

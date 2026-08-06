@@ -22,7 +22,7 @@ export function CategoryCard({ category, offerCount, toneIndex = 0 }: CategoryCa
       <div>
         <span className="cl-tag bg-paper/70">{offerCount} 則優惠</span>
         <h3 className="mt-2.5 text-[19px] font-[850] leading-snug text-ink">{category.name}</h3>
-        <p className="mt-1.5 text-[11.5px] leading-relaxed text-[#707179]">
+        <p className="mt-1.5 text-[11.5px] leading-relaxed text-muted">
           {category.description ?? "此分類包含多種信用卡優惠。"}
         </p>
       </div>

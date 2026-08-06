@@ -13,7 +13,7 @@ type CardImageProps = CardColorInput & {
 export function CardImage({ alt, bankName, className = "", imageUrl, name, slug, ...colors }: CardImageProps) {
   return (
     <div
-      className={`relative flex aspect-[1.58/1] min-h-[88px] w-full items-center justify-center overflow-hidden rounded-md border border-line bg-brand-50 text-brand-700 ${className}`}
+      className={`relative flex aspect-[1.58/1] min-h-[88px] w-full items-center justify-center overflow-hidden rounded-control border border-line bg-canvas text-ink ${className}`}
     >
       {imageUrl ? (
         <Image src={imageUrl} alt={alt ?? name} fill sizes="220px" className="object-contain p-3" unoptimized />

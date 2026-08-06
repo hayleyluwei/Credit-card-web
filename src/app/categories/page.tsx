@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { CategoryCard } from "@/components/CategoryCard";
 import { getCanonicalUrl } from "@/lib/domain-seo";
+import { Breadcrumb, PageContainer } from "@/components/design-system";
 
 export const metadata = {
   title: "分類列表｜信用卡優惠查詢網站",
@@ -27,25 +27,20 @@ export default async function CategoriesPage() {
   );
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-6xl px-5 py-8 sm:px-8 lg:px-10">
-      <header className="mb-10 border-b border-line pb-6">
-        <nav className="text-sm font-semibold text-brand-700">
-          <Link href="/">首頁</Link>
-          <span className="mx-2">/</span>
-          分類列表
-        </nav>
-        <h1 className="mt-4 text-3xl font-bold text-ink">優惠分類</h1>
-        <p className="mt-3 text-base leading-7 text-slate-700">
-          依照分類快速瀏覽公開優惠，找到最適合自己的信用卡活動類型。
-        </p>
-      </header>
+    <PageContainer>
+      <Breadcrumb items={[{ label: "首頁", href: "/" }, { label: "分類列表" }]} />
+      <p className="cl-eyebrow">Browse categories</p>
+      <h1 className="cl-page-title">從你在意的回饋開始</h1>
+      <p className="cl-lead mt-3 max-w-xl">
+        還沒有明確想完成的事也沒關係，先看看有哪些類型的回饋，再決定要不要深入。
+      </p>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {categories.map((category) => {
+      <section className="mt-9 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {categories.map((category, index) => {
           const count = offerCounts.find((item) => item.categoryId === category.id)?.count ?? 0;
-          return <CategoryCard key={category.id} category={category} offerCount={count} />;
+          return <CategoryCard category={category} key={category.id} offerCount={count} toneIndex={index} />;
         })}
       </section>
-    </main>
+    </PageContainer>
   );
 }

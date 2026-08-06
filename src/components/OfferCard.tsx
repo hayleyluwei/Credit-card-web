@@ -39,9 +39,9 @@ export function OfferCard({ offer }: OfferCardProps) {
         </div>
 
         <h3 className="mt-1.5 text-[17px] font-[850] leading-snug text-ink">{offer.title}</h3>
-        <p className="mt-1.5 line-clamp-2 text-[11.5px] leading-relaxed text-[#707179]">{summary}</p>
+        <p className="mt-1.5 line-clamp-2 text-[11.5px] leading-relaxed text-muted">{summary}</p>
 
-        <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1 text-[10.5px] text-[#707179]">
+        <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1 text-[10.5px] text-muted">
           {cardSources.length > 0 ? <span className="line-clamp-1">{cardSources.join("、")}</span> : null}
           <span>{offer.cards.length} 張適用卡片</span>
           {offer.endDate ? <span>截至 {new Date(offer.endDate).toLocaleDateString("zh-TW")}</span> : null}
@@ -52,7 +52,7 @@ export function OfferCard({ offer }: OfferCardProps) {
       {offer.headlineRate ? (
         <div className="text-left tabular-nums sm:text-right">
           <p className="text-[19px] font-[850] leading-tight text-ink">{offer.headlineRate}</p>
-          <p className="mt-1 text-[10px] text-[#707179]">查看活動條件 →</p>
+          <p className="mt-1 text-[10px] text-muted">查看活動條件 →</p>
         </div>
       ) : (
         <p className="text-[11px] font-[850] text-blue-deep sm:text-right">查看優惠 →</p>

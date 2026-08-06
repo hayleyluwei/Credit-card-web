@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getPublicOffers } from "@/lib/domain-offers";
-import { CardImage } from "@/components/CardImage";
+import { CardTile } from "@/components/CardTile";
 import { getCanonicalUrl } from "@/lib/domain-seo";
+import { Breadcrumb, PageContainer } from "@/components/design-system";
 
 export const metadata = {
   title: "信用卡列表｜信用卡優惠查詢網站",
@@ -50,58 +50,25 @@ export default async function CardsPage() {
     });
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-6xl px-5 py-8 sm:px-8 lg:px-10">
-      <header className="mb-10 border-b border-line pb-6">
-        <nav className="text-sm font-semibold text-brand-700">
-          <Link href="/">首頁</Link>
-          <span className="mx-2">/</span>
-          信用卡列表
-        </nav>
-        <h1 className="mt-4 text-3xl font-bold text-ink">所有信用卡</h1>
-        <p className="mt-3 text-base leading-7 text-slate-700">
-          共 {cardEntries.length} 張信用卡，點進去看這張卡目前整理到的公開優惠。
-        </p>
-      </header>
+    <PageContainer>
+      <Breadcrumb items={[{ label: "首頁", href: "/" }, { label: "信用卡" }]} />
+      <p className="cl-eyebrow">Credit cards</p>
+      <h1 className="cl-page-title">從手上的卡開始</h1>
+      <p className="cl-lead mt-3 max-w-xl">
+        目前整理了 {cardEntries.length} 張信用卡。點進去可以看到這張卡的定位、年費，以及現在有哪些優惠可以用。
+      </p>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <section className="mt-9 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {cardEntries.length > 0 ? (
           cardEntries.map(({ card, publicOfferCount }) => (
-            <Link
-              key={card.id}
-              href={`/cards/${card.slug}`}
-              className="group grid gap-4 rounded-3xl border border-line bg-white p-5 shadow-soft transition duration-200 hover:-translate-y-1 hover:border-brand-300"
-            >
-              <CardImage
-                imageUrl={card.imageUrl}
-                alt={card.imageAlt}
-                name={card.name}
-                bankName={card.bank.name}
-                slug={card.slug}
-                cardBgColorFrom={card.cardBgColorFrom}
-                cardBgColorTo={card.cardBgColorTo}
-                cardTextColor={card.cardTextColor}
-                cardChipColorFrom={card.cardChipColorFrom}
-                cardChipColorTo={card.cardChipColorTo}
-              />
-              <div>
-                <p className="text-sm font-semibold text-brand-700">{card.bank.name}</p>
-                <h2 className="mt-2 text-xl font-bold text-ink">{card.name}</h2>
-                <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">
-                  {card.summary ?? card.targetAudience ?? "查看這張信用卡目前整理到的優惠。"}
-                </p>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="rounded-full bg-brand-50 px-3 py-1 font-semibold text-brand-700">{publicOfferCount} 筆優惠</span>
-                <span className="font-semibold text-brand-700 transition group-hover:translate-x-1">查看這張卡 →</span>
-              </div>
-            </Link>
+            <CardTile card={card} key={card.id} offerCount={publicOfferCount} />
           ))
         ) : (
-          <div className="rounded-3xl border border-line bg-white p-8 text-center text-slate-600 shadow-soft md:col-span-2 xl:col-span-3">
+          <p className="rounded-card border border-line bg-paper p-7 text-center text-[13px] text-muted sm:col-span-2 lg:col-span-3">
             目前尚無可顯示的信用卡。
-          </div>
+          </p>
         )}
       </section>
-    </main>
+    </PageContainer>
   );
 }

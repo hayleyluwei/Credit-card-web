@@ -5,6 +5,8 @@ import { getPublicOffers, sortOffers } from "@/lib/domain-offers";
 import { OfferCard } from "@/components/OfferCard";
 import { generateWebPageJsonLd, getCanonicalUrl } from "@/lib/domain-seo";
 import { getScenarioTagBySlug, offerHasTag, SCENARIO_TAGS } from "@/lib/domain-scenarios";
+import { getScenarioCopy } from "@/lib/domain-scenario-copy";
+import { Breadcrumb, PageContainer, SectionHead } from "@/components/design-system";
 
 interface ScenarioPageProps {
   params: {
@@ -67,41 +69,46 @@ export default async function ScenarioDetailPage({ params }: ScenarioPageProps) 
   const sortedOffers = sortOffers(publicOffers);
   const canonicalUrl = getCanonicalUrl(`/scenarios/${scenario.slug}`);
 
-  return (
-    <main className="mx-auto min-h-screen w-full max-w-6xl px-5 py-8 sm:px-8 lg:px-10">
-      <header className="mb-10 border-b border-line pb-6">
-        <nav className="text-sm font-semibold text-brand-700">
-          <Link href="/">首頁</Link>
-          <span className="mx-2">/</span>
-          {scenario.pageTitle}
-        </nav>
-        <h1 className="mt-4 text-3xl font-bold text-ink">{scenario.pageTitle}</h1>
-        <p className="mt-3 text-base leading-7 text-slate-700">{scenario.seoDescription}</p>
-      </header>
+  const copy = getScenarioCopy(scenario.slug, scenario.tagLabel);
 
-      <section className="space-y-8">
-        <div className="space-y-4">
+  return (
+    <PageContainer>
+      <Breadcrumb items={[{ label: "首頁", href: "/" }, { label: "生活情境" }, { label: scenario.tagLabel }]} />
+      <p className="cl-eyebrow">Scenario</p>
+      <h1 className="cl-page-title max-w-3xl text-balance">{copy.title}</h1>
+      <p className="cl-lead mt-3 max-w-xl">{scenario.seoDescription}</p>
+
+      <section className="mt-9">
+        <SectionHead
+          action={{ href: "/search", label: "搜尋更多" }}
+          copy="先看重點，完整條件點進去都查得到。"
+          title={`${scenario.tagLabel}相關的優惠`}
+        />
+        <div className="grid gap-3">
           {sortedOffers.length > 0 ? (
             sortedOffers.map((offer) => <OfferCard key={offer.id} offer={offer} />)
           ) : (
-            <div className="rounded-3xl border border-line bg-white p-8 text-center text-slate-600 shadow-soft">
+            <p className="rounded-card border border-line bg-paper p-7 text-center text-[13px] text-muted">
               目前還沒有標註「{scenario.tagLabel}」情境的已發布優惠，之後有相關資料會更新在這裡。
-            </div>
+            </p>
           )}
         </div>
+      </section>
 
-        {guide ? (
-          <div className="rounded-3xl border border-line bg-brand-50 p-6 shadow-soft">
-            <h2 className="text-lg font-bold text-ink">找不到更深入的整理？</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-700">
-              查看攻略文章，有結論判斷、比較表與常見問題整理。
+      {guide ? (
+        <section className="mt-9">
+          <div className="rounded-panel border border-line bg-blue-soft p-6">
+            <p className="cl-eyebrow">延伸閱讀</p>
+            <h2 className="mt-2 text-[20px] font-[850] leading-snug text-ink">想看更深入的整理？</h2>
+            <p className="mt-2 text-[13px] leading-relaxed text-muted">
+              攻略文章裡有結論判斷、比較表與常見問題，適合想一次弄懂的時候看。
             </p>
-            <Link className="mt-3 inline-block text-sm font-semibold text-brand-700 underline" href={`/guides/${guide.slug}`}>
-              閱讀《{guide.title}》
+            <Link className="mt-3 inline-flex items-center rounded-control bg-blue px-4 py-2.5 text-[13px] font-[850] text-white transition hover:bg-blue-deep" href={`/guides/${guide.slug}`}>
+              閱讀《{guide.title}》→
             </Link>
           </div>
-        ) : null}
-      </section>
+        </section>
+      ) : null}
 
       <script
         id="scenario-jsonld"
@@ -110,6 +117,6 @@ export default async function ScenarioDetailPage({ params }: ScenarioPageProps) 
           __html: JSON.stringify(generateWebPageJsonLd(`${scenario.pageTitle}｜信用卡優惠查詢網站`, scenario.seoDescription, canonicalUrl))
         }}
       />
-    </main>
+    </PageContainer>
   );
 }

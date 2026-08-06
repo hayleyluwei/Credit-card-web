@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getPublicOffers, sortOffers } from "@/lib/domain-offers";
 import { parseJsonStringArray } from "@/lib/domain-parsing";
 import { CardImage } from "@/components/CardImage";
 import { OfferCard } from "@/components/OfferCard";
 import { generateWebPageJsonLd, getCanonicalUrl } from "@/lib/domain-seo";
+import { Breadcrumb, IssuerLink, PageContainer, SectionHead } from "@/components/design-system";
 
 interface CardPageProps {
   params: {
@@ -62,130 +62,104 @@ export default async function CardDetailPage({ params }: CardPageProps) {
   const pros = parseJsonStringArray(card.prosJson);
   const cons = parseJsonStringArray(card.consJson);
 
+  const details = [
+    { label: "發卡銀行", value: card.bank.name },
+    { label: "適用對象", value: card.targetAudience ?? "不限客群" },
+    card.cardLevel ? { label: "卡片等級", value: card.cardLevel } : null,
+    card.cardNetwork ? { label: "發卡組織", value: card.cardNetwork } : null,
+    card.annualFee ? { label: "年費", value: card.annualFee } : null,
+    card.annualFeeWaiver ? { label: "免年費條件", value: card.annualFeeWaiver } : null
+  ].filter((item): item is { label: string; value: string } => item !== null);
+
   return (
-    <main className="mx-auto min-h-screen w-full max-w-6xl px-5 py-8 sm:px-8 lg:px-10">
-      <header className="mb-10 rounded-3xl border border-line bg-white p-8 shadow-soft">
-        <nav className="text-sm font-semibold text-brand-700">
-          <Link href="/">首頁</Link>
-          <span className="mx-2">/</span>
-          <Link href="/categories">分類列表</Link>
-          <span className="mx-2">/</span>
-          <Link href={`/banks/${card.bank.slug}`}>{card.bank.name}</Link>
-          <span className="mx-2">/</span>
-          {card.name}
-        </nav>
-        <div className="mt-5 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-brand-700">信用卡詳情</p>
-            <h1 className="mt-3 text-3xl font-bold text-ink">{card.name}</h1>
-            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-700">{card.summary ?? "這張信用卡提供多種優惠機會，詳情如下。"}</p>
-          </div>
-          <div className="w-full max-w-[260px] shrink-0">
-            <p className="sr-only">卡面圖片</p>
-            <CardImage
-              imageUrl={card.imageUrl}
-              alt={card.imageAlt}
-              name={card.name}
-              bankName={card.bank.name}
-              slug={card.slug}
-              cardBgColorFrom={card.cardBgColorFrom}
-              cardBgColorTo={card.cardBgColorTo}
-              cardTextColor={card.cardTextColor}
-              cardChipColorFrom={card.cardChipColorFrom}
-              cardChipColorTo={card.cardChipColorTo}
-            />
-          </div>
+    <PageContainer>
+      {/* 契約 4.3：卡片詳情的麵包屑固定為「首頁 / 信用卡 / 卡片名稱」，
+          發卡銀行是可點選的內容關聯（IssuerLink），不是假的麵包屑層級。 */}
+      <Breadcrumb items={[{ label: "首頁", href: "/" }, { label: "信用卡", href: "/cards" }, { label: card.name }]} />
+
+      <header className="grid gap-6 rounded-panel border border-line bg-paper p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+        <div>
+          <p className="cl-eyebrow">信用卡詳情</p>
+          <h1 className="mt-2 text-[28px] font-[850] leading-tight text-ink sm:text-[38px]">{card.name}</h1>
+          <p className="cl-lead mt-3 max-w-2xl">{card.summary ?? "這張信用卡提供多種優惠機會，詳情如下。"}</p>
+          <IssuerLink bankName={card.bank.name} href={`/banks/${card.bank.slug}`} />
+        </div>
+        <div className="w-full max-w-[250px] shrink-0">
+          <p className="sr-only">卡面圖片</p>
+          <CardImage
+            alt={card.imageAlt}
+            bankName={card.bank.name}
+            cardBgColorFrom={card.cardBgColorFrom}
+            cardBgColorTo={card.cardBgColorTo}
+            cardChipColorFrom={card.cardChipColorFrom}
+            cardChipColorTo={card.cardChipColorTo}
+            cardTextColor={card.cardTextColor}
+            imageUrl={card.imageUrl}
+            name={card.name}
+            slug={card.slug}
+          />
         </div>
       </header>
 
-      <section className="space-y-8">
-          <div className="rounded-3xl border border-line bg-white p-6 shadow-soft">
-            <h2 className="text-2xl font-bold text-ink">卡片資訊</h2>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div>
-                <p className="text-sm font-semibold text-slate-900">銀行</p>
-                <p className="mt-2 text-sm text-slate-600">{card.bank.name}</p>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-900">適用對象</p>
-                <p className="mt-2 text-sm text-slate-600">{card.targetAudience ?? "不限客群"}</p>
-              </div>
-              {card.cardLevel ? (
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">卡片等級</p>
-                  <p className="mt-2 text-sm text-slate-600">{card.cardLevel}</p>
-                </div>
-              ) : null}
-              {card.cardNetwork ? (
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">發卡組織</p>
-                  <p className="mt-2 text-sm text-slate-600">{card.cardNetwork}</p>
-                </div>
-              ) : null}
-              {card.annualFee ? (
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">年費</p>
-                  <p className="mt-2 text-sm text-slate-600">{card.annualFee}</p>
-                </div>
-              ) : null}
-              {card.annualFeeWaiver ? (
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">免年費條件</p>
-                  <p className="mt-2 text-sm text-slate-600">{card.annualFeeWaiver}</p>
-                </div>
-              ) : null}
-              <div className="sm:col-span-2">
-                <p className="text-sm font-semibold text-slate-900">卡片說明</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{card.description ?? "尚未提供更多說明。"}</p>
-              </div>
+      <section className="mt-8 cl-panel">
+        <SectionHead title="卡片資訊" />
+        <div className="grid gap-x-6 sm:grid-cols-2">
+          {details.map((item) => (
+            <div className="border-t border-line py-3.5" key={item.label}>
+              <p className="text-[12px] font-[850] text-ink">{item.label}</p>
+              <p className="mt-1 text-[12.5px] leading-relaxed text-muted">{item.value}</p>
             </div>
+          ))}
+          <div className="border-t border-line py-3.5 sm:col-span-2">
+            <p className="text-[12px] font-[850] text-ink">卡片說明</p>
+            <p className="mt-1 text-[12.5px] leading-relaxed text-muted">{card.description ?? "尚未提供更多說明。"}</p>
           </div>
+        </div>
+      </section>
 
-          {pros.length > 0 || cons.length > 0 ? (
-            <div className="rounded-3xl border border-line bg-white p-6 shadow-soft">
-              <h2 className="text-2xl font-bold text-ink">優點與注意事項</h2>
-              <div className="mt-4 grid gap-6 sm:grid-cols-2">
-                {pros.length > 0 ? (
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">優點</p>
-                    <ul className="mt-2 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-600">
-                      {pros.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-                {cons.length > 0 ? (
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">注意事項</p>
-                    <ul className="mt-2 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-600">
-                      {cons.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          ) : null}
-
-          <div className="rounded-3xl border border-line bg-white p-6 shadow-soft">
-            <div className="mb-6 flex items-center justify-between">
+      {pros.length > 0 || cons.length > 0 ? (
+        <section className="mt-8 cl-panel">
+          <SectionHead title="優點與注意事項" />
+          <div className="grid gap-6 sm:grid-cols-2">
+            {pros.length > 0 ? (
               <div>
-                <h2 className="text-2xl font-bold text-ink">相關優惠</h2>
+                <p className="cl-tag">優點</p>
+                <ul className="mt-2.5 list-disc space-y-2 pl-5 text-[12.5px] leading-relaxed text-muted">
+                  {pros.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
               </div>
-              <span className="rounded-full bg-brand-50 px-3 py-1 text-sm text-brand-700">{sortedOffers.length} 筆</span>
-            </div>
-            <div className="grid gap-4">
-              {sortedOffers.length > 0 ? (
-                sortedOffers.map((offer) => <OfferCard key={offer.id} offer={offer} />)
-              ) : (
-                <div className="rounded-3xl border border-line bg-white p-8 text-center text-slate-600 shadow-soft">
-                  目前沒有可顯示的優惠。
-                </div>
-              )}
-            </div>
+            ) : null}
+            {cons.length > 0 ? (
+              <div>
+                <p className="cl-tag bg-yellow text-ink">注意事項</p>
+                <ul className="mt-2.5 list-disc space-y-2 pl-5 text-[12.5px] leading-relaxed text-muted">
+                  {cons.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </div>
+        </section>
+      ) : null}
+
+      <section className="mt-8">
+        <SectionHead
+          action={{ href: "/search", label: "查看全部" }}
+          copy={`目前整理到 ${sortedOffers.length} 筆可以用的優惠。`}
+          title="這張卡的優惠"
+        />
+        <div className="grid gap-3">
+          {sortedOffers.length > 0 ? (
+            sortedOffers.map((offer) => <OfferCard key={offer.id} offer={offer} />)
+          ) : (
+            <p className="rounded-card border border-line bg-paper p-7 text-center text-[13px] text-muted">
+              目前沒有可顯示的優惠。
+            </p>
+          )}
+        </div>
       </section>
 
       <script
@@ -201,6 +175,6 @@ export default async function CardDetailPage({ params }: CardPageProps) {
           )
         }}
       />
-    </main>
+    </PageContainer>
   );
 }

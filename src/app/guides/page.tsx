@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCanonicalUrl } from "@/lib/domain-seo";
+import { Breadcrumb, CardFoot, PageContainer } from "@/components/design-system";
 
 export async function generateMetadata() {
   return {
@@ -19,38 +20,41 @@ export default async function GuidesPage() {
   });
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-5xl px-5 py-8 sm:px-8 lg:px-10">
-      <header className="mb-10 border-b border-line pb-6">
-        <Link className="text-sm font-semibold text-brand-700" href="/">
-          首頁
-        </Link>
-        <h1 className="mt-4 text-3xl font-bold text-ink">攻略文章</h1>
-        <p className="mt-3 text-base leading-7 text-slate-700">情境式選卡整理，結論先行、附官方來源與查證日期。</p>
-      </header>
+    <PageContainer>
+      <Breadcrumb items={[{ label: "首頁", href: "/" }, { label: "攻略文章" }]} />
+      <p className="cl-eyebrow">Guides</p>
+      <h1 className="cl-page-title">把回饋規則，說成生活聽得懂的事。</h1>
+      <p className="cl-lead mt-3 max-w-xl">
+        結論先行，附上官方來源與查證日期。不急著推薦你辦卡，先幫你把判斷的依據整理清楚。
+      </p>
 
-      <section className="grid gap-4">
+      <section className="mt-9 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {articles.length > 0 ? (
           articles.map((article) => (
-            <Link
-              className="block rounded-3xl border border-line bg-white p-6 shadow-soft transition hover:border-brand-300"
-              href={`/guides/${article.slug}`}
-              key={article.id}
-            >
-              <h2 className="text-xl font-bold text-ink">{article.title}</h2>
-              {article.summary ? <p className="mt-2 text-sm leading-6 text-slate-600">{article.summary}</p> : null}
-              {article.lastVerifiedAt ? (
-                <p className="mt-3 text-xs font-semibold text-slate-500">
-                  最後查證日期：{new Date(article.lastVerifiedAt).toISOString().slice(0, 10)}
-                </p>
-              ) : null}
+            <Link className="cl-card flex flex-col justify-between" href={`/guides/${article.slug}`} key={article.id}>
+              <div>
+                <span className="cl-tag">攻略</span>
+                <h2 className="mt-2.5 text-[18px] font-[850] leading-snug text-ink">{article.title}</h2>
+                {article.summary ? (
+                  <p className="mt-1.5 line-clamp-3 text-[11.5px] leading-relaxed text-muted">{article.summary}</p>
+                ) : null}
+              </div>
+              <CardFoot
+                action="閱讀攻略"
+                value={
+                  article.lastVerifiedAt
+                    ? `查證 ${new Date(article.lastVerifiedAt).toISOString().slice(0, 10)}`
+                    : undefined
+                }
+              />
             </Link>
           ))
         ) : (
-          <div className="rounded-3xl border border-line bg-white p-8 text-center text-slate-600 shadow-soft">
-            目前還沒有已發布的攻略文章。
-          </div>
+          <p className="rounded-card border border-line bg-paper p-7 text-center text-[13px] text-muted sm:col-span-2 lg:col-span-3">
+            攻略文章陸續整理中，先從首頁的生活情境開始找也可以。
+          </p>
         )}
       </section>
-    </main>
+    </PageContainer>
   );
 }

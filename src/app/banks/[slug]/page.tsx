@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
-import { getPublicOffers, sortOffers, isOfferExpired } from "@/lib/domain-offers";
+import { getPublicOffers, sortOffers } from "@/lib/domain-offers";
 import { OfferCard } from "@/components/OfferCard";
-import { CardImage } from "@/components/CardImage";
+import { CardTile } from "@/components/CardTile";
 import { generateWebPageJsonLd, getCanonicalUrl } from "@/lib/domain-seo";
+import { Breadcrumb, PageContainer, SectionHead } from "@/components/design-system";
 
 interface BankPageProps {
   params: {
@@ -75,115 +75,85 @@ export default async function BankDetailPage({ params }: BankPageProps) {
   }
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-6xl px-5 py-8 sm:px-8 lg:px-10">
-      <header className="mb-10 rounded-3xl border border-line bg-white p-8 shadow-soft">
-        <nav className="text-sm font-semibold text-brand-700">
-          <Link href="/">首頁</Link>
-          <span className="mx-2">/</span>
-          <Link href="/categories">分類列表</Link>
-          <span className="mx-2">/</span>
-          {bank.name}
-        </nav>
-        <div className="mt-5 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-brand-700">銀行詳情</p>
-            <h1 className="mt-3 text-3xl font-bold text-ink">{bank.name}</h1>
-            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-700">{bank.description ?? "此銀行擁有多張經典信用卡與合作優惠。"}</p>
-          </div>
-          <div className="relative h-28 min-h-[112px] min-w-[112px] overflow-hidden rounded-3xl border border-line bg-brand-50 p-4 text-center text-brand-700 shadow-soft">
+    <PageContainer>
+      {/* 契約 4.3：沒有銀行列表 route 時，麵包屑使用「首頁 / 銀行名稱」，不得連向不存在的層級。 */}
+      <Breadcrumb items={[{ label: "首頁", href: "/" }, { label: bank.name }]} />
+
+      <header className="grid gap-6 rounded-panel border border-line bg-lime p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+        <div>
+          <p className="text-[11px] font-[850] uppercase tracking-[0.09em] text-blue-deep">發卡銀行</p>
+          <h1 className="mt-2 text-[28px] font-[850] leading-tight text-ink sm:text-[38px]">{bank.name}的卡片與優惠</h1>
+          <p className="mt-3 max-w-2xl text-[14px] leading-[1.75] text-lime-ink">
+            {bank.description ?? "這間銀行旗下的信用卡與公開優惠都整理在這裡。"}
+          </p>
+          {bank.websiteUrl ? (
+            <a
+              className="mt-4 inline-flex items-center gap-2 rounded-control border border-line bg-paper px-3 py-2 text-xs font-[850] text-blue-deep transition hover:border-blue"
+              href={bank.websiteUrl}
+              rel="noreferrer"
+              target="_blank"
+            >
+              官方網站 ↗
+            </a>
+          ) : null}
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="relative h-[72px] w-[72px] shrink-0 overflow-hidden rounded-card border border-line bg-paper">
             {bank.logoUrl ? (
               <Image
-                src={bank.logoUrl}
                 alt={bank.logoAlt ?? bank.name}
+                className="object-contain p-3"
                 fill
-                sizes="112px"
-                className="object-contain p-4"
+                sizes="72px"
+                src={bank.logoUrl}
                 unoptimized
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-4xl font-bold">{bank.name.charAt(0)}</div>
+              <div className="flex h-full w-full items-center justify-center text-[28px] font-[850] text-ink">
+                {bank.name.charAt(0)}
+              </div>
             )}
+          </div>
+          <div>
+            <p className="text-[38px] font-[850] leading-none tabular-nums text-blue-deep">{bank.cards.length}</p>
+            <p className="mt-1 text-[11px] text-lime-ink">張信用卡</p>
           </div>
         </div>
-        {bank.websiteUrl ? (
-          <a
-            href={bank.websiteUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-6 inline-flex rounded-full border border-brand-700 px-4 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-50"
-          >
-            官方網站
-          </a>
-        ) : null}
       </header>
 
-      <section>
-        <div className="space-y-8">
-          <div className="rounded-3xl border border-line bg-white p-6 shadow-soft">
-            <h2 className="text-2xl font-bold text-ink">本行相關卡片</h2>
-          </div>
+      <section className="mt-9">
+        <SectionHead action={{ href: "/cards", label: "所有信用卡" }} title="這間銀行的信用卡" />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {bank.cards.length > 0 ? (
+            bank.cards.map((card) => (
+              <CardTile
+                card={{ ...card, bank }}
+                key={card.id}
+                offerCount={offerCountByCard.get(card.id) ?? 0}
+              />
+            ))
+          ) : (
+            <p className="rounded-card border border-line bg-paper p-7 text-center text-[13px] text-muted sm:col-span-2 lg:col-span-3">
+              尚無可用的啟用卡片。
+            </p>
+          )}
+        </div>
+      </section>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            {bank.cards.length > 0 ? (
-              bank.cards.map((card) => (
-                <Link
-                  key={card.id}
-                  href={`/cards/${card.slug}`}
-                  className="group rounded-3xl border border-line bg-white p-6 shadow-soft transition duration-200 hover:-translate-y-1 hover:border-brand-300"
-                >
-                  <div className="grid gap-4 sm:grid-cols-[140px_1fr]">
-                    <div>
-                      <p className="sr-only">卡面圖片</p>
-                      <CardImage
-                        imageUrl={card.imageUrl}
-                        alt={card.imageAlt}
-                        name={card.name}
-                        bankName={bank.name}
-                        slug={card.slug}
-                        cardBgColorFrom={card.cardBgColorFrom}
-                        cardBgColorTo={card.cardBgColorTo}
-                        cardTextColor={card.cardTextColor}
-                        cardChipColorFrom={card.cardChipColorFrom}
-                        cardChipColorTo={card.cardChipColorTo}
-                      />
-                    </div>
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-sm font-semibold text-brand-700">信用卡</p>
-                        <h3 className="mt-2 text-xl font-bold text-ink">{card.name}</h3>
-                      </div>
-                      <span className="rounded-full bg-brand-100 px-3 py-1 text-xs font-semibold text-brand-800">
-                        {offerCountByCard.get(card.id) ?? 0} 則優惠
-                      </span>
-                    </div>
-                  </div>
-                  <p className="mt-4 text-sm leading-6 text-slate-600">{card.summary ?? "此卡片擁有專屬優惠，點擊查看詳情。"}</p>
-                </Link>
-              ))
-            ) : (
-              <div className="rounded-3xl border border-line bg-white p-8 text-center text-slate-600 shadow-soft">
-                尚無可用的啟用卡片。
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-3xl border border-line bg-white p-6 shadow-soft">
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-ink">相關優惠</h2>
-              </div>
-              <span className="rounded-full bg-brand-50 px-3 py-1 text-sm text-brand-700">共 {sortedOffers.length} 筆</span>
-            </div>
-            <div className="grid gap-4">
-              {sortedOffers.length > 0 ? (
-                sortedOffers.map((offer) => <OfferCard key={offer.id} offer={offer} />)
-              ) : (
-                <div className="rounded-3xl border border-line bg-white p-8 text-center text-slate-600 shadow-soft">
-                  目前沒有可顯示的優惠。
-                </div>
-              )}
-            </div>
-          </div>
+      <section className="mt-9">
+        <SectionHead
+          action={{ href: "/search", label: "搜尋更多" }}
+          copy={`目前整理到 ${sortedOffers.length} 筆可以用的優惠。`}
+          title="相關優惠"
+        />
+        <div className="grid gap-3">
+          {sortedOffers.length > 0 ? (
+            sortedOffers.map((offer) => <OfferCard key={offer.id} offer={offer} />)
+          ) : (
+            <p className="rounded-card border border-line bg-paper p-7 text-center text-[13px] text-muted">
+              目前沒有可顯示的優惠。
+            </p>
+          )}
         </div>
       </section>
 
@@ -200,6 +170,6 @@ export default async function BankDetailPage({ params }: BankPageProps) {
           )
         }}
       />
-    </main>
+    </PageContainer>
   );
 }

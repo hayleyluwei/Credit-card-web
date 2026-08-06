@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { OfferCard } from "@/components/OfferCard";
 import { performSearch } from "@/lib/domain-search";
+import { Breadcrumb, PageContainer, SectionHead } from "@/components/design-system";
 
 type SearchPageProps = {
   searchParams?: {
@@ -38,63 +39,58 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const results = performSearch(offers, query, siteSetting?.showExpiredOffers ?? false).map((result) => result.offer);
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-5 py-8 sm:px-8 lg:px-10">
-      <header className="border-b border-line pb-6">
-        <Link className="text-sm font-semibold text-brand-700" href="/">
-          回首頁
-        </Link>
-        <h1 className="mt-4 text-3xl font-bold text-ink">搜尋優惠</h1>
-      </header>
+    <PageContainer>
+      <Breadcrumb items={[{ label: "首頁", href: "/" }, { label: "搜尋優惠" }]} />
+      <p className="cl-eyebrow">Search offers</p>
+      <h1 className="cl-page-title">找一個適合現在的優惠</h1>
+      <p className="cl-lead mt-3 max-w-xl">
+        用關鍵字、生活情境或優惠分類開始都可以。找到之後再看完整規則與官方來源。
+      </p>
 
-      <section className="rounded-3xl border border-line bg-white p-6 shadow-soft">
-        <div className="mb-6">
-          <p className="text-sm font-semibold text-ink">熱門搜尋</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {HOT_SEARCH_TERMS.map((term) => (
-              <Link
-                key={term}
-                href={`/search?q=${encodeURIComponent(term)}`}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  query === term ? "bg-brand-700 text-white" : "bg-brand-50 text-brand-700 hover:bg-brand-100"
-                }`}
-              >
-                {term}
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        <form className="space-y-4">
-          <label className="block text-sm font-semibold text-ink" htmlFor="keyword">
-            關鍵字
-          </label>
+      <section className="mt-8 cl-panel">
+        <form className="grid grid-cols-[minmax(0,1fr)_auto] gap-1.5 rounded-[14px] border border-line bg-paper p-1.5">
           <input
-            className="w-full rounded-md border border-line px-4 py-3 outline-none focus:border-brand-600"
+            aria-label="關鍵字"
+            className="min-w-0 rounded-control bg-transparent px-3 py-2.5 text-sm text-ink outline-none placeholder:text-subtle"
+            defaultValue={query}
             id="keyword"
             name="q"
             placeholder="輸入優惠、銀行、信用卡或分類"
             type="search"
-            defaultValue={query}
           />
+          <button className="rounded-control bg-blue px-4 py-2.5 text-sm font-[850] text-white transition hover:bg-blue-deep" type="submit">
+            搜尋
+          </button>
         </form>
 
-        <div className="mt-8">
+        <div className="mt-4 flex flex-wrap gap-2">
+          {HOT_SEARCH_TERMS.map((term) => (
+            <Link
+              className={`cl-filter ${query === term ? "cl-filter-active" : ""}`}
+              href={`/search?q=${encodeURIComponent(term)}`}
+              key={term}
+            >
+              {term}
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-8">
+        <SectionHead
+          copy={query ? `關鍵字：${query}` : "還沒輸入關鍵字，可以先從上面的熱門搜尋開始。"}
+          title={results.length > 0 ? `找到 ${results.length} 筆結果` : "搜尋結果"}
+        />
+        <div className="grid gap-3">
           {results.length > 0 ? (
-            <div className="space-y-4">
-              <p className="text-sm text-slate-600">找到 {results.length} 筆結果</p>
-              <div className="grid gap-4">
-                {results.map((offer) => (
-                  <OfferCard key={offer.id} offer={offer} />
-                ))}
-              </div>
-            </div>
+            results.map((offer) => <OfferCard key={offer.id} offer={offer} />)
           ) : (
-            <div className="rounded-3xl border border-line bg-white p-8 text-center text-slate-600 shadow-soft">
-              {query ? `找不到「${query}」相關優惠` : "請輸入關鍵字開始搜尋"}
-            </div>
+            <p className="rounded-card border border-line bg-paper p-7 text-center text-[13px] text-muted">
+              {query ? `找不到「${query}」相關的優惠，換個說法或從熱門搜尋看看。` : "請輸入關鍵字開始搜尋。"}
+            </p>
           )}
         </div>
       </section>
-    </main>
+    </PageContainer>
   );
 }

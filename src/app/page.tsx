@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getFeaturedOffers, getLatestOffers, getPublicOffers } from "@/lib/domain-offers";
-import { CardImage } from "@/components/CardImage";
+import { CardTile } from "@/components/CardTile";
 import { CategoryCard } from "@/components/CategoryCard";
 import { OfferCard } from "@/components/OfferCard";
 import { generateOrganizationJsonLd, getCanonicalUrl } from "@/lib/domain-seo";
@@ -158,7 +158,7 @@ export default async function HomePage() {
         <form action="/search" className="mx-auto mt-6 grid max-w-xl grid-cols-[minmax(0,1fr)_auto] gap-1.5 rounded-[14px] border border-line bg-paper p-1.5">
           <input
             aria-label="搜尋優惠"
-            className="min-w-0 rounded-control bg-transparent px-3 py-2.5 text-sm text-ink outline-none placeholder:text-[#9b9da5]"
+            className="min-w-0 rounded-control bg-transparent px-3 py-2.5 text-sm text-ink outline-none placeholder:text-subtle"
             name="q"
             placeholder="例如：繳稅、旅遊訂房、外送、現金回饋"
             type="search"
@@ -230,7 +230,7 @@ export default async function HomePage() {
             <div className="w-full max-w-[250px] rotate-3 rounded-card bg-paper p-5 text-ink shadow-preview">
               <p className="text-[11px] font-[850] text-blue-deep">待後台支援</p>
               <p className="mt-1.5 text-[19px] font-[850] leading-tight">本月選讀內容</p>
-              <p className="mt-1.5 text-[11px] text-[#707179]">連向真實存在的情境或攻略頁，不會是死連結。</p>
+              <p className="mt-1.5 text-[11px] text-muted">連向真實存在的情境或攻略頁，不會是死連結。</p>
             </div>
           </div>
         </article>
@@ -251,7 +251,7 @@ export default async function HomePage() {
                 <div>
                   <span className="cl-tag">{copy.group}</span>
                   <h3 className="mt-2.5 text-[19px] font-[850] leading-snug text-ink">{copy.title}</h3>
-                  <p className="mt-1.5 text-[11.5px] leading-relaxed text-[#707179]">{copy.description}</p>
+                  <p className="mt-1.5 text-[11.5px] leading-relaxed text-muted">{copy.description}</p>
                 </div>
                 <CardFoot action={copy.action} value={scenario.tagLabel} />
               </Link>
@@ -285,7 +285,7 @@ export default async function HomePage() {
           {featuredOffers.length > 0 ? (
             featuredOffers.map((offer) => <OfferCard key={offer.id} offer={offer} />)
           ) : (
-            <p className="rounded-card border border-line bg-paper p-7 text-center text-[13px] text-[#707179]">
+            <p className="rounded-card border border-line bg-paper p-7 text-center text-[13px] text-muted">
               目前還沒有標記為精選的優惠，下面是最近整理好的活動。
             </p>
           )}
@@ -305,33 +305,15 @@ export default async function HomePage() {
         <div className="-mx-[18px] flex snap-x snap-proximity gap-3 overflow-x-auto px-[18px] pb-4 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
           {cardEntries.length > 0 ? (
             cardEntries.map(({ card, publicOfferCount }) => (
-              <Link className="cl-card flex w-[78%] shrink-0 snap-start flex-col justify-between sm:w-auto" href={`/cards/${card.slug}`} key={card.id}>
-                <div>
-                  <div className="mx-auto mb-3 w-[72%] max-w-[212px]">
-                    <CardImage
-                      alt={card.imageAlt}
-                      bankName={card.bank.name}
-                      cardBgColorFrom={card.cardBgColorFrom}
-                      cardBgColorTo={card.cardBgColorTo}
-                      cardChipColorFrom={card.cardChipColorFrom}
-                      cardChipColorTo={card.cardChipColorTo}
-                      cardTextColor={card.cardTextColor}
-                      imageUrl={card.imageUrl}
-                      name={card.name}
-                      slug={card.slug}
-                    />
-                  </div>
-                  <span className="cl-tag">{card.bank.name}</span>
-                  <h3 className="mt-2.5 text-[15.5px] font-[850] leading-snug text-ink">{card.name}</h3>
-                  <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-[#707179]">
-                    {card.summary ?? card.targetAudience ?? "查看這張信用卡目前整理到的優惠。"}
-                  </p>
-                </div>
-                <CardFoot action={`${publicOfferCount} 筆優惠可以用`} />
-              </Link>
+              <CardTile
+                card={card}
+                className="w-[78%] shrink-0 snap-start sm:w-auto"
+                key={card.id}
+                offerCount={publicOfferCount}
+              />
             ))
           ) : (
-            <p className="rounded-card border border-line bg-paper p-7 text-center text-[13px] text-[#707179] sm:col-span-2 lg:col-span-3">
+            <p className="rounded-card border border-line bg-paper p-7 text-center text-[13px] text-muted sm:col-span-2 lg:col-span-3">
               目前尚無可顯示的信用卡。
             </p>
           )}
@@ -353,7 +335,7 @@ export default async function HomePage() {
                   <span className="cl-tag">攻略</span>
                   <h3 className="mt-2.5 text-[17px] font-[850] leading-snug text-ink">{article.title}</h3>
                   {article.summary ? (
-                    <p className="mt-1.5 line-clamp-3 text-[11.5px] leading-relaxed text-[#707179]">{article.summary}</p>
+                    <p className="mt-1.5 line-clamp-3 text-[11.5px] leading-relaxed text-muted">{article.summary}</p>
                   ) : null}
                 </div>
                 <CardFoot action="閱讀攻略" />
@@ -361,7 +343,7 @@ export default async function HomePage() {
             ))}
           </div>
         ) : (
-          <p className="rounded-card border border-line bg-paper p-7 text-center text-[13px] text-[#707179]">
+          <p className="rounded-card border border-line bg-paper p-7 text-center text-[13px] text-muted">
             攻略文章陸續整理中，先從上面的生活情境開始找也可以。
           </p>
         )}
