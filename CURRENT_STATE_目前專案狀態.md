@@ -10,17 +10,17 @@
 - 工作區 alias：`C:/Users/user/Documents/信用卡查詢網站`
 - alias 類型：Windows junction，兩個路徑指向同一份檔案
 - branch：`main`
-- HEAD：**`63a3794`**（2026-08-05）
-- 遠端關係：**已與 `origin/main` 同步，無待 push 的 commit**。使用者於 2026-08-06 明確指示 push，已完成（`554cb60..d4cd835`，共 6 個 commit）。本輪對話的 Git 授權原本不含 push，push 為使用者當下另行明確授權。
-- **本輪已 push 的 6 個 commit**（由舊到新）：
+- HEAD：**`0fdbc85`**（2026-08-06）
+- 遠端關係：**本地領先 `origin/main` 1 個 commit（`0fdbc85`），尚未 push**（`ef28462` 以前已 push；本次 T22 驗收記錄為之後新增）。使用者於 2026-08-06 稍早已明確指示 push 過一輪（`554cb60..d4cd835..ef28462`），本輪對話的 Git 授權原本不含 push，該次 push 為使用者當下另行明確授權，尚未確認是否延續至本次新 commit。
+- **累計 commit 歷程**（由舊到新，含已 push 與待 push）：
   - `476d150` docs：design-system 納入版控、新增 T26／T27／T28 任務卡、T22 改版為 v2
   - `c5be854` docs：記錄 T22 Scope v2 正式核准
   - `e37f07f` feat：T22 瘦身版實作（抓取／比對／健康檢查／通知／排程）
   - `5fb5a88` fix：修正正規化刪空白導致 token 捏造的缺陷
   - `63a3794` docs：記錄 T22 全量實測與 4 筆逐筆查證結果
   - `d4cd835` docs：同步 CURRENT_STATE 與任務索引至 T22 實作後狀態
-  - `ef28462` docs：標記已與 origin 同步
-  - （本次更新前尚未 commit）docs：記錄 2026-08-06 T22 端對端驗收結果（三項 GitHub Secrets 設定、GitHub Actions run `31065358168` 成功、Telegram 通知確認送達）
+  - `ef28462` docs：標記已與 origin 同步（**已 push，此為前一輪 push 的最後一筆**）
+  - `0fdbc85` docs：記錄 2026-08-06 T22 端對端驗收結果（三項 GitHub Secrets 設定、GitHub Actions run `31065358168` 成功、Telegram 通知確認送達）（**尚未 push**）
 - 本輪之前的歷史：`fdc7432`（2026-08-05）及更早的 7 個 commit 詳見 `docs/implementation/handoffs/2026-08-05-新卡資料補齊與多層回饋支援-交接摘要.md`
 - **未追蹤且刻意未 commit**：`docs/data-collection/backups/`（既有 xlsx 舊快照，非本輪產生，先前交接摘要已明確標記不得未經同意 commit 或刪除）
 - **push 觸發的部署（2026-08-06）**：push 到 `main` 會觸發 Vercel 自動部署。本批變更皆為文件、獨立腳本與 GitHub Actions workflow，**未修改 `src/` 任何檔案**（push 前已用 `git diff --name-only` 確認），因此網站外觀與行為不會改變。push 前亦已掃描待送內容確認無連線字串、API 金鑰、Telegram token 或私鑰。**新 session 若要確認正式站是否已更新到最新 commit，仍應核對 Vercel Deployments 分頁。**
