@@ -1,6 +1,6 @@
 # 目前專案狀態
 
-最後更新：2026-08-05（Asia/Taipei，本日第二次更新：T22 實作與查證）  
+最後更新：2026-08-06（Asia/Taipei，T22 端對端驗收通過）  
 用途：所有新 AI session 接續本專案時的唯一目前狀態入口
 交接摘要：`docs/implementation/handoffs/2026-08-05-新卡資料補齊與多層回饋支援-交接摘要.md`（最新一輪對話的完整導覽，內容橫跨 2026-08-04 至 2026-08-05，同一輪對話跨日繼續，含一次資料事故與善後；2026-08-04 稍早的 T18 部署與 T25 草案見前一篇 `2026-08-04-T18部署上線與T25草案-交接摘要.md`；2026-08-03 之前的細節見 `2026-08-03-T20攻略文章實作與收尾-交接摘要.md`；2026-07-30 之前的細節見 `2026-07-30-T20情境頁與訂閱標籤-交接摘要.md`；2026-07-29 的 T23 定案過程見 `2026-07-29-T23-卡面配色與資料蒐集v4-交接摘要.md`）
 
@@ -19,6 +19,8 @@
   - `5fb5a88` fix：修正正規化刪空白導致 token 捏造的缺陷
   - `63a3794` docs：記錄 T22 全量實測與 4 筆逐筆查證結果
   - `d4cd835` docs：同步 CURRENT_STATE 與任務索引至 T22 實作後狀態
+  - `ef28462` docs：標記已與 origin 同步
+  - （本次更新前尚未 commit）docs：記錄 2026-08-06 T22 端對端驗收結果（三項 GitHub Secrets 設定、GitHub Actions run `31065358168` 成功、Telegram 通知確認送達）
 - 本輪之前的歷史：`fdc7432`（2026-08-05）及更早的 7 個 commit 詳見 `docs/implementation/handoffs/2026-08-05-新卡資料補齊與多層回饋支援-交接摘要.md`
 - **未追蹤且刻意未 commit**：`docs/data-collection/backups/`（既有 xlsx 舊快照，非本輪產生，先前交接摘要已明確標記不得未經同意 commit 或刪除）
 - **push 觸發的部署（2026-08-06）**：push 到 `main` 會觸發 Vercel 自動部署。本批變更皆為文件、獨立腳本與 GitHub Actions workflow，**未修改 `src/` 任何檔案**（push 前已用 `git diff --name-only` 確認），因此網站外觀與行為不會改變。push 前亦已掃描待送內容確認無連線字串、API 金鑰、Telegram token 或私鑰。**新 session 若要確認正式站是否已更新到最新 commit，仍應核對 Vercel Deployments 分頁。**
@@ -110,7 +112,7 @@
   - Phase 5 ⏳ `import-offer-data.mjs`／`seed.mjs` 改寫 tiers；幣倍卡做為第一筆多層結構化案例；**從 schema 移除扁平欄位＝高風險，執行前再確認**；寫 T21 Summary。
 - 目前資料庫「新舊並存」：資料已在 RewardTier、前台讀新的，扁平欄位仍在、後台仍寫舊的，網站正常。
 
-### T22 排程輔助資料更新 — **Scope v2 瘦身版已核准，第一輪實作完成，待人工驗收**（2026-08-05）
+### T22 排程輔助資料更新 — **Scope v2 瘦身版已核准，端對端驗收通過，長期營運中**（2026-08-06）
 
 - 任務卡：`docs/implementation/tasks/T22-SCHEDULED_DATA_UPDATE_排程輔助資料更新.md`（v2）
 - **2026-08-05 逐項討論後，(a)–(g) 七題全部拍板，並由使用者決定把 Scope 從「完整版」縮減為「瘦身版」。**
@@ -147,11 +149,18 @@
 
 其中最嚴重的一項：正規化刪空白使「Level 1 2%」黏成「level12%」，抽出資料裡不存在的「12%」，**同時真正的 2%／3%／3.3%／0.3% 完全未被檢查**——國泰 CUBE 卡的回饋率就算真被改掉也偵測不到。已拆為 `normalizeText`（錨點用）與 `normalizeNumericText`（數值用）兩套。其餘四項：錨點過嚴、斷言範圍過寬、千分位單邊正規化、數字邊界缺失。
 
-#### 尚未完成
+#### 端對端驗收結果（2026-08-06，已完成）
 
-- **Telegram 與 GitHub Actions 端對端未驗證**，因為需要使用者本人先完成三項前置動作（AI 不代辦，屬帳號與憑證操作）：① 建立 Telegram Bot 取得 Token；② 於 Neon 建立**唯讀**資料庫使用者；③ 將兩者填入 GitHub Secrets，名稱為 `DATABASE_URL_READONLY`／`TELEGRAM_BOT_TOKEN`／`TELEGRAM_CHAT_ID`（**請直接貼進 GitHub 設定頁，勿貼在對話中**）。
-- **本機測試時 Playwright 被執行環境沙箱擋住**，是以停用沙箱的方式跑（操作本身為唯讀抓取公開網頁）；GitHub Actions 上無此限制。
-- **4 項改善候選尚未實作**（皆會改變系統行為，待使用者決定）：區分「被銀行擋下」與「頁面異常」、來源網址粒度偏總覽、費率置於圖片的來源宜標記為不適用自動檢查、疑似暫時性差異是否加重試機制。
+使用者本人完成三項前置動作並設定 GitHub Secrets：`DATABASE_URL_READONLY`（Neon 唯讀角色 `offer_checker_ro`，經三段查詢驗證僅有 `SELECT` 且無繼承群組，涵蓋 13 張表；過程中曾用較弱的臨時密碼、經回報後已用 `ALTER ROLE` 立即輪替）、`TELEGRAM_BOT_TOKEN`、`TELEGRAM_CHAT_ID`。
+
+手動觸發 GitHub Actions（run `31065358168`）：**前四步全數成功，「執行來源檢查」以唯讀憑證成功連線並跑完全部 34 筆（32 成功／2 失敗／2 疑似有變，與既有查證的 4 筆一致，非新問題）；`Telegram 通知已送出。`，使用者已收到內容一致的通知，確認端對端貫通。** Job 以 `exit code 1` 結束、Actions 顯示紅燈——此為設計行為（有失敗筆數即回傳非零狀態碼），非執行錯誤。
+
+至此「驗證方式與完成定義」四項驗收全數達成，任務轉為**每月 1 日自動執行的長期營運狀態**，非阻塞待辦。
+
+#### 尚未完成（非阻塞，皆會改變系統行為，待使用者決定是否進行）
+
+- **4 項改善候選**：區分「被銀行擋下」與「頁面異常」（`ctbc-uniopen` 兩筆已知會穩定重現）、來源網址粒度偏總覽（`taishin-richart` 一例）、費率置於圖片的來源宜標記為不適用自動檢查、疑似暫時性差異（`ctbc-uniopen-brand-weekly-promos` 兩輪結果不同）是否加重試機制。
+- 本機測試時 Playwright 曾被執行環境沙箱擋住，改以停用沙箱方式跑通（操作本身為唯讀抓取公開網頁）；GitHub Actions 雲端環境無此限制，已於雲端成功驗證。
 
 ### T23 卡面圖像視覺風格規則 — 已核准 v1，**已完整實作並上線於本機環境**
 
@@ -297,7 +306,7 @@
 1. ~~本地 3 個 commit（`f512fdb`～`322049b`）尚未 push~~ **已確認 push 完成（2026-07-29 新 session 核對），此項不再是待辦。**
 2. T18（部署上線）：**已於 2026-08-04 正式標記完成**（同一輪對話 2026-08-03 開工，跨日到 08-04 完成，commit 時間戳可證實）。schema 遷移至 PostgreSQL（v8）、Neon 資料庫（`credit-card-web`，Singapore region）建立並載入正式資料、Vercel 部署成功（`https://credit-card-web-pi.vercel.app`，第一次因 Vercel 依賴快取導致 Prisma Client 未重新產生失敗，已加 `postinstall: prisma generate` 修正，commit `bd6e7c7`，08-03）、正式管理員帳號建立（`hayleylu0902@gmail.com`）。`NEXTAUTH_URL` 一開始填錯猜測網址，08-04 修正後 Redeploy 生效。上線後驗證全數通過：首頁／六個分類頁／搜尋／三個優惠詳情頁／銀行頁／卡片頁皆正常，**使用者本人已在正式網址親自登入後台成功**，Dashboard 資料正確。已知風險：Neon Free／Vercel Hobby 有冷啟動延遲，確認為免費方案預期行為，非錯誤。詳見 `summaries/T18-FIRST_RELEASE_DEPLOYMENT_SUMMARY-v1-2026-08-04.md`。測試期間順手移除情境頁重複標題卡片（commit `0958296`）與銀行/卡片頁重複說明文字（commit `241598e`），皆已 push。
 3. T24（申辦導引連結）v1 方向已拍板（純導引＋UTM），待正式核准 Scope 開工。
-4. T22（排程輔助資料更新）**已於 2026-08-05 核准 Scope v2 瘦身版並完成第一輪實作**（34 筆全量實測：30 無變動／2 疑似有變／2 健康檢查未過，4 筆皆已查證無資料錯誤）。**剩餘待辦：使用者完成 Telegram Bot、Neon 唯讀憑證與 GitHub Secrets 三項前置動作後，才能做端對端驗收。** 詳見上方 T22 段落。
+4. T22（排程輔助資料更新）**已於 2026-08-05 核准 Scope v2 瘦身版，2026-08-06 完成端對端驗收**（三項 GitHub Secrets 設定完成、GitHub Actions 手動觸發成功跑完 34 筆、Telegram 通知確認送達）。**已轉為每月 1 日自動執行的長期營運狀態，非阻塞待辦。** 詳見上方 T22 段落。
 5. Codex 若有後續資料蒐集批次，先確認 `.ai-worktree-lock.json` 再接手；**指派任務時需明確指定使用 `DATA_COLLECTION_SPEC...v6-2026-07-30.md` 與 `信用卡優惠資料整理模板-v3-2026-07-29.xlsx`**（v6 規格書核心情境標籤共 14 項；v3 模板含卡面配色欄位；這個切換不會自動發生）；重跑 `npm run data:import`（增量模式）不會清空既有資料。
 6. `esun-unicard-wallet-new-card-2026q3` 的「最低消費」欄位為欄位歸類問題（非事實錯誤），已隨 T21 遷移進 RewardTier.minSpend，待資料整理時再校正語意。
 7. T20（攻略文章功能與自動情境頁）**已於 2026-08-03 正式標記完成**：自動情境頁（`/scenarios/[slug]`）與人工攻略文章並行上線，核心情境標籤 14 項，後台文章 CRUD 含刪除功能，人工測試腳本 8 項全數通過，詳見上方 T20 段落。
