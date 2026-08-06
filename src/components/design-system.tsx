@@ -9,6 +9,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
+import { ContactEmail } from "@/components/ContactEmail";
 
 function cx(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
@@ -33,7 +34,6 @@ export function PageContainer({ children, className }: { children: ReactNode; cl
  * 刻意不放導覽連結——表頭已經有完整導覽，頁尾再放一份只是重複，
  * 手機上還會變成一長串把頁面拉長。
  */
-const CONTACT_EMAIL = "hayleylustock@gmail.com";
 
 function SiteFooter() {
   return (
@@ -48,11 +48,7 @@ function SiteFooter() {
         <p className="text-[12px] text-muted">從今天想完成的事開始，找到適合的卡。</p>
 
         <p className="w-full text-[11.5px] leading-relaxed text-muted">
-          資料有誤或想回報問題，歡迎來信{" "}
-          <a className="font-[850] text-blue-deep transition hover:underline" href={`mailto:${CONTACT_EMAIL}`}>
-            {CONTACT_EMAIL}
-          </a>
-          。
+          資料有誤或想回報問題，歡迎來信 <ContactEmail />。
         </p>
 
         <p className="w-full text-[11.5px] leading-relaxed text-muted">
