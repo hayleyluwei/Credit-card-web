@@ -30,30 +30,19 @@ export function PageContainer({ children, className }: { children: ReactNode; cl
 }
 
 /**
- * 頁尾維持契約 reference 的極簡結構：品牌、一句說明、聯絡方式、免責聲明。
- * 刻意不放導覽連結——表頭已經有完整導覽，頁尾再放一份只是重複，
- * 手機上還會變成一長串把頁面拉長。
+ * 頁尾只留必要資訊：聯絡方式與免責聲明。
+ *
+ * 刻意不放品牌與標語——表頭已經有品牌，首頁也有主張，頁尾再放一次只是重複。
+ * 也不放導覽連結：表頭是 sticky、隨時都在，使用者不需要捲到底才有出口。
  */
-
 function SiteFooter() {
   return (
     <footer className="mt-16 border-t border-line bg-paper">
-      <div className="cl-container flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 py-7">
-        <p className="flex items-center gap-2 text-[15px] font-[850] text-ink">
-          <span className="grid h-5 w-5 place-items-center rounded bg-blue text-[11px] text-white" aria-hidden="true">
-            卡
-          </span>
-          信用卡優惠查詢
-        </p>
-        <p className="text-[12px] text-muted">從今天想完成的事開始，找到適合的卡。</p>
-
-        <p className="w-full text-[11.5px] leading-relaxed text-muted">
+      <div className="cl-container flex flex-col gap-2 py-6 text-[11.5px] leading-relaxed text-muted">
+        <p>
           資料有誤或想回報問題，歡迎來信 <ContactEmail />。
         </p>
-
-        <p className="w-full text-[11.5px] leading-relaxed text-muted">
-          本站整理公開的信用卡優惠資訊，僅供參考，不構成申辦建議。實際權益與活動條件以各發卡銀行官方公告為準。
-        </p>
+        <p>本站整理公開的信用卡優惠資訊，僅供參考，不構成申辦建議。實際權益與活動條件以各發卡銀行官方公告為準。</p>
       </div>
     </footer>
   );
