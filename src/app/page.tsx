@@ -6,7 +6,9 @@ import { CategoryCard } from "@/components/CategoryCard";
 import { OfferCard } from "@/components/OfferCard";
 import { generateOrganizationJsonLd, getCanonicalUrl } from "@/lib/domain-seo";
 import { SCENARIO_TAGS } from "@/lib/domain-scenarios";
+import { getScenarioCopy } from "@/lib/domain-scenario-copy";
 import { EntryIcon } from "@/components/EntryIcon";
+import { CardFoot, PageContainer, PreviewCard, SectionHead, type PreviewTone } from "@/components/design-system";
 
 export const metadata = {
   title: "信用卡優惠查詢網站",
@@ -15,6 +17,69 @@ export const metadata = {
     canonical: getCanonicalUrl("/")
   }
 };
+
+/** 首頁五張快速入口預覽卡。契約規定五張與三種入口都不得刪除。 */
+const PREVIEW_ENTRIES: {
+  tone: PreviewTone;
+  label: string;
+  iconKey: string;
+  title: string;
+  copy: string;
+  action: string;
+  href: string;
+  delayClass: string;
+}[] = [
+  {
+    tone: "blue",
+    label: "情境",
+    iconKey: "tax-payment",
+    title: "繳稅季到了",
+    copy: "從今天要付的帳單開始找。",
+    action: "看情境",
+    href: "/scenarios/tax-payment",
+    delayClass: ""
+  },
+  {
+    tone: "lime",
+    label: "優惠",
+    iconKey: "cashback",
+    title: "現金回饋",
+    copy: "把常刷的地方放在一起看。",
+    action: "瀏覽優惠",
+    href: "/categories/cashback",
+    delayClass: "[animation-delay:-0.7s]"
+  },
+  {
+    tone: "ink",
+    label: "攻略",
+    iconKey: "subscription",
+    title: "卡片不用越多越好",
+    copy: "從你的生活開始做選擇。",
+    action: "讀一篇",
+    href: "/guides",
+    delayClass: "[animation-delay:-1.6s]"
+  },
+  {
+    tone: "rose",
+    label: "分類",
+    iconKey: "travel",
+    title: "旅遊交通",
+    copy: "海外消費、哩程與訂房。",
+    action: "查看分類",
+    href: "/categories/travel",
+    delayClass: "[animation-delay:-2.4s]"
+  },
+  {
+    tone: "yellow",
+    label: "卡片",
+    iconKey: "installment",
+    title: "從手上的卡開始",
+    copy: "看懂卡片與相關優惠。",
+    action: "查看卡片",
+    href: "/cards",
+    delayClass: "[animation-delay:-3.1s]"
+  }
+];
 
 export default async function HomePage() {
   const siteSetting = await prisma.siteSetting.findFirst();
@@ -31,6 +96,12 @@ export default async function HomePage() {
       cards: true,
       category: true
     }
+  });
+
+  const articles = await prisma.article.findMany({
+    where: { isPublished: true },
+    orderBy: { publishedAt: "desc" },
+    take: 3
   });
 
   const cards = await prisma.card.findMany({
@@ -75,169 +146,225 @@ export default async function HomePage() {
     .slice(0, 6);
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-6xl px-5 py-8 sm:px-8 lg:px-10">
-      <header className="mb-6 rounded-3xl border border-line bg-white p-8 shadow-soft">
-        <div className="max-w-2xl">
-          <p className="text-sm font-semibold text-brand-700">信用卡優惠查詢</p>
-          <h1 className="mt-3 text-3xl font-bold text-ink sm:text-4xl">找到最適合你的信用卡優惠</h1>
-          <p className="mt-4 text-base leading-7 text-slate-700">
-            依照分類、銀行、卡片與優惠內容快速瀏覽公開優惠。首頁提供精選優惠、最新優惠與常見分類入口。
-          </p>
-        </div>
-      </header>
+    <PageContainer>
+      {/* ① 生活任務主張＋搜尋入口 */}
+      <section className="text-center">
+        <p className="cl-eyebrow">cards, rewards, and everyday decisions</p>
+        <h1 className="cl-page-title mx-auto max-w-3xl text-balance">先從今天想完成的事，找到適合的卡。</h1>
+        <p className="cl-lead mx-auto mt-4 max-w-lg">
+          不用先看懂一長串回饋規則。告訴我們你要做什麼，剩下的我們幫你整理好，每筆都附官方來源。
+        </p>
 
-      <nav className="mb-10 flex flex-wrap gap-3 text-sm font-semibold">
-        <Link className="rounded-full bg-brand-700 px-5 py-3 text-white transition hover:bg-brand-800" href="/search">
-          搜尋優惠
-        </Link>
-        <Link className="rounded-full border border-brand-700 px-5 py-3 text-brand-700 transition hover:bg-brand-50" href="/categories">
-          瀏覽分類
-        </Link>
-        <Link className="rounded-full border border-brand-700 px-5 py-3 text-brand-700 transition hover:bg-brand-50" href="/guides">
-          攻略文章
-        </Link>
-      </nav>
+        <form action="/search" className="mx-auto mt-6 grid max-w-xl grid-cols-[minmax(0,1fr)_auto] gap-1.5 rounded-[14px] border border-line bg-paper p-1.5">
+          <input
+            aria-label="搜尋優惠"
+            className="min-w-0 rounded-control bg-transparent px-3 py-2.5 text-sm text-ink outline-none placeholder:text-[#9b9da5]"
+            name="q"
+            placeholder="例如：繳稅、旅遊訂房、外送、現金回饋"
+            type="search"
+          />
+          <button className="rounded-control bg-blue px-4 py-2.5 text-sm font-[850] text-white transition hover:bg-blue-deep" type="submit">
+            開始找
+          </button>
+        </form>
 
-      <section className="mb-10">
-        <div className="mb-6">
-          <p className="text-sm font-semibold text-brand-700">情境入口</p>
-          <h2 className="mt-2 text-2xl font-bold text-ink">熱門情境</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">依生活情境快速找優惠，例如繳稅、學費、水電瓦斯或訂閱服務。</p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          {SCENARIO_TAGS.map((scenario) => (
-            <Link
-              key={scenario.slug}
-              href={`/scenarios/${scenario.slug}`}
-              className="flex w-24 flex-col items-center gap-2 rounded-2xl border border-line bg-white p-3 text-center shadow-soft transition duration-200 hover:-translate-y-1 hover:border-brand-300"
-            >
-              <EntryIcon className="h-10 w-10" iconKey={scenario.slug} />
-              <span className="text-xs font-semibold text-ink">{scenario.tagLabel}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="mb-10">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-brand-700">分類入口</p>
-            <h2 className="mt-2 text-2xl font-bold text-ink">熱門優惠分類</h2>
-          </div>
-          <Link href="/categories" className="text-sm font-semibold text-brand-700">
-            查看全部分類 →
-          </Link>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {categories.map((category) => (
-            <CategoryCard key={category.id} category={category} offerCount={category._count.offers} />
-          ))}
-        </div>
-      </section>
-
-      <section className="mb-10">
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-brand-700">依信用卡查優惠</p>
-            <h2 className="mt-2 text-2xl font-bold text-ink">信用卡優惠</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              不確定要看哪個分類時，先從手上的卡開始。點進信用卡頁，就能看到這張卡目前整理到的公開優惠。
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
-            <Link href="/cards" className="text-brand-700">
-              查看全部信用卡 →
-            </Link>
-            <Link href="/search" className="text-brand-700">
-              用關鍵字搜尋優惠 →
-            </Link>
-          </div>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {cardEntries.length > 0 ? (
-            cardEntries.map(({ card, publicOfferCount }) => (
-              <Link
-                key={card.id}
-                href={`/cards/${card.slug}`}
-                className="group grid gap-4 rounded-3xl border border-line bg-white p-5 shadow-soft transition duration-200 hover:-translate-y-1 hover:border-brand-300"
-              >
-                <CardImage
-                  imageUrl={card.imageUrl}
-                  alt={card.imageAlt}
-                  name={card.name}
-                  bankName={card.bank.name}
-                  slug={card.slug}
-                  cardBgColorFrom={card.cardBgColorFrom}
-                  cardBgColorTo={card.cardBgColorTo}
-                  cardTextColor={card.cardTextColor}
-                  cardChipColorFrom={card.cardChipColorFrom}
-                  cardChipColorTo={card.cardChipColorTo}
-                />
-                <div>
-                  <p className="text-sm font-semibold text-brand-700">{card.bank.name}</p>
-                  <h3 className="mt-2 text-xl font-bold text-ink">{card.name}</h3>
-                  <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">
-                    {card.summary ?? card.targetAudience ?? "查看這張信用卡目前整理到的優惠。"}
-                  </p>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="rounded-full bg-brand-50 px-3 py-1 font-semibold text-brand-700">{publicOfferCount} 筆優惠</span>
-                  <span className="font-semibold text-brand-700 transition group-hover:translate-x-1">查看這張卡 →</span>
-                </div>
+        <div className="mt-3 flex flex-wrap justify-center gap-2">
+          {["tax-payment", "travel-booking", "food-delivery"].map((slug) => {
+            const scenario = SCENARIO_TAGS.find((entry) => entry.slug === slug);
+            if (!scenario) return null;
+            return (
+              <Link className="cl-filter" href={`/scenarios/${scenario.slug}`} key={scenario.slug}>
+                {scenario.tagLabel}
               </Link>
-            ))
-          ) : (
-            <div className="rounded-3xl border border-line bg-white p-8 text-center text-slate-600 shadow-soft md:col-span-2 xl:col-span-3">
-              目前尚無可顯示的信用卡。
-            </div>
-          )}
+            );
+          })}
+          <Link className="cl-filter" href="/cards">
+            手上的卡
+          </Link>
         </div>
       </section>
 
-      <section className="mb-10">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-brand-700">精選優惠</p>
-            <h2 className="mt-2 text-2xl font-bold text-ink">本期精選</h2>
-          </div>
-          <Link href="/search" className="text-sm font-semibold text-brand-700">
-            查看更多優惠 →
-          </Link>
-        </div>
+      {/* ② 五張快速入口預覽卡：手機改為左右滑動，讓下一張露出一角 */}
+      <div className="-mx-[18px] mt-10 flex snap-x snap-proximity gap-3 overflow-x-auto px-[18px] pb-4 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-5 lg:items-end">
+        {PREVIEW_ENTRIES.map((entry) => (
+          <PreviewCard delayClass={entry.delayClass} href={entry.href} key={entry.title} tone={entry.tone}>
+            <div className="w-[162px] shrink-0 sm:w-auto">
+              <div className="flex items-center justify-between text-[10px] font-extrabold">
+                <span className={entry.tone === "ink" ? "text-paper/70" : "text-ink/70"}>{entry.label}</span>
+              </div>
+              <EntryIcon className="mt-3 h-9 w-9" iconKey={entry.iconKey} tone={entry.tone === "ink" ? "lime" : "ink"} />
+              <h2 className="mt-3 text-[19px] font-[850] leading-tight">{entry.title}</h2>
+              <p className={`mt-1 text-[11px] leading-snug ${entry.tone === "ink" ? "text-paper/70" : "text-ink/65"}`}>{entry.copy}</p>
+            </div>
+            <span
+              className={`mt-3 flex items-center justify-between border-t pt-2.5 text-[10px] font-[850] ${
+                entry.tone === "ink" ? "border-paper/25 text-lime" : "border-black/15 text-blue-deep"
+              }`}
+            >
+              {entry.action}
+              <span aria-hidden="true">→</span>
+            </span>
+          </PreviewCard>
+        ))}
+      </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+      {/* ③ 本月情境選讀：T27 視覺預留版位，未核准前不接資料來源 */}
+      <section className="mt-12">
+        <SectionHead
+          action={{ href: "/guides", label: "所有攻略" }}
+          copy="每個月挑一件你可能正在煩惱的事（版位預留中）"
+          title="本月情境選讀"
+        />
+        <article className="grid overflow-hidden rounded-panel bg-ink text-paper lg:grid-cols-[1.06fr_0.94fr]">
+          <div className="flex flex-col items-start justify-center gap-3 p-8 sm:p-10">
+            <p className="text-[10px] font-[850] uppercase tracking-[0.09em] text-lime">版位示意</p>
+            <h3 className="text-[26px] font-[850] leading-tight sm:text-[32px]">每個月，我們挑一件你可能正在煩惱的事。</h3>
+            <p className="text-[13px] leading-relaxed text-paper/70">
+              這個位置的樣式已經定案，實際內容要等後台可以按月指定選讀之後才會填入。在那之前，先從下面的生活情境開始找。
+            </p>
+            <Link className="mt-2 inline-flex items-center rounded-control bg-lime px-4 py-2.5 text-[13px] font-[850] text-ink transition hover:brightness-95" href="/scenarios/travel-booking">
+              先看旅遊情境 →
+            </Link>
+          </div>
+          <div className="flex min-h-[200px] items-center justify-center bg-blue p-6">
+            <div className="w-full max-w-[250px] rotate-3 rounded-card bg-paper p-5 text-ink shadow-preview">
+              <p className="text-[11px] font-[850] text-blue-deep">待後台支援</p>
+              <p className="mt-1.5 text-[19px] font-[850] leading-tight">本月選讀內容</p>
+              <p className="mt-1.5 text-[11px] text-[#707179]">連向真實存在的情境或攻略頁，不會是死連結。</p>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      {/* ④ 熱門情境 */}
+      <section className="mt-12">
+        <SectionHead
+          action={{ href: "/search", label: "查看全部情境" }}
+          copy="先從生活情境開始，不必一次讀完所有規則。"
+          title="你最近想完成什麼？"
+        />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {SCENARIO_TAGS.map((scenario) => {
+            const copy = getScenarioCopy(scenario.slug, scenario.tagLabel);
+            return (
+              <Link className="cl-card flex flex-col justify-between" href={`/scenarios/${scenario.slug}`} key={scenario.slug}>
+                <div>
+                  <span className="cl-tag">{copy.group}</span>
+                  <h3 className="mt-2.5 text-[19px] font-[850] leading-snug text-ink">{copy.title}</h3>
+                  <p className="mt-1.5 text-[11.5px] leading-relaxed text-[#707179]">{copy.description}</p>
+                </div>
+                <CardFoot action={copy.action} value={scenario.tagLabel} />
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ⑤ 熱門優惠分類 */}
+      <section className="mt-12">
+        <SectionHead
+          action={{ href: "/categories", label: "查看全部分類" }}
+          copy="已經知道自己想要哪一種回饋的話，從這裡開始比較快。"
+          title="或者，直接從回饋類型看起"
+        />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {categories.map((category, index) => (
+            <CategoryCard category={category} key={category.id} offerCount={category._count.offers} toneIndex={index} />
+          ))}
+        </div>
+      </section>
+
+      {/* ⑥ 正在發生的回饋（精選＋最新） */}
+      <section className="mt-12">
+        <SectionHead
+          action={{ href: "/search", label: "看更多優惠" }}
+          copy="先看幾個重點就好，詳細條件點進去都查得到。"
+          title="現在正在跑的活動"
+        />
+        <div className="grid gap-3">
           {featuredOffers.length > 0 ? (
             featuredOffers.map((offer) => <OfferCard key={offer.id} offer={offer} />)
           ) : (
-            <div className="rounded-3xl border border-line bg-white p-8 text-center text-slate-600 shadow-soft">
-              目前尚無可顯示的精選優惠。
-            </div>
+            <p className="rounded-card border border-line bg-paper p-7 text-center text-[13px] text-[#707179]">
+              目前還沒有標記為精選的優惠，下面是最近整理好的活動。
+            </p>
+          )}
+          {latestOffers.map((offer) => (
+            <OfferCard key={`latest-${offer.id}`} offer={offer} />
+          ))}
+        </div>
+      </section>
+
+      {/* ⑦ 從手上的卡開始：手機改為左右滑動，讓下一張露出一角 */}
+      <section className="mt-12">
+        <SectionHead
+          action={{ href: "/cards", label: "所有信用卡" }}
+          copy="不用再多辦一張。先看看手上這幾張，現在有哪些優惠可以用。"
+          title="已經有卡了？看看它能做什麼"
+        />
+        <div className="-mx-[18px] flex snap-x snap-proximity gap-3 overflow-x-auto px-[18px] pb-4 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
+          {cardEntries.length > 0 ? (
+            cardEntries.map(({ card, publicOfferCount }) => (
+              <Link className="cl-card flex w-[78%] shrink-0 snap-start flex-col justify-between sm:w-auto" href={`/cards/${card.slug}`} key={card.id}>
+                <div>
+                  <div className="mx-auto mb-3 w-[72%] max-w-[212px]">
+                    <CardImage
+                      alt={card.imageAlt}
+                      bankName={card.bank.name}
+                      cardBgColorFrom={card.cardBgColorFrom}
+                      cardBgColorTo={card.cardBgColorTo}
+                      cardChipColorFrom={card.cardChipColorFrom}
+                      cardChipColorTo={card.cardChipColorTo}
+                      cardTextColor={card.cardTextColor}
+                      imageUrl={card.imageUrl}
+                      name={card.name}
+                      slug={card.slug}
+                    />
+                  </div>
+                  <span className="cl-tag">{card.bank.name}</span>
+                  <h3 className="mt-2.5 text-[15.5px] font-[850] leading-snug text-ink">{card.name}</h3>
+                  <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-[#707179]">
+                    {card.summary ?? card.targetAudience ?? "查看這張信用卡目前整理到的優惠。"}
+                  </p>
+                </div>
+                <CardFoot action={`${publicOfferCount} 筆優惠可以用`} />
+              </Link>
+            ))
+          ) : (
+            <p className="rounded-card border border-line bg-paper p-7 text-center text-[13px] text-[#707179] sm:col-span-2 lg:col-span-3">
+              目前尚無可顯示的信用卡。
+            </p>
           )}
         </div>
       </section>
 
-      <section>
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-brand-700">最新優惠</p>
-            <h2 className="mt-2 text-2xl font-bold text-ink">最近加入的優惠</h2>
+      {/* ⑧ 攻略文章 */}
+      <section className="mt-12">
+        <SectionHead
+          action={{ href: "/guides", label: "更多文章" }}
+          copy="把複雜的規則寫成看得懂的判斷，不急著推薦你辦卡。"
+          title="想再多懂一點的時候"
+        />
+        {articles.length > 0 ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {articles.map((article) => (
+              <Link className="cl-card flex flex-col justify-between" href={`/guides/${article.slug}`} key={article.id}>
+                <div>
+                  <span className="cl-tag">攻略</span>
+                  <h3 className="mt-2.5 text-[17px] font-[850] leading-snug text-ink">{article.title}</h3>
+                  {article.summary ? (
+                    <p className="mt-1.5 line-clamp-3 text-[11.5px] leading-relaxed text-[#707179]">{article.summary}</p>
+                  ) : null}
+                </div>
+                <CardFoot action="閱讀攻略" />
+              </Link>
+            ))}
           </div>
-          <Link href="/search" className="text-sm font-semibold text-brand-700">
-            搜尋更多 →
-          </Link>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          {latestOffers.length > 0 ? (
-            latestOffers.map((offer) => <OfferCard key={offer.id} offer={offer} />)
-          ) : (
-            <div className="rounded-3xl border border-line bg-white p-8 text-center text-slate-600 shadow-soft">
-              目前尚無最新優惠。
-            </div>
-          )}
-        </div>
+        ) : (
+          <p className="rounded-card border border-line bg-paper p-7 text-center text-[13px] text-[#707179]">
+            攻略文章陸續整理中，先從上面的生活情境開始找也可以。
+          </p>
+        )}
       </section>
 
       <script
@@ -253,6 +380,6 @@ export default async function HomePage() {
           )
         }}
       />
-    </main>
+    </PageContainer>
   );
 }

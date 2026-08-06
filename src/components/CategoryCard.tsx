@@ -1,28 +1,32 @@
 import Link from "next/link";
 import type { Category } from "@prisma/client";
-import { EntryIcon } from "@/components/EntryIcon";
+import { CardFoot } from "@/components/design-system";
+
+/**
+ * [T28] 分類卡的亮色底。契約允許「白底或指定亮色底」，用固定順序輪替，
+ * 讓分類列表有節奏但不隨機跳色（第 1、4 張維持白底當留白）。
+ */
+const TONES = ["bg-paper", "bg-blue-soft", "bg-lime", "bg-paper", "bg-rose", "bg-yellow"] as const;
 
 interface CategoryCardProps {
   category: Category;
   offerCount: number;
+  toneIndex?: number;
 }
 
-export function CategoryCard({ category, offerCount }: CategoryCardProps) {
+export function CategoryCard({ category, offerCount, toneIndex = 0 }: CategoryCardProps) {
+  const tone = TONES[toneIndex % TONES.length];
+
   return (
-    <Link
-      href={`/categories/${category.slug}`}
-      className="group block rounded-3xl border border-line bg-white p-6 shadow-soft transition duration-200 hover:-translate-y-1 hover:border-brand-300"
-    >
-      <div className="mb-4 flex items-center gap-3">
-        <EntryIcon iconKey={category.slug} />
-        <div>
-          <p className="text-sm font-semibold text-brand-700">{category.name}</p>
-          <p className="text-xs text-slate-500">{offerCount} 則優惠</p>
-        </div>
+    <Link className={`cl-card flex flex-col justify-between ${tone}`} href={`/categories/${category.slug}`}>
+      <div>
+        <span className="cl-tag bg-paper/70">{offerCount} 則優惠</span>
+        <h3 className="mt-2.5 text-[19px] font-[850] leading-snug text-ink">{category.name}</h3>
+        <p className="mt-1.5 text-[11.5px] leading-relaxed text-[#707179]">
+          {category.description ?? "此分類包含多種信用卡優惠。"}
+        </p>
       </div>
-      <h3 className="text-xl font-bold text-ink">{category.name}</h3>
-      <p className="mt-3 text-sm leading-6 text-slate-600">{category.description ?? "此分類包含多種信用卡優惠。"}</p>
-      <p className="mt-6 text-sm font-semibold text-brand-700">查看全部 {offerCount} 則優惠 →</p>
+      <CardFoot action={`查看全部 ${offerCount} 則`} />
     </Link>
   );
 }

@@ -1,7 +1,10 @@
 /**
- * Consistent icon badges for homepage entry points (scenario tags and
- * category cards). Hand-authored inline SVGs to avoid adding an icon
- * library dependency — style consistency only, not final art direction.
+ * Hand-authored inline SVG icons (no icon-library dependency).
+ *
+ * [T28] 用途已收斂：新的風格契約中，情境卡與分類卡改為「標籤／標題／說明／行動列」
+ * 結構，不再使用彩色圖示徽章；圖示只留給首頁的五張快速入口預覽卡。
+ * 原本每個 icon 各自一組的 Tailwind 調色（bg-lime-50 等）在新 token 下已不存在，
+ * 改為契約內的兩種色調，避免產生不會生效的 class。
  */
 
 type IconKey =
@@ -156,41 +159,32 @@ const ICON_PATHS: Record<IconKey, React.ReactNode> = {
   )
 };
 
-const ICON_COLORS: Record<IconKey, string> = {
-  "tax-payment": "bg-sky-50 text-sky-600",
-  tuition: "bg-amber-50 text-amber-600",
-  utilities: "bg-cyan-50 text-cyan-600",
-  "insurance-premium": "bg-emerald-50 text-emerald-600",
-  gas: "bg-orange-50 text-orange-600",
-  "food-delivery": "bg-rose-50 text-rose-600",
-  supermarket: "bg-lime-50 text-lime-700",
-  "travel-booking": "bg-indigo-50 text-indigo-600",
-  subscription: "bg-purple-50 text-purple-600",
-  movies: "bg-fuchsia-50 text-fuchsia-600",
-  "hsr-tra": "bg-teal-50 text-teal-600",
-  etag: "bg-yellow-50 text-yellow-700",
-  parking: "bg-slate-100 text-slate-600",
-  "roadside-assistance": "bg-red-50 text-red-600",
-  cashback: "bg-brand-50 text-brand-700",
-  dining: "bg-orange-50 text-orange-600",
-  travel: "bg-sky-50 text-sky-600",
-  "online-shopping": "bg-pink-50 text-pink-600",
-  transport: "bg-teal-50 text-teal-600",
-  installment: "bg-indigo-50 text-indigo-600"
-};
+/** 契約內的兩種圖示色調：深色卡面用萊姆，其餘一律深墨底白字。 */
+const TONES = {
+  ink: "bg-ink text-paper",
+  lime: "bg-lime text-ink"
+} as const;
 
-export function EntryIcon({ iconKey, className = "h-12 w-12" }: { iconKey: string; className?: string }) {
+export function EntryIcon({
+  iconKey,
+  className = "h-10 w-10",
+  tone = "ink"
+}: {
+  iconKey: string;
+  className?: string;
+  tone?: keyof typeof TONES;
+}) {
   const key = iconKey as IconKey;
   const path = ICON_PATHS[key];
-  const colorClass = ICON_COLORS[key] ?? "bg-slate-100 text-slate-600";
+  const toneClass = TONES[tone];
 
   if (!path) {
-    return <div className={`flex items-center justify-center rounded-2xl ${colorClass} ${className}`} />;
+    return <div className={`flex shrink-0 items-center justify-center rounded-xl ${toneClass} ${className}`} />;
   }
 
   return (
-    <div className={`flex shrink-0 items-center justify-center rounded-2xl ${colorClass} ${className}`}>
-      <svg className="h-[55%] w-[55%]" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} viewBox="0 0 24 24">
+    <div className={`flex shrink-0 items-center justify-center rounded-xl ${toneClass} ${className}`}>
+      <svg className="h-[56%] w-[56%]" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} viewBox="0 0 24 24">
         {path}
       </svg>
     </div>
