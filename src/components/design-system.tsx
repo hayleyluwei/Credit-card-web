@@ -29,69 +29,23 @@ export function PageContainer({ children, className }: { children: ReactNode; cl
 }
 
 /**
- * 頁尾同時是全站的次要導覽出口：三種平行入口（搜尋／生活情境／手上的卡）在這裡
- * 各自有落點，避免使用者捲到底之後無路可走。連結一律指向真實存在的 route。
+ * 頁尾維持契約 reference 的極簡結構：品牌、一句說明、免責聲明。
+ * 刻意不放導覽連結——表頭已經有完整導覽，頁尾再放一份只是重複，
+ * 手機上還會變成一長串把頁面拉長。
  */
-const FOOTER_GROUPS: { title: string; links: { href: string; label: string }[] }[] = [
-  {
-    title: "開始找",
-    links: [
-      { href: "/search", label: "搜尋優惠" },
-      { href: "/categories", label: "瀏覽分類" },
-      { href: "/cards", label: "所有信用卡" }
-    ]
-  },
-  {
-    title: "常見情境",
-    links: [
-      { href: "/scenarios/tax-payment", label: "繳稅" },
-      { href: "/scenarios/travel-booking", label: "旅遊訂房" },
-      { href: "/scenarios/food-delivery", label: "外送" },
-      { href: "/scenarios/supermarket", label: "超市量販" }
-    ]
-  },
-  {
-    title: "看懂規則",
-    links: [{ href: "/guides", label: "攻略文章" }]
-  }
-];
-
 function SiteFooter() {
   return (
     <footer className="mt-16 border-t border-line bg-paper">
-      <div className="cl-container py-10">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
-          <div>
-            <p className="flex items-center gap-2 text-[16px] font-[850] text-ink">
-              <span className="grid h-6 w-6 place-items-center rounded-md bg-blue text-[12px] text-white" aria-hidden="true">
-                卡
-              </span>
-              信用卡優惠查詢
-            </p>
-            <p className="mt-2.5 max-w-xs text-[12px] leading-relaxed text-muted">
-              從今天想完成的事開始，找到適合的卡。每筆優惠都附官方來源與查證日期。
-            </p>
-          </div>
-
-          {FOOTER_GROUPS.map((group) => (
-            <nav aria-label={group.title} key={group.title}>
-              <p className="text-[11px] font-[850] uppercase tracking-[0.09em] text-blue-deep">{group.title}</p>
-              <ul className="mt-3 flex flex-col gap-2 text-[12.5px] text-muted">
-                {group.links.map((link) => (
-                  <li key={link.href}>
-                    <Link className="transition hover:text-blue-deep" href={link.href}>
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          ))}
-        </div>
-
-        <p className="mt-9 border-t border-line pt-6 text-[11.5px] leading-relaxed text-muted">
-          本站整理公開的信用卡優惠資訊，僅供參考，不構成任何申辦建議。實際權益、回饋上限與活動條件以各發卡銀行的官方公告為準，
-          使用前請自行至官方來源確認。
+      <div className="cl-container flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 py-7">
+        <p className="flex items-center gap-2 text-[15px] font-[850] text-ink">
+          <span className="grid h-5 w-5 place-items-center rounded bg-blue text-[11px] text-white" aria-hidden="true">
+            卡
+          </span>
+          信用卡優惠查詢
+        </p>
+        <p className="text-[12px] text-muted">從今天想完成的事開始，找到適合的卡。</p>
+        <p className="w-full text-[11.5px] leading-relaxed text-muted">
+          本站整理公開的信用卡優惠資訊，僅供參考，不構成申辦建議。實際權益與活動條件以各發卡銀行官方公告為準。
         </p>
       </div>
     </footer>
