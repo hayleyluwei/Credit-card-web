@@ -185,7 +185,12 @@ export default async function HomePage() {
       </section>
 
       {/* ② 五張快速入口預覽卡：手機改為左右滑動，讓下一張露出一角 */}
-      <div className="-mx-[18px] mt-10 flex snap-x snap-proximity gap-3 overflow-x-auto px-[18px] pb-4 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-5 lg:items-end">
+      {/*
+        手機是橫向捲動容器：CSS 規範下 overflow-x 一旦非 visible，另一軸也會變成 auto
+        而產生裁切。預覽卡的 preview-bob 會往上位移 6px，若上方沒有留白，卡片上緣
+        （連同框線與陰影）就會被容器裁掉。pt-3 留 12px > 6px 的位移量。
+      */}
+      <div className="-mx-[18px] mt-8 flex snap-x snap-proximity gap-3 overflow-x-auto px-[18px] pb-4 pt-3 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-5 lg:items-end">
         {PREVIEW_ENTRIES.map((entry) => (
           <PreviewCard delayClass={entry.delayClass} href={entry.href} key={entry.title} tone={entry.tone}>
             <div className="w-[162px] shrink-0 sm:w-auto">
@@ -302,7 +307,8 @@ export default async function HomePage() {
           copy="不用再多辦一張。先看看手上這幾張，現在有哪些優惠可以用。"
           title="已經有卡了？看看它能做什麼"
         />
-        <div className="-mx-[18px] flex snap-x snap-proximity gap-3 overflow-x-auto px-[18px] pb-4 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
+        {/* 同上：橫向捲動會裁切上下緣，留白讓 hover 位移與框線陰影不被切掉 */}
+        <div className="-mx-[18px] flex snap-x snap-proximity gap-3 overflow-x-auto px-[18px] pb-4 pt-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 sm:pt-0 lg:grid-cols-3">
           {cardEntries.length > 0 ? (
             cardEntries.map(({ card, publicOfferCount }) => (
               <CardTile
