@@ -1,6 +1,6 @@
 # 目前階段任務索引
 
-最後更新：2026-08-06（Asia/Taipei，T26 與 T28 皆已實作並上線）  
+最後更新：2026-08-09（Asia/Taipei，T26 與 T28 皆已實作並上線）  
 用途：管理 T15 起的目前階段任務；T01–T14 歷史請讀 `00-master-task-index.md`
 
 ## 使用規則
@@ -27,7 +27,7 @@
 | T25 | 優惠網址穩定性與過期轉址（SEO 資產保護） | v1 草案，待核准；待決問題 (a)–(e) 未拍板 | 規劃中（待核准） | 不適用 | 無（設計上與 T21、T22 有介面銜接） | `tasks/T25-OFFER_URL_STABILITY_優惠網址穩定性與過期轉址.md` | 無 |
 | T26 | GA 網站流量分析 | **v1 已核准（2026-08-06）**；拍板 Production only、`next/script` 手動載入、不新增套件、暫不做 cookie banner | **已實作並上線**（由 Codex 於 `codex/t26-ga-analytics` 完成，commit `4e7e871`，已在 `main`）：`src/app/layout.tsx` 加入 GA4 gtag.js（僅 `NODE_ENV=production` 且有 Measurement ID 才載入）、`scripts/verify-t26-ga.mjs`、`.env.example` 新增 `NEXT_PUBLIC_GA_MEASUREMENT_ID` | **已部署**：2026-08-06 核對正式站首頁確認 gtag.js 已載入且 Measurement ID 已設定 | T18（已完成）；與 T24 有介面銜接（UTM 參數） | `tasks/T26-GA_ANALYTICS_GA網站流量分析.md` | 無 |
 | T27 | 首頁本月情境選讀模組 | v2 草案，待核准；(a)–(h) 中 **(e) 已因風格契約交付而解決**，其餘未拍板 | 規劃中（待核准） | 不適用 | T20（可連結既有情境／文章）；**T28（風格契約已交付，負責版位與視覺預留）**；schema 專門流程與正式資料庫安全決策 | `tasks/T27-HOMEPAGE_EDITORIAL_SPOTLIGHT_首頁本月情境選讀模組.md` | 無 |
-| T28 | 卡片生活誌設計系統套用（公開頁面視覺改版） | **v2 已核准（2026-08-06）**；6 個待決問題全數拍板 | **實作完成並已上線**（2026-08-06）：11 個公開 route 全部套用契約；補上網站原本完全缺少的全站表頭（含手機漢堡選單）與頁尾；修正 3 處麵包屑／區塊順序的結構性問題。**人工逐頁驗收待使用者本人執行** | **已部署**：`4e7e871..911eed8` 快轉合併推送至 `main`，Vercel 自動部署完成，12 個 URL 全數 200 並通過關鍵功能核對 | 風格契約 `docs/design-system/card-life-pop-style/`（v1，鎖定）；與 T27 分工（T28 做版位視覺、T27 做資料功能） | `tasks/T28-DESIGN_SYSTEM_ROLLOUT_卡片生活誌設計系統套用.md` | `summaries/T28-DESIGN_SYSTEM_ROLLOUT_SUMMARY-v1-2026-08-06.md` |
+| T28 | 卡片生活誌設計系統套用（公開頁面視覺改版） | **v2 已核准（2026-08-06）**；6 個待決問題全數拍板 | **實作完成並已上線**（2026-08-06 實作與首次部署，2026-08-09 定稿）：11 個公開 route 全部套用契約；補上網站原本完全缺少的全站表頭（含手機漢堡選單）與頁尾；修正 3 處麵包屑／區塊順序的結構性問題；上線後再修正手機橫向捲動裁切框線並依使用者指定改寫首頁 hero 文案。**人工逐頁驗收待使用者本人執行** | **已部署**：最新為 `7637dcb`（2026-08-09）；首次部署 `4e7e871..911eed8`（2026-08-06）。皆為快轉合併，Vercel 自動部署完成，12 個 URL 全數 200 並通過關鍵功能核對 | 風格契約 `docs/design-system/card-life-pop-style/`（v1，鎖定）；與 T27 分工（T28 做版位視覺、T27 做資料功能） | `tasks/T28-DESIGN_SYSTEM_ROLLOUT_卡片生活誌設計系統套用.md` | `summaries/T28-DESIGN_SYSTEM_ROLLOUT_SUMMARY-v1-2026-08-06.md` |
 
 第一版上線總計畫：`docs/superpowers/plans/2026-07-08-FIRST_RELEASE_第一版上線實作計畫.md`（T16–T18 的整體規劃、角色分工與待決事項）。
 
