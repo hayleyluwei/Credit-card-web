@@ -149,11 +149,9 @@ export default async function HomePage() {
     <PageContainer>
       {/* ① 生活任務主張＋搜尋入口 */}
       <section className="text-center">
-        <p className="cl-eyebrow">cards, rewards, and everyday decisions</p>
-        <h1 className="cl-page-title mx-auto max-w-3xl text-balance">先從今天想完成的事，找到適合的卡。</h1>
-        <p className="cl-lead mx-auto mt-4 max-w-lg">
-          不用先看懂一長串回饋規則。告訴我們你要做什麼，剩下的我們幫你整理好，每筆都附官方來源。
-        </p>
+        <p className="cl-eyebrow">credit card rewards, all in one place</p>
+        <h1 className="cl-page-title mx-auto max-w-3xl text-balance">信用卡回饋大集合！</h1>
+        <p className="cl-lead mx-auto mt-4 max-w-lg">今天需要哪個優惠？</p>
 
         <form action="/search" className="mx-auto mt-6 grid max-w-xl grid-cols-[minmax(0,1fr)_auto] gap-1.5 rounded-[14px] border border-line bg-paper p-1.5">
           <input
