@@ -41,6 +41,8 @@
 
 **國泰世華CUBE信用卡**（`cathay-cube-card`）
 - `https://www.cathaybk.com.tw/cathaybk/promo/event/credit-card/product/CUBE_rights/index.html`（權益分級指定消費回饋）
+- `https://www.cathaybk.com.tw/cathaybk/promo/event/credit-card/discount/2026/familypillar/index.html`（童樂匯指定私校學費 1%；限 i 繳費平台、須先解鎖童樂匯資格，2026-07-01 至 2026-12-31）
+- `https://www.cathay-cube.com.tw/cathaybk/personal/product/credit-card/cards/cube/`（CUBE 卡條款頁：「指定消費」的通用定義與排除條款，含不得透過 LINE Pay／街口支付／全支付等第三方支付。活動頁本身不載此條，引用該限制時須改引此頁）
 - ⚠️ 此頁為 JS 動態載入內容，自動抓取工具可能讀到舊版文字，務必用真人瀏覽器核對（見上方「使用方式」）。
 
 ### 永豐銀行（sinopac）— https://bank.sinopac.com/sinopacBT/personal/credit-card/introduction/list.html

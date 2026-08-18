@@ -342,6 +342,8 @@ local commit 不受此限，仍依各任務卡的 Git 授權進行。
 
 **新 session 請先讀交接摘要**：`docs/implementation/handoffs/2026-08-09-T28設計系統套用與上線-交接摘要.md`
 
+**2026-08-18 資料更新**：使用者已授權新增 CUBE「童樂匯指定私校學費 1%」優惠。已依國泰世華官方活動頁查證，建立增量資料檔並完成後台增量匯入；公開優惠頁 `https://credit-card-web-pi.vercel.app/offers/cathay-cube-private-school-tuition-2026` 已回應 200。詳見 `docs/implementation/summaries/CUBE_PRIVATE_SCHOOL_TUITION_OFFER_SUMMARY-v1-2026-08-18.md`。未修改 schema、程式碼或既有優惠。
+
 **回來後的第一件事：執行 T28 人工驗收腳本**
 `docs/implementation/manual-test-scripts/T28-設計系統套用驗收腳本-v1-2026-08-06.md`
 視覺類任務最終需人眼判定，自動驗證不能取代。腳本只列需要人眼判斷的項目，含後台是否仍可正常使用。
