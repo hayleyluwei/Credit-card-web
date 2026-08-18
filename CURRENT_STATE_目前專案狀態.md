@@ -124,6 +124,21 @@ Chill 刷最高 10%、好饗刷 3.3%、支付工具與排除清單、中秋連�
 - 純資料變更，未改 schema、未改程式碼，未觸發部署。
 - 詳見 Summary：`docs/implementation/summaries/RICHART_SWITCH_OFFER_TIER_ENRICHMENT_SUMMARY-v1-2026-08-18.md`。
 
+### 後續：補上「外送」標籤（2026-08-18，使用者回報 `/scenarios/food-delivery` 缺這筆）
+
+- 使用者發現 `/scenarios/food-delivery` 沒有這筆優惠。查證：好饗刷子方案確實涵蓋
+  Uber Eats／Foodpanda（3.3%），但先前補資料時漏加「外送」標籤（tag 是 `/scenarios/[slug]`
+  比對的依據，與 `categoryId` 是兩套獨立機制）。已補上。
+- 同時在「好饗刷」tier 補一句澄清：外送僅適用好饗刷 3.3%，**Pay著刷 3.8% 不適用外送平台消費**
+  （官方頁面明文排除，且每日只能擇一方案，兩者不能疊加）——回應使用者提到「外送也有3.8%」的說法。
+- **`/scenarios/[slug]` 是靜態頁，這次修正要等下次部署才會顯示**；已驗證 `/search?q=外送`
+  （動態頁）已能查到這筆，資料本身即時生效。
+- ⚠️ **同時發現一個範圍更大的架構問題**：`/categories/dining` 只有 1 筆優惠，
+  但另外 2 筆已經有「外送」標籤的優惠（CUBE、玉山 Unicard）`categoryId` 都掛在「現金回饋」
+  （cashback，18 / 35 筆優惠集中在此），不是「餐飲美食」。Tag 與 Category 是兩套獨立系統，
+  多用途卡片的資料長期只填了 Category=cashback，沒有依實際內容分流。**這不是單一優惠的問題，
+  待使用者決定處理方式**（詳見對話紀錄）。
+
 ## ⚠️ Git 授權規則（使用者於 2026-08-09 明訂，對所有 AI 有效）
 
 > **除非使用者明確說「指定的網頁 bug 修改後不用問我，直接 push」，否則一律先問，才可以 push 到 `main`（＝部署正式站）。**
