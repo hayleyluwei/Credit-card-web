@@ -3,6 +3,8 @@
  * Centralized business rules for offer validation, FAQ validation, and publish checks.
  */
 
+import { isPastTaipeiDay } from "@/lib/domain-date";
+
 /**
  * Validates faqJson field
  * @param faqJson - JSON string or null
@@ -104,15 +106,7 @@ export function validateOfferPublish(offer: {
  * @returns boolean - true if offer is expired
  */
 export function isOfferExpired(endDate: Date | null | undefined): boolean {
-  if (!endDate) {
-    return false;
-  }
-
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-
-  const end = new Date(endDate);
-  end.setHours(0, 0, 0, 0);
-
-  return end < now;
+  // [T30] 原本這裡是與 domain-offers 重複的第二份實作，且同樣用伺服器本機時區。
+  // 改為委派給唯一的日期基準，避免日後只修好其中一份。
+  return isPastTaipeiDay(endDate);
 }

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { isOfferExpired, getPublicOffers } from "@/lib/domain-offers";
+import { formatTaipeiDate } from "@/lib/domain-date";
 import { resolveSummaryPreview } from "@/lib/domain-parsing";
 import { CardTile } from "@/components/CardTile";
 import { generateArticleJsonLd, generateFaqJsonLd, getCanonicalUrl } from "@/lib/domain-seo";
@@ -12,9 +13,8 @@ interface OfferPageProps {
   };
 }
 
-function formatDate(date?: Date | null) {
-  return date ? new Date(date).toLocaleDateString("zh-TW") : null;
-}
+// [T30] 一律以 Asia/Taipei 格式化；原本未指定 timeZone，在 Vercel（UTC）會少一天。
+const formatDate = formatTaipeiDate;
 
 function formatRewardType(type?: string | null) {
   const labels: Record<string, string> = {

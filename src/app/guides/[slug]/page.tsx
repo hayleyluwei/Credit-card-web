@@ -9,6 +9,7 @@ import {
   getCanonicalUrl
 } from "@/lib/domain-seo";
 import { Breadcrumb, PageContainer, SectionHead } from "@/components/design-system";
+import { taipeiDayKey } from "@/lib/domain-date";
 
 interface GuidePageProps {
   params: {
@@ -85,9 +86,9 @@ export default async function GuideDetailPage({ params }: GuidePageProps) {
         <h1 className="mt-2 text-[28px] font-[850] leading-tight text-ink sm:text-[36px]">{article.title}</h1>
         {article.summary ? <p className="cl-lead mt-3">{article.summary}</p> : null}
         <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 border-t border-line pt-4 text-[11px] font-[850] text-muted">
-          <span>最後更新：{new Date(article.updatedAt).toISOString().slice(0, 10)}</span>
+          <span>最後更新：{taipeiDayKey(article.updatedAt)}</span>
           {article.lastVerifiedAt ? (
-            <span>最後查證：{new Date(article.lastVerifiedAt).toISOString().slice(0, 10)}</span>
+            <span>最後查證：{taipeiDayKey(article.lastVerifiedAt)}</span>
           ) : null}
         </div>
 

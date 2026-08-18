@@ -4,6 +4,7 @@
  */
 
 import { Offer } from "@prisma/client";
+import { daysUntilTaipeiDay, isPastTaipeiDay } from "@/lib/domain-date";
 
 /**
  * Offer sort comparator function
@@ -54,19 +55,10 @@ export function getPublicOffers<T extends Offer>(offers: T[], showExpiredOffers:
   const published = offers.filter((offer) => offer.isPublished);
 
   if (!showExpiredOffers) {
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-
-    return published.filter((offer) => {
-      if (!offer.endDate) {
-        return true; // No end date = not expired
-      }
-
-      const endDate = new Date(offer.endDate);
-      endDate.setHours(0, 0, 0, 0);
-
-      return endDate >= now;
-    });
+    // [T30] 以台北日曆日判斷，結果與伺服器時區無關。
+    // 原本的 setHours(0,0,0,0) 用伺服器本機時區，在 Vercel（UTC）會讓優惠
+    // 在它有效的最後一天上午 8 點就消失。
+    return published.filter((offer) => !isPastTaipeiDay(offer.endDate));
   }
 
   return published;
@@ -112,17 +104,7 @@ export function getLatestOffers<T extends Offer>(offers: T[], count: number, sho
  * @returns true if offer is expired
  */
 export function isOfferExpired(offer: Offer | { endDate: Date | null }): boolean {
-  if (!offer.endDate) {
-    return false;
-  }
-
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-
-  const endDate = new Date(offer.endDate);
-  endDate.setHours(0, 0, 0, 0);
-
-  return endDate < now;
+  return isPastTaipeiDay(offer.endDate);
 }
 
 /**
@@ -132,20 +114,7 @@ export function isOfferExpired(offer: Offer | { endDate: Date | null }): boolean
  * @returns number of days
  */
 export function daysUntilExpiry(offer: Offer | { endDate: Date | null }): number | null {
-  if (!offer.endDate) {
-    return null;
-  }
-
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-
-  const endDate = new Date(offer.endDate);
-  endDate.setHours(0, 0, 0, 0);
-
-  const diffMs = endDate.getTime() - now.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  return diffDays;
+  return daysUntilTaipeiDay(offer.endDate);
 }
 
 /**

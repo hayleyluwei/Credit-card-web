@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AdminLogoutButton } from "@/components/AdminLogoutButton";
+import { taipeiDayOffset, taipeiTodayStart } from "@/lib/domain-date";
 
 const navItems = [
   { label: "儀表板", href: "/admin" },
@@ -21,11 +22,11 @@ const quickActions = [
 
 export default async function AdminDashboardPage() {
   const session = await getServerSession(authOptions);
-  const today = new Date();
-  const soon = new Date();
-  soon.setDate(today.getDate() + 14);
-  const staleVerifiedDate = new Date();
-  staleVerifiedDate.setDate(today.getDate() - 30);
+  // [T30] 以台北日曆日為基準，否則在 Vercel（UTC）上「過期」與「即將到期」的
+  // 統計會比實際早一天，與前台顯示不一致。
+  const today = taipeiTodayStart();
+  const soon = taipeiDayOffset(14);
+  const staleVerifiedDate = taipeiDayOffset(-30);
 
   const [
     publishedOffers,

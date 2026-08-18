@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { generateSlug, linesToJsonArray } from "@/lib/domain-parsing";
 import { resolveSummaryPreview } from "@/lib/domain-parsing";
 import { validateFaqJson, validateOfferPublish } from "@/lib/domain-validation";
+import { parseTaipeiDate } from "@/lib/domain-date";
 
 export type AdminActionState = {
   errors: string[];
@@ -263,9 +264,14 @@ export async function toggleCategory(formData: FormData) {
   revalidatePath("/admin/categories");
 }
 
+/**
+ * [T30] 把 `<input type="date">` 的 `YYYY-MM-DD` 存成「台北該日午夜」。
+ *
+ * 原本的 `new Date(`${value}T00:00:00`)` 沒有時區後綴，會以伺服器本機時區解析——
+ * 在 Vercel（UTC）與本機（台北）存出來的值不同，且與匯入腳本的約定不一致。
+ */
 function dateValue(formData: FormData, key: string): Date | null {
-  const value = text(formData, key);
-  return value ? new Date(`${value}T00:00:00`) : null;
+  return parseTaipeiDate(text(formData, key));
 }
 
 function selectedCardIds(formData: FormData): number[] {

@@ -4,6 +4,7 @@
  */
 
 import type { Bank, Card, Category, Offer } from "@prisma/client";
+import { isPastTaipeiDay } from "@/lib/domain-date";
 
 export type SearchOfferCard = {
   id?: number;
@@ -101,19 +102,8 @@ export function filterExpiredOffers(results: SearchResultItem[], showExpiredOffe
     return results;
   }
 
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-
-  return results.filter((result) => {
-    if (!result.offer.endDate) {
-      return true;
-    }
-
-    const endDate = new Date(result.offer.endDate);
-    endDate.setHours(0, 0, 0, 0);
-
-    return endDate >= now;
-  });
+  // [T30] 與 getPublicOffers 使用同一套台北日曆日判斷，避免兩處結果不一致。
+  return results.filter((result) => !isPastTaipeiDay(result.offer.endDate));
 }
 
 /**

@@ -7,6 +7,7 @@ import { useFormState, useFormStatus } from "react-dom";
 import { AdminField, adminInputClass } from "@/components/AdminField";
 import { StableSlugInput } from "@/components/StableSlugInput";
 import type { AdminActionState } from "@/lib/admin-actions";
+import { taipeiDateInput } from "@/lib/domain-date";
 
 type CardWithBank = Card & { bank: Bank };
 type OfferWithCards = Offer & { cards: OfferCard[]; tiers: RewardTier[] };
@@ -62,9 +63,8 @@ const initialOfferActionState: AdminActionState = {
   ok: true
 };
 
-function dateInput(value?: Date | null) {
-  return value ? value.toISOString().slice(0, 10) : "";
-}
+// [T30] 一律以台北日曆日取值；原本的 toISOString() 取的是 UTC 日期，會少一天。
+const dateInput = taipeiDateInput;
 
 function SubmitButton({ children, intent, tone = "default" }: { children: string; intent: string; tone?: "default" | "primary" | "danger" }) {
   const { pending } = useFormStatus();

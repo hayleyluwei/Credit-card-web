@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { resolveSummaryPreview } from "@/lib/domain-parsing";
+import { formatTaipeiDate } from "@/lib/domain-date";
 import type { Bank, Card, Offer } from "@prisma/client";
 
 interface OfferCardProps {
@@ -44,7 +45,7 @@ export function OfferCard({ offer }: OfferCardProps) {
         <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1 text-[10.5px] text-muted">
           {cardSources.length > 0 ? <span className="line-clamp-1">{cardSources.join("、")}</span> : null}
           <span>{offer.cards.length} 張適用卡片</span>
-          {offer.endDate ? <span>截至 {new Date(offer.endDate).toLocaleDateString("zh-TW")}</span> : null}
+          {offer.endDate ? <span>截至 {formatTaipeiDate(offer.endDate)}</span> : null}
           {offer.isFeatured ? <span className="font-[850] text-blue-deep">精選</span> : null}
         </div>
       </div>

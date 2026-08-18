@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCanonicalUrl } from "@/lib/domain-seo";
+import { taipeiDayKey } from "@/lib/domain-date";
 import { Breadcrumb, CardFoot, PageContainer } from "@/components/design-system";
 
 export async function generateMetadata() {
@@ -43,7 +44,7 @@ export default async function GuidesPage() {
                 action="閱讀攻略"
                 value={
                   article.lastVerifiedAt
-                    ? `查證 ${new Date(article.lastVerifiedAt).toISOString().slice(0, 10)}`
+                    ? `查證 ${taipeiDayKey(article.lastVerifiedAt)}`
                     : undefined
                 }
               />
