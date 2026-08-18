@@ -10,9 +10,9 @@
 - 工作區 alias：`C:/Users/user/Documents/信用卡查詢網站`
 - alias 類型：Windows junction，兩個路徑指向同一份檔案
 - branch：**`feat/t28-design-system-rollout`**（T28 的工作分支；內容已全部合併進 `origin/main`）
-- HEAD：**`7ade795`**（2026-08-18，新增攻略文章上稿流程 SOP 與 T31 草稿預覽任務卡）
-- 遠端關係：**已與 `origin/main` 同步**。最近一次為 2026-08-18 使用者授權（「T30 push 上正式站」），以快轉方式推送 `3dd19a8..d41aed9`，Vercel 自動部署完成並經正式站實測驗證。
-- 本地 `main`：**已同步至 `d41aed9`**（先前因 Codex worktree 佔用而落後的問題已於 2026-08-18 修復）。
+- HEAD：**`22e1292`**（2026-08-18，補齊台新Richart卡切換刷優惠資料並記錄中秋攻略上稿）
+- 遠端關係：**已與 `origin/main` 同步**。最近一次為 2026-08-18 使用者授權（「好」，回應「要不要把這批（連同稍早的 T28、T30）一起 push 上正式站」），以快轉方式推送 `7ade795..22e1292`，Vercel 自動部署完成。本輪對話累計推送：`3dd19a8..d41aed9`（T30）→`d41aed9..6b89706`（T30 文件）→`6b89706..d245072`（T28 v2.1）→`d245072..7ade795`（上稿流程與 T31）→`7ade795..22e1292`（Richart 資料補齊），皆為快轉、皆經正式站驗證。
+- 本地 `main`：**已同步至 `22e1292`**（先前因 Codex worktree 佔用而落後的問題已於 2026-08-18 修復）。
 - **累計 commit 歷程**（由舊到新，含已 push 與待 push）：
   - `476d150` docs：design-system 納入版控、新增 T26／T27／T28 任務卡、T22 改版為 v2
   - `c5be854` docs：記錄 T22 Scope v2 正式核准
@@ -95,7 +95,8 @@
 - Article：`id=2`、`slug=mid-autumn-dining-2026`，標題為「2026中秋聚餐刷哪張？火鍋、燒肉信用卡優惠整理」。
 - 已依使用者指示，把摘要、比較表、正文、SEO 與 FAQ 的卡名統一為「台新Richart卡」、「永豐DAWHO現金回饋信用卡／永豐DAWHO卡」與「國泰CUBE卡」。
 - 後台 `/admin/articles/2` 顯示「已儲存文章」與「狀態：已發布」；前台 `/guides/mid-autumn-dining-2026` 已確認顯示修正版。
-- `lastVerifiedAt` 依上稿 SOP 保留空白，待使用者人工查證官方來源後填寫。
+- ~~`lastVerifiedAt` 依上稿 SOP 保留空白~~ **已於 2026-08-18 填入**（使用者確認「已被驗證」後授權）。
+  值為台北 2026-08-18 午夜，前台 `/guides/mid-autumn-dining-2026` 已確認顯示「最後查證：2026-08-18」。
 - 本次未切換發布狀態、未觸發部署、未修改其他文章或優惠。
 - 最新紀錄：`docs/implementation/summaries/MID_AUTUMN_DINING_GUIDE_DRAFT_SUMMARY-v1-2026-08-18.md`。
 
