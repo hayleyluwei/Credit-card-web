@@ -6,7 +6,7 @@ import { CategoryCard } from "@/components/CategoryCard";
 import { OfferCard } from "@/components/OfferCard";
 import { generateOrganizationJsonLd, getCanonicalUrl } from "@/lib/domain-seo";
 import { SCENARIO_TAGS } from "@/lib/domain-scenarios";
-import { getScenarioCopy } from "@/lib/domain-scenario-copy";
+import { getScenarioCopy, splitScenarioTitle } from "@/lib/domain-scenario-copy";
 import { EntryIcon } from "@/components/EntryIcon";
 import { CardFoot, PageContainer, PreviewCard, SectionHead, type PreviewTone } from "@/components/design-system";
 
@@ -211,19 +211,24 @@ export default async function HomePage() {
         ))}
       </div>
 
-      {/* ③ 本月情境選讀：T27 視覺預留版位，未核准前不接資料來源 */}
+      {/*
+        ③ 情境選讀
+        [T28 v2.1] 原為 T27 的視覺預留版位，文案寫的是「版位預留中」。2026-08-18 使用者檢視上線
+        成果後決定改為正式文案：不再顯示施工中的字樣，改為直接推薦一個真實存在的情境。
+        目前推薦目標寫死在此處；T27 完成後改為後台可按月指定，屆時本區塊改由資料驅動。
+      */}
       <section className="mt-12">
         <SectionHead
           action={{ href: "/guides", label: "所有攻略" }}
-          copy="每個月挑一件你可能正在煩惱的事（版位預留中）"
-          title="本月情境選讀"
+          copy="精打細算，玩樂更歡"
+          title="情境選讀"
         />
         <article className="grid overflow-hidden rounded-panel bg-ink text-paper lg:grid-cols-[1.06fr_0.94fr]">
           <div className="flex flex-col items-start justify-center gap-3 p-8 sm:p-10">
-            <p className="text-[10px] font-[850] uppercase tracking-[0.09em] text-lime">版位示意</p>
-            <h3 className="text-[26px] font-[850] leading-tight sm:text-[32px]">每個月，我們挑一件你可能正在煩惱的事。</h3>
+            <p className="text-[10px] font-[850] uppercase tracking-[0.09em] text-lime">生活提案</p>
+            <h3 className="text-[26px] font-[850] leading-tight sm:text-[32px]">生活中有大大小小與消費相關的事，善用信用卡，聰明消費。</h3>
             <p className="text-[13px] leading-relaxed text-paper/70">
-              這個位置的樣式已經定案，實際內容要等後台可以按月指定選讀之後才會填入。在那之前，先從下面的生活情境開始找。
+              繳稅、學費、加油、訂閱⋯⋯每一種花費都有適合的卡。先挑一個你最近會遇到的情境開始看。
             </p>
             <Link className="mt-2 inline-flex items-center rounded-control bg-lime px-4 py-2.5 text-[13px] font-[850] text-ink transition hover:brightness-95" href="/scenarios/travel-booking">
               先看旅遊情境 →
@@ -231,9 +236,9 @@ export default async function HomePage() {
           </div>
           <div className="flex min-h-[200px] items-center justify-center bg-blue p-6">
             <div className="w-full max-w-[250px] rotate-3 rounded-card bg-paper p-5 text-ink shadow-preview">
-              <p className="text-[11px] font-[850] text-blue-deep">待後台支援</p>
-              <p className="mt-1.5 text-[19px] font-[850] leading-tight">本月選讀內容</p>
-              <p className="mt-1.5 text-[11px] text-muted">連向真實存在的情境或攻略頁，不會是死連結。</p>
+              <p className="text-[11px] font-[850] text-blue-deep">這個月</p>
+              <p className="mt-1.5 text-[19px] font-[850] leading-tight">旅遊訂房</p>
+              <p className="mt-1.5 text-[11px] text-muted">訂房、機票和海外消費常常分屬不同活動，出國前先看懂哪張卡划算。</p>
             </div>
           </div>
         </article>
@@ -244,16 +249,22 @@ export default async function HomePage() {
         <SectionHead
           action={{ href: "/search", label: "查看全部情境" }}
           copy="先從生活情境開始，不必一次讀完所有規則。"
-          title="你最近想完成什麼？"
+          title="生活中的消費有沒有回饋"
         />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {SCENARIO_TAGS.map((scenario) => {
             const copy = getScenarioCopy(scenario.slug, scenario.tagLabel);
+            // [T28 v2.1] 標題字多，第一眼認不出主題，因此把核心詞彙以萊姆底色標出。
+            const titleParts = splitScenarioTitle(copy, scenario.tagLabel);
             return (
               <Link className="cl-card flex flex-col justify-between" href={`/scenarios/${scenario.slug}`} key={scenario.slug}>
                 <div>
                   <span className="cl-tag">{copy.group}</span>
-                  <h3 className="mt-2.5 text-[19px] font-[850] leading-snug text-ink">{copy.title}</h3>
+                  <h3 className="mt-2.5 text-[19px] font-[850] leading-snug text-ink">
+                    {titleParts.before}
+                    {titleParts.match ? <mark className="bg-lime text-ink">{titleParts.match}</mark> : null}
+                    {titleParts.after}
+                  </h3>
                   <p className="mt-1.5 text-[11.5px] leading-relaxed text-muted">{copy.description}</p>
                 </div>
                 <CardFoot action={copy.action} value={scenario.tagLabel} />

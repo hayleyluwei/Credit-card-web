@@ -17,6 +17,18 @@ export interface ScenarioCopy {
   description: string;
   /** 卡片底部左側的行動文字。 */
   action: string;
+  /**
+   * [T28 v2.1] 標題中要以萊姆底色標示的關鍵字。
+   *
+   * 使用者回報「標題字太多，第一眼認不出這張卡在講什麼優惠」，因此把該情境的核心
+   * 詞彙標出來。多數標題本身就含情境標籤（例如「繳稅」），會自動沿用標籤文字；
+   * 只有標題沒出現標籤字的情境才需要在此明確指定。
+   *
+   * 為什麼用底色而不是換顏色或加粗：風格契約把 `blue`／`blue-deep` 指定為「主要行動
+   * 與連結」專用，拿來標關鍵字會與連結語意衝突；標題字重已是契約上限 850，往上沒有
+   * 空間。`lime` 在契約中的用途就是「萊姆亮點」，用底色標示不動字重、字距與框線。
+   */
+  highlight?: string;
 }
 
 /** key 為 ScenarioTagConfig.slug。 */
@@ -25,13 +37,15 @@ export const SCENARIO_COPY: Record<string, ScenarioCopy> = {
     group: "旅遊回饋",
     title: "出國前，哪張卡刷起來最划算？",
     description: "訂房、機票和海外消費常常分屬不同活動，先看清楚再決定帶哪張。",
-    action: "查看優惠"
+    action: "查看優惠",
+    highlight: "出國"
   },
   supermarket: {
     group: "生活採買",
     title: "每週的採買，能多拿一點回饋嗎？",
     description: "超市和量販的活動通常有指定日或指定通路，看懂就不會白刷。",
-    action: "查看優惠"
+    action: "查看優惠",
+    highlight: "採買"
   },
   "food-delivery": {
     group: "吃得開心",
@@ -67,7 +81,8 @@ export const SCENARIO_COPY: Record<string, ScenarioCopy> = {
     group: "數位訂閱",
     title: "那些每月自動扣款的訂閱呢？",
     description: "影音、雲端這類小額扣款累積起來也不少，適合固定用一張卡。",
-    action: "查看優惠"
+    action: "查看優惠",
+    highlight: "訂閱"
   },
   gas: {
     group: "交通移動",
@@ -103,9 +118,37 @@ export const SCENARIO_COPY: Record<string, ScenarioCopy> = {
     group: "安心保障",
     title: "車子拋錨的時候，誰來幫你？",
     description: "道路救援多半是卡片附帶權益，不用花錢但要先知道自己有。",
-    action: "看權益"
+    action: "看權益",
+    highlight: "車子拋錨"
   }
 };
+
+/**
+ * [T28 v2.1] 把標題拆成「關鍵字前／關鍵字／關鍵字後」三段，供首頁情境卡標示重點。
+ *
+ * 關鍵字優先取 `highlight`，沒有就用情境標籤；標題裡找不到該字串時整段回傳，
+ * 不做任何標示——寧可不標，也不要標錯位置。
+ * @param copy - 該情境的文案
+ * @param tagLabel - 情境標籤，作為關鍵字的預設值
+ * @returns 三段字串，`match` 為空字串時代表不需標示
+ */
+export function splitScenarioTitle(
+  copy: ScenarioCopy,
+  tagLabel: string
+): { before: string; match: string; after: string } {
+  const keyword = copy.highlight ?? tagLabel;
+  const index = keyword ? copy.title.indexOf(keyword) : -1;
+
+  if (index < 0) {
+    return { before: copy.title, match: "", after: "" };
+  }
+
+  return {
+    before: copy.title.slice(0, index),
+    match: keyword,
+    after: copy.title.slice(index + keyword.length)
+  };
+}
 
 /** 找不到文案時回退為情境標籤本身，確保新增情境不會讓首頁破版。 */
 export function getScenarioCopy(slug: string, tagLabel: string): ScenarioCopy {
