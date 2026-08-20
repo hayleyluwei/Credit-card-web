@@ -16,12 +16,23 @@ interface OfferPageProps {
 // [T30] 一律以 Asia/Taipei 格式化；原本未指定 timeZone，在 Vercel（UTC）會少一天。
 const formatDate = formatTaipeiDate;
 
+/**
+ * [T32 Scope E] 回饋類型代碼 → 中文顯示，對應資料蒐集規格書 v9 §5.3。
+ *
+ * `points`（舊代碼）刻意保留為籠統的「點數回饋」：資料庫現有 31 個 points 層裡混了
+ * 等值點數、滙豐旅遊積分（非等值）與華航哩程三種，在 T32 Scope E 逐筆重新分類完成前，
+ * 若把它們改稱「等值點數」會在前台顯示錯誤資訊。新資料改用細分後的代碼。
+ */
 function formatRewardType(type?: string | null) {
   const labels: Record<string, string> = {
     cashback: "現金回饋",
+    "points-equivalent": "等值點數",
+    "points-variable": "非等值點數",
+    miles: "哩程",
     discount: "折扣優惠",
+    voucher: "餐券贈品",
     installment: "分期零利率",
-    miles: "哩程 / 旅遊回饋",
+    other: "其他",
     points: "點數回饋",
     "travel-benefit": "旅遊權益"
   };

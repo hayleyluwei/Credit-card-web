@@ -273,7 +273,7 @@ export function AdminOfferForm({ action, cards, categories, offer }: AdminOfferF
                     onChange={(event) => updateTier(tier.key, "label", event.target.value)}
                   />
                 </AdminField>
-                <AdminField label="回饋方式" help="例：cashback、points、discount、installment、miles、travel-benefit。">
+                <AdminField label="回饋方式" help="規格書 v9 §5.3：cashback（現金回饋）、points-equivalent（等值點數，1:1）、points-variable（非等值點數，須註明折現率）、miles（哩程）、discount（折扣）、voucher（餐券贈品）、installment（分期）、other（其他）。points 為舊代碼，僅既有資料沿用。">
                   <input
                     className={adminInputClass}
                     name={`tier-${index}-rewardType`}
