@@ -22,8 +22,12 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Local environment files
+# 用萬用字元涵蓋所有 .env 變體（含備份檔如 .env.backup-production），
+# 再單獨放行 .env.example。2026-08-20 修正：原本只排除 .env 與 .env*.local，
+# 備份檔會落在保護範圍外，而備份檔同樣含明碼連線字串。
 .env
-.env*.local
+.env.*
+!.env.example
 
 # Prisma local database files
 *.db

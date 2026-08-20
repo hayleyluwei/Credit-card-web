@@ -79,10 +79,17 @@ netstat -ano
 
 不要在未確認前把 stale chunk 當成程式邏輯錯誤，也不要直接清除證據。
 
-## 5. SQLite 與 seed
+## 5. 資料庫與 seed
 
-- 本專案 `db:seed` 會刪除並重建本機資料。
-- 任何 seed、db push 或會寫共用 `dev.db` 的測試都需要確認。
+> **2026-08-20 更新**：本專案早已不用 SQLite（2026-08-03 T18 遷移至 Neon PostgreSQL），
+> 且自 2026-08-20 起**本機連的是 Neon 的 `dev` 分支，不再是正式站**。
+> 連到哪個分支、怎麼切換、Neon Free 的限制，一律見
+> `LOCAL_DEV_ENVIRONMENT_本機開發環境與資料庫分支.md`。
+>
+> **執行任何資料庫寫入前，先確認目前連到哪個分支**，不可假設。
+
+- 本專案 `db:seed` 會刪除並重建資料——**確認連到 dev 分支再執行**。
+- 任何 seed、`db push` 或寫入型測試都需要確認目標分支；寫入 `production` 分支永遠是第三層操作。
 - 需要自動執行寫入測試時，使用明確隔離的測試資料庫，並證明連線不可能指向 shared local、Preview 或 Production。
 - 驗證後回報測試資料建立與清理結果。
 
