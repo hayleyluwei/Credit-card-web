@@ -371,7 +371,7 @@ C6 執行前已用 `Get-NetTCPConnection` 確認 port 3000／3001／3002 皆未�
 | E2 唯讀確認現況 | AI | ✅ 13 表（含 `playing_with_neon`）、1 筆 migration、35／18／9／2／6，**與預期完全相符** |
 | E3 `npx prisma migrate deploy` | **使用者本人執行** | ✅ 完成（見下方「執行方式的例外」） |
 | E4 驗證 | AI | ✅ 全數通過 |
-| E5 切回 dev | 使用者 | ⏸️ **待執行**（見下方「dev 連線字串遺失」） |
+| E5 切回 dev | 使用者切、AI 驗證 | ✅ **完成**（2026-08-20 23:58）。連線實測 735ms、12 張表、2 筆 migration、35／18／9／2／6，確認為 dev。已建立 `.env.backup-dev` 備份（`.gitignore` 已涵蓋） |
 
 #### E4 驗證結果（正式站）
 
@@ -405,9 +405,26 @@ AI 指示使用者執行 `cp .env.backup-production .env` 時，**未事先提�
 **dev 的連線字串因此從本機檔案中消失**。
 
 - **影響**：非永久性。連線字串可從 Neon 控制台重新複製（LOCAL_DEV SOP 第 4 節）。
-- **補救**：切回 dev 後執行 `cp .env .env.backup-dev` 建立備份；
-  `.gitignore` 的 `.env.*` 已涵蓋此檔。
+- **補救**：✅ 已完成。切回 dev 後建立 `.env.backup-dev`，`.gitignore` 的 `.env.*` 已涵蓋。
+  兩個方向現在都有備份，往後切換只需 `cp`。
 - **已修正流程**：LOCAL_DEV SOP 第 4 節新增「切換前先備份目前設定」步驟。
+
+#### ⚠️ 第二個坑：Neon 連線視窗預設給 Default 分支（**連續兩次拿到錯字串**）
+
+切回 dev 時，使用者**連續兩次**從 Neon 複製到的都是 **production** 的連線字串。
+
+原因：`production` 是本專案的 **Default 分支**，Neon 的 Connect 視窗與 Connection details
+面板**預設顯示 Default 分支的字串**，即使從 `dev` 分支頁面點進去也一樣。
+必須手動把 `Branch` 下拉選單改成 `dev`。
+
+**最危險的地方是它完全沒有錯誤訊息**：檔案有存、時間戳有更新，但內容與原本
+**逐字元相同**，看起來像是「存好了」。
+
+AI 是靠 `cmp -s .env .env.backup-production` 逐字元比對才發現的——
+**光看端點比對或「使用者說存好了」都會漏掉**。
+
+已寫入 LOCAL_DEV SOP 第 3、4 節：複製前先改 Branch 下拉選單、用眼睛確認 `ep-` 那段
+不是 `bitter-surf`、貼上後必須實際連線驗證而非憑存檔判斷。
 
 ### Scope F 進行中
 

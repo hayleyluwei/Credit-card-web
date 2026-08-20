@@ -94,7 +94,19 @@ Free plan 保留 **6 小時**的 history，可以把分支還原到這段時間�
 grep -q "ep-bitter-surf" .env && echo "連到 production" || echo "連到其他分支（dev）"
 ```
 
-或用資料筆數交叉比對：兩個分支剛分家時筆數相同，
+**切換後一定要再實際連線一次**——端點比對只證明字串換了，不證明連得上。
+用 Prisma 跑一個查詢，確認表數與資料筆數符合預期（T33 後兩個分支都是 12 張表、2 筆 migration）。
+
+### ⚠️ 「有存檔」不等於「切換成功」
+
+2026-08-20 實測：使用者存了檔、時間戳也更新了，但因為複製到錯的分支字串（見第 4 節的坑），
+**內容與原本逐字元相同**。判斷是否真的換掉，用這個：
+
+```bash
+cmp -s .env .env.backup-production && echo "內容仍與 production 相同" || echo "內容已不同"
+```
+
+資料筆數交叉比對也可以：兩個分支剛分家時筆數相同，
 但 dev 一旦有測試資料就會不同（2026-08-20 分家時：35 優惠／18 卡／9 銀行／2 文章／6 分類）。
 
 ## 4. 切換分支
@@ -135,10 +147,34 @@ cp .env.backup-dev .env
 
 沒有備份時（回 Neon 重拿）：
 
-1. Neon → `credit-card-web` → Branches → `dev` → Connection details → Copy
-2. 編輯專案根目錄 `.env`，**只換 `DATABASE_URL=` 等號後面那串**，其餘四個變數不動
-3. 存檔
-4. **存檔後補一份備份**：`cp .env .env.backup-dev`
+1. Neon → `credit-card-web` → Branches → `dev` → Connection details
+2. **⚠️ 先把 `Branch` 下拉選單改成 `dev`**（見下方「Neon 介面的坑」），再按 Copy
+3. 編輯專案根目錄 `.env`，**只換 `DATABASE_URL=` 等號後面那串**，其餘四個變數不動
+   （本專案的格式是 `DATABASE_URL="postgresql://…"`，**前後有雙引號**，要保留）
+4. 存檔
+5. **存檔後補一份備份**：`cp .env .env.backup-dev`
+
+### ⚠️ Neon 介面的坑：連線視窗預設給的是 Default 分支
+
+2026-08-20 實際踩到，**連續兩次拿到錯的字串**：
+
+`production` 是本專案的 **Default 分支**，所以 Neon 的 Connect 視窗與 Connection details
+面板**預設顯示 `production` 的連線字串**——即使你是從 `dev` 分支頁面點進去的。
+
+照著複製會拿到正式站那一串，貼進 `.env` 之後「看起來有存檔、實際上什麼都沒變」，
+而且**不會有任何錯誤訊息**。
+
+**複製前一定要做的兩件事**：
+
+1. 把視窗上方的 **`Branch` 下拉選單改成 `dev`**（`Database` 與 `Role` 維持預設 `neondb` / `neondb_owner`）
+2. **用眼睛看畫面上那串字**——`@` 後面的 `ep-` 那段：
+
+| 看到 | 意思 |
+|---|---|
+| `ep-bitter-surf…` | ❌ 這是 **production**，分支選錯了 |
+| 其他名字 | ✅ 這才是 dev |
+
+**貼上之後仍要驗證**（第 3 節），不要憑「有存檔」就認為切換成功。
 
 ### 切回 production（需要動正式資料時）
 

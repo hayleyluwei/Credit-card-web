@@ -84,13 +84,33 @@ AI 執行 `npx prisma migrate deploy`（目標 production）時被安全分類�
 說明的單位是**影響範圍**，不是語法。SQL 的正確去處是 SOP 與檔案註解。
 已寫入 `DATABASE_MIGRATION_資料庫結構變更流程.md` 第 1 節，成為往後通則。
 
-## 一項疏失（已補流程）
+## 切換 `.env` 踩到的兩個坑（都已補進 SOP）
+
+### 坑一：`cp` 覆蓋掉沒有備份的那一組（AI 的疏失）
 
 AI 指示 `cp .env.backup-production .env` 時未提醒先備份 dev 連線字串，
 專案又只有 production 的備份，導致 **dev 連線字串被覆蓋、需回 Neon 重拿**。
 
-非永久性損失，但流程有缺口。已在 `LOCAL_DEV_ENVIRONMENT` 第 4 節新增
-「切換前先確認兩個方向的備份都在」的步驟與指令。
+### 坑二：Neon 連線視窗預設給 Default 分支（連續兩次拿到錯字串）
+
+`production` 是 Default 分支，Neon 的 Connect 視窗**預設顯示它的連線字串**，
+即使從 `dev` 分支頁面點進去也一樣。使用者連續兩次複製到 production 的字串。
+
+**最危險的是完全沒有錯誤訊息**：檔案有存、時間戳有更新，但內容**逐字元相同**。
+是靠 `cmp -s .env .env.backup-production` 才發現——
+**光看端點比對或「使用者說存好了」都會漏掉。**
+
+### 已補的流程（`LOCAL_DEV_ENVIRONMENT` 第 3、4 節）
+
+- 切換前先確認兩個方向的備份都在
+- 複製前先把 Neon 的 `Branch` 下拉選單改成目標分支
+- 用眼睛確認 `ep-` 那段不是 `bitter-surf`
+- **驗證用 `cmp` 逐字元比對 ＋ 實際連線，不能憑「有存檔」判斷**
+
+### 收尾結果
+
+`.env` 已於 2026-08-20 23:58 切回 dev 並實測（735ms、12 表、2 筆 migration、35／18／9／2／6）。
+`.env.backup-dev` 已建立，兩個方向往後都只需 `cp`。
 
 ## 解鎖了什麼
 
@@ -109,5 +129,7 @@ AI 指示 `cp .env.backup-production .env` 時未提醒先備份 dev 連線字�
 
 ## 收尾狀態
 
-- `.env`：**執行後仍指向 production，須切回 dev**（步驟見 `LOCAL_DEV_ENVIRONMENT` 第 4 節）
-- Git：本輪變更已 commit（未 push；push 依 2026-08-09 規則須另外詢問）
+- `.env`：✅ **已切回 dev 並實測連線**，`.env.backup-dev` 已建立
+- Git：本輪變更已 commit（`6a11236` ＋ 收尾 commit）。
+  **未 push**——push 依 2026-08-09 規則須另外詢問
+- Worktree lock：已釋放
