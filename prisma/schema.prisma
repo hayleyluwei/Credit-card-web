@@ -3,7 +3,9 @@
 // Product Spec: credit-card-mvp-spec-v11-2026-06-08
 // Schema Spec: prisma-schema-spec-v8-2026-08-03.md
 // Target: personal developer MVP, low-cost setup
-// Database: PostgreSQL (Neon) for production; also used for local dev
+// Database: PostgreSQL (Neon). Production uses the `production` branch;
+//   local dev uses the `dev` branch (separated 2026-08-20, T33).
+//   See docs/sop/LOCAL_DEV_ENVIRONMENT_本機開發環境與資料庫分支.md
 // v3 (T21): add RewardTier / Channel / RewardTierChannel; Offer gains tiers
 //   relation + headlineRate/headlineSummary. Reconciled the drifted v2
 //   spec-dir copy (missing T19 Card fields).

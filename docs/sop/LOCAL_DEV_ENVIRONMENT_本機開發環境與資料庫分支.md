@@ -1,6 +1,6 @@
 # 本機開發環境與資料庫分支
 
-最後更新：2026-08-20（Asia/Taipei）
+最後更新：2026-08-20（Asia/Taipei，第 6 節更新：dev 已清除 playing_with_neon，production 待處理）
 用途：說明本機開發環境連到哪個資料庫、與正式站的關係，以及切換與驗證方式。
 適用對象：所有能讀取本專案的 AI，以及使用者本人。
 
@@ -99,11 +99,46 @@ grep -q "ep-bitter-surf" .env && echo "連到 production" || echo "連到其他�
 
 ## 4. 切換分支
 
+### ⚠️ 切換前先備份目前設定（2026-08-20 新增，這條是踩到才補的）
+
+**`cp` 會直接覆蓋 `.env`，被蓋掉的那組連線字串就從本機消失了。**
+
+2026-08-20 T33 執行時，AI 指示使用者 `cp .env.backup-production .env`，
+但當時**只有 production 的備份、沒有 dev 的備份**，dev 連線字串因此被覆蓋，
+只能回 Neon 控制台重拿。
+
+**所以每次切換前先確認要切過去的方向有沒有備份**：
+
+```bash
+ls -la .env*
+```
+
+備份檔應該要有兩個：`.env.backup-production` 與 `.env.backup-dev`。
+缺哪一個，就在目前連著那個分支時先補起來：
+
+```bash
+# 目前連 dev 時執行
+cp .env .env.backup-dev
+# 目前連 production 時執行
+cp .env .env.backup-production
+```
+
+`.gitignore` 的 `.env.*` 已涵蓋所有備份檔，不會進版控。
+
 ### 切到 dev（日常開發，預設狀態）
+
+備份齊全時：
+
+```bash
+cp .env.backup-dev .env
+```
+
+沒有備份時（回 Neon 重拿）：
 
 1. Neon → `credit-card-web` → Branches → `dev` → Connection details → Copy
 2. 編輯專案根目錄 `.env`，**只換 `DATABASE_URL=` 等號後面那串**，其餘四個變數不動
 3. 存檔
+4. **存檔後補一份備份**：`cp .env .env.backup-dev`
 
 ### 切回 production（需要動正式資料時）
 
@@ -144,19 +179,32 @@ cp .env.backup-production .env
 
 現在所有 `.env` 變體都被排除，只有 `.env.example` 仍在版控。
 
-## 6. dev 分支上的已知殘留
+## 6. `playing_with_neon`：✅ 兩個分支都已清除（2026-08-20 完成）
 
-`playing_with_neon`：Neon 建立專案時的範例表（`id`／`name`／`value`，10 筆假資料，
-`name` 是數字的 MD5 前 10 碼）。**專案程式碼零引用**，兩個分支都有。
+`playing_with_neon` 是 Neon 建立專案時的範例表（`id`／`name`／`value`，10 筆假資料，
+`name` 是數字的 MD5 前 10 碼），**專案程式碼零引用**。
 
-它的實際風險：`prisma migrate` 會把這張 schema 檔沒有的表判定為 **drift**，
-可能建議重置資料庫。處理方式與時機見 T33（待建立）。
+它的風險是：`prisma migrate dev` 會把這張 schema 檔沒有的表判定為 **drift**，
+並**提議重置整個資料庫**。
+
+### 處理結果（T33）
+
+| 分支 | 狀態 |
+|---|---|
+| `dev` | ✅ 2026-08-20 移除 |
+| `production` | ✅ 2026-08-20 移除 |
+
+兩個分支皆套用同一個 migration `20260820230418_drop_playing_with_neon`，
+現在都是 **2 筆 migration、12 張表、漂移歸零**，資料筆數零變動（35／18／9／2／6）。
+
+處理流程與陷阱見 `DATABASE_MIGRATION_資料庫結構變更流程.md`。
 
 ## 7. 與其他 SOP 的分工
 
 | 文件 | 負責 |
 |---|---|
 | **本文件** | 連到哪個資料庫、分支切換、Neon 限制 |
+| `DATABASE_MIGRATION_資料庫結構變更流程.md` | **改資料庫結構怎麼執行**：migration 流程、陷阱、驗證、把關方式 |
 | `LOCAL_VERIFICATION_本機驗證與快取排查.md` | dev server、port、`.next`、build、stale chunk |
 | `PRODUCTION_DEPLOYMENT_正式環境部署檢查.md` | 部署授權與正式環境操作 |
 

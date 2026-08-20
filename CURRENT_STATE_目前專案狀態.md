@@ -1,6 +1,6 @@
 # 目前專案狀態
 
-最後更新：2026-08-20（Asia/Taipei，架構收斂完成並落地：規格書 v9、T29 升 v1.3、T32 完成 Scope A 乾跑；T30 已上線並驗證；兩篇攻略已發布）
+最後更新：2026-08-20（Asia/Taipei，架構收斂完成並落地：規格書 v9、T29 升 v1.3、T32 完成 Scope A 乾跑；T30 已上線並驗證；兩篇攻略已發布；本機已與正式站分離；**T33 完成——兩個資料庫已對齊，四張 schema 卡解鎖；⚠️ `.env` 仍指向 production 待切回**）
 用途：所有新 AI session 接續本專案時的唯一目前狀態入口
 交接摘要：**`docs/implementation/handoffs/2026-08-20-資訊架構收斂與規格書v9-交接摘要.md`（最新，新 session 請先讀這份）**；前一篇 `2026-08-18-CUBE優惠納管與T29建卡-交接摘要.md`；前一篇 `2026-08-09-T28設計系統套用與上線-交接摘要.md`；前一篇為 `docs/implementation/handoffs/2026-08-05-新卡資料補齊與多層回饋支援-交接摘要.md`（更早一輪的完整導覽，內容橫跨 2026-08-04 至 2026-08-05，同一輪對話跨日繼續，含一次資料事故與善後；2026-08-04 稍早的 T18 部署與 T25 草案見前一篇 `2026-08-04-T18部署上線與T25草案-交接摘要.md`；2026-08-03 之前的細節見 `2026-08-03-T20攻略文章實作與收尾-交接摘要.md`；2026-07-30 之前的細節見 `2026-07-30-T20情境頁與訂閱標籤-交接摘要.md`；2026-07-29 的 T23 定案過程見 `2026-07-29-T23-卡面配色與資料蒐集v4-交接摘要.md`）
 
@@ -10,7 +10,8 @@
 - 工作區 alias：`C:/Users/user/Documents/信用卡查詢網站`
 - alias 類型：Windows junction，兩個路徑指向同一份檔案
 - branch：**`feat/t28-design-system-rollout`**（T28 的工作分支；內容已全部合併進 `origin/main`）
-- HEAD：**`bf5ccfe`**（2026-08-20，規格書 v9）
+- HEAD：**`854aa9e`**（2026-08-20 22:29，新增本機開發環境 SOP）。
+  先前記載的 `bf5ccfe`（規格書 v9）已被同輪的 `1ba85d8`（全專案盤點與交接摘要）與 `854aa9e` 推進兩筆
 - 遠端關係：**已與 `origin/main` 同步**。最近一次為 2026-08-18 使用者授權（「好」，回應「要不要把這批（連同稍早的 T28、T30）一起 push 上正式站」），以快轉方式推送 `7ade795..22e1292`，Vercel 自動部署完成。本輪對話累計推送：`3dd19a8..d41aed9`（T30）→`d41aed9..6b89706`（T30 文件）→`6b89706..d245072`（T28 v2.1）→`d245072..7ade795`（上稿流程與 T31）→`7ade795..22e1292`（Richart 資料補齊），皆為快轉、皆經正式站驗證。
 - 本地 `main`：**已同步至 `22e1292`**（先前因 Codex worktree 佔用而落後的問題已於 2026-08-18 修復）。
 - **累計 commit 歷程**（由舊到新，含已 push 與待 push）：
@@ -252,12 +253,76 @@ Chill 刷最高 10%、好饗刷 3.3%、支付工具與排除清單、中秋連�
 （該檔含正式站明碼密碼）。已改為 `.env` ＋ `.env.*` ＋ `!.env.example`。
 **這個漏洞先前就存在，本次是第一次被觸發。**
 
-## ▶️ 下一步
+## ✅ T33 完成：兩個資料庫已對齊（2026-08-20）
 
-1. **在 dev 分支上處理 `playing_with_neon`**（Neon 範例表，專案零引用，
-   會讓 `prisma migrate` 判定 drift）——現在可以安全練習
-2. **migration 對齊**，讓資料庫有變更履歷（目前只有一筆 init，之後都用 `db push` 沒留紀錄）
-3. 把 1、2 寫成任務卡（暫編 T33）
+任務卡：`docs/implementation/tasks/T33-DB_MIGRATION_BASELINE_資料庫遷移基準與範例表清理.md`（**v1 已核准**）
+Summary：`docs/implementation/summaries/T33-DB_MIGRATION_BASELINE_SUMMARY-v1-2026-08-20.md`
+新增 SOP：**`docs/sop/DATABASE_MIGRATION_資料庫結構變更流程.md`（改資料庫結構前必讀）**
+
+`playing_with_neon`（Neon 附贈範例表）已從 **dev 與 production 兩個分支移除**，
+兩邊套用同一個 migration `20260820230418_drop_playing_with_neon`。
+
+| 檢查 | 執行前 | 執行後（兩個分支相同） |
+|---|---|---|
+| public schema 表數 | 13 | **12** |
+| `_prisma_migrations` | 1 筆 | **2 筆**，皆完成、無回滾 |
+| `migrate diff` 漂移 | `DROP TABLE "playing_with_neon";` | **空（零漂移）** |
+| 優惠／卡片／銀行／文章／分類 | 35／18／9／2／6 | **35／18／9／2／6（零變動）** |
+| RewardTier／AdminUser | 46／1 | **46／1（零變動）** |
+| 網站 | — | 本機與正式站首頁皆正常，**console 零錯誤** |
+
+**🔓 解鎖**：T24／T25／T27／T29 四張卡的 schema 變更路徑現在是通的。
+
+### ⚠️ 收尾未完成：`.env` 仍指向 production
+
+**本機目前連的是正式站，不是 dev。** 在切回來之前，`npm run dev`、後台操作、
+AI 的任何查詢與寫入**都會直接動到正式站**。
+
+切回步驟見 `LOCAL_DEV_ENVIRONMENT` 第 4 節。
+**注意：dev 連線字串已於本輪被 `cp` 覆蓋、本機沒有備份**，需回 Neon 控制台重拿，
+拿回來後請立刻執行 `cp .env .env.backup-dev` 建立備份。
+
+### 🔑 本輪確立的三條規則
+
+1. **AI 對 production 資料庫的寫入會被 auto mode 擋下**——這是保護，不繞過。
+   往後直接規劃成「**使用者本人執行 ＋ AI 用數字驗證**」，不要浪費一輪嘗試。
+2. **Vercel 不會自動套用 migration**（build 是純 `next build`）。
+   部署順序必須是**先套 production migration，再 push 依賴新結構的程式碼**。
+3. **不得把 SQL 當使用者的把關點**——使用者原話「看不懂的東西當關卡，等於沒有關卡」。
+   AI 用執行前後可比對的數字自證，使用者判斷結果對不對；說明的單位是影響範圍，不是語法。
+
+### 已更正的既有記載
+
+原本寫「之後都用 `db push` 沒留履歷」——**不成立**。`schema.prisma` 自 `bd6e7c7`
+（2026-08-03）起零變更，init migration 的 11 張表 ＝ schema 的 11 個 model，baseline 完整。
+無履歷期是 **SQLite 時代（T18 之前）**。
+
+### 🔑 新增治理規則：不得把 SQL 當使用者的把關點
+
+使用者於 2026-08-20 指出「**看不懂的東西當關卡，等於沒有關卡**」。
+往後 AI 用**執行前後可比對的數字**自證，使用者判斷**結果對不對**；
+說明的單位是影響範圍，不是語法。技術細節寫進 SOP 與檔案註解。
+已落地於 `DATABASE_MIGRATION_資料庫結構變更流程.md` 第 1 節。
+
+### ⚠️ 更正先前記載：沒有履歷斷層
+
+本節原本寫「migration 對齊，讓資料庫有變更履歷（目前只有一筆 init，**之後都用 `db push` 沒留紀錄**）」。
+2026-08-20 唯讀查證後確認這句不精確：
+
+- `prisma/schema.prisma` 最後一次變更是 `bd6e7c7`（2026-08-03，T18 轉 PostgreSQL），**之後至今零變更**
+- init migration 由**同一筆 commit** 產生，`CREATE TABLE` **11 張 ＝ schema 的 11 個 model**，baseline 完整
+- `prisma migrate status` → `Database schema is up to date!`（checksum 相符）
+
+**PostgreSQL 時代根本沒有發生過 schema 變更**，沒有遺失的履歷。`db push` 的無履歷期是
+**SQLite 時代（T18 之前）**，init migration 已是壓縮後的 baseline。
+→ T33 的性質是「**在第一次真正需要改 schema 之前，把流程建立起來**」，不是「補回履歷」。
+
+### 同時查到的兩項事實
+
+- **`migrate diff` 的完整輸出只有 `DROP TABLE "playing_with_neon";`** ——11 張專案表零漂移
+- **`rolcreatedb = true`**，`prisma migrate dev` 可自動建 shadow database，不佔用 Neon 分支額度
+- ⚠️ **Vercel 的 build 指令是純 `next build`，不會自動跑 migration**，
+  production 的每一次結構變更都得手動套用
 
 **解鎖效果**：T24／T25／T27／T29 四張都要改 schema。有了 dev 分支才能
 「先在複本改 → 確認 → 再套正式站」，這四張才有辦法安全開工。
