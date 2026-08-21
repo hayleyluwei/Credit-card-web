@@ -68,6 +68,8 @@ const REWARD_TYPE_VALID_COUNT = Object.keys(REWARD_TYPE_MAP).length - Object.key
 const args = process.argv.slice(2);
 const isDryRun = args.includes("--dry-run");
 const isReset = args.includes("--reset");
+// [T32] 明確表態「知道會刪掉既有回饋層，仍要照試算表重建」。預設不允許，見 validate() 的層級保護。
+const allowTierLoss = args.includes("--allow-tier-loss");
 const xlsxPathArg = args.find((a) => !a.startsWith("--"));
 const xlsxPath = xlsxPathArg ? path.resolve(xlsxPathArg) : DEFAULT_XLSX;
 
@@ -128,7 +130,8 @@ function validate(
   offerCards,
   existingBankSlugs = new Set(),
   existingCardSlugs = new Set(),
-  existingCategorySlugs = new Set()
+  existingCategorySlugs = new Set(),
+  existingTierCountBySlug = new Map()
 ) {
   const errors = [];
   const warnings = [];
@@ -262,6 +265,32 @@ function validate(
     }
   });
 
+  // [T32] 匯入既有優惠時，腳本會先 deleteMany 掉該筆的所有 RewardTier，再依本次表格的列數重建。
+  // 試算表比資料庫舊時（後台或補資料腳本加過層級，但試算表沒同步），這會靜默刪掉既有回饋層。
+  //
+  // 實際發生過：台新 Richart 切換刷於 2026-08-18 由 1 層擴充為 10 層（查證後官方最高是 10% 而非
+  // 我方原記的 3.8%），但試算表始終只有 1 列。照跑就會刪掉 9 層且不會有任何提示。
+  //
+  // 因此在這裡先擋下。確定要縮減層級時，加 --allow-tier-loss 明確表態。
+  if (existingTierCountBySlug.size > 0) {
+    const sheetRowCountBySlug = new Map();
+    offers.forEach((o) => {
+      const slug = o["優惠代號＊"];
+      if (isBlank(slug)) return;
+      sheetRowCountBySlug.set(slug, (sheetRowCountBySlug.get(slug) ?? 0) + 1);
+    });
+    sheetRowCountBySlug.forEach((sheetRows, slug) => {
+      const dbTiers = existingTierCountBySlug.get(slug);
+      if (dbTiers === undefined || dbTiers <= sheetRows) return;
+      const msg =
+        `offers（${slug}）：試算表只有 ${sheetRows} 列，但資料庫現有 ${dbTiers} 層回饋，` +
+        `照跑會刪掉 ${dbTiers - sheetRows} 層。請先把缺的層級補進試算表；` +
+        `確定要縮減請加 --allow-tier-loss`;
+      if (allowTierLoss) warnings.push(msg + "（已由 --allow-tier-loss 放行）");
+      else errors.push(msg);
+    });
+  }
+
   const coveredOffers = new Set(offerCards.map((oc) => oc["優惠代號＊"]));
   offers.forEach((o, i) => {
     const row = i + 2;
@@ -293,18 +322,23 @@ async function main() {
   let existingCardSlugs = new Set();
   // [T32] 分類一律以資料庫現況為準（--reset 不會清掉 Category，所以兩種模式都要查）。
   let existingCategorySlugs = new Set();
+  // [T32] 既有優惠的回饋層數，用來擋下「試算表比資料庫舊、照跑會刪層」的情況。
+  // --reset 會整批清空重建，本來就不保留既有層級，因此不套用這個保護。
+  let existingTierCountBySlug = new Map();
   {
     const lookupPrisma = new PrismaClient();
     try {
-      const [existingBanks, existingCards, existingCategories] = await Promise.all([
+      const [existingBanks, existingCards, existingCategories, existingOffers] = await Promise.all([
         lookupPrisma.bank.findMany({ select: { slug: true } }),
         lookupPrisma.card.findMany({ select: { slug: true } }),
-        lookupPrisma.category.findMany({ select: { slug: true } })
+        lookupPrisma.category.findMany({ select: { slug: true } }),
+        lookupPrisma.offer.findMany({ select: { slug: true, _count: { select: { tiers: true } } } })
       ]);
       existingCategorySlugs = new Set(existingCategories.map((c) => c.slug));
       if (!isReset) {
         existingBankSlugs = new Set(existingBanks.map((b) => b.slug));
         existingCardSlugs = new Set(existingCards.map((c) => c.slug));
+        existingTierCountBySlug = new Map(existingOffers.map((o) => [o.slug, o._count.tiers]));
       }
     } finally {
       await lookupPrisma.$disconnect();
@@ -318,7 +352,8 @@ async function main() {
     offerCards,
     existingBankSlugs,
     existingCardSlugs,
-    existingCategorySlugs
+    existingCategorySlugs,
+    existingTierCountBySlug
   );
 
   console.log("\n=== 檢查報告 ===");
